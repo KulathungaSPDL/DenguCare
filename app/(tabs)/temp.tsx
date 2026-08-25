@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Alert, StyleSheet, Text, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 
+import { AppTopBar } from '../../src/components/AppTopBar';
 import { Banner } from '../../src/components/Banner';
 import { PrimaryButton } from '../../src/components/Buttons';
 import { Card } from '../../src/components/Card';
@@ -126,6 +127,7 @@ export default function TempScreen() {
 
   return (
     <Screen>
+      <AppTopBar icon="thermometer" title={t('topBar.temperature')} />
       <Header
         kicker="Temperature"
         title={'Track the fever,\nand the fall'}
@@ -205,7 +207,7 @@ export default function TempScreen() {
         <View style={{ height: spacing.lg }} />
 
         <LabeledInput
-          label="Temperature (°C)"
+          label="Temperature ( C)"
           keyboardType="decimal-pad"
           mono
           value={tempText}
@@ -238,9 +240,9 @@ export default function TempScreen() {
             <React.Fragment key={t.id}>
               {i > 0 && <EntryListDivider />}
               <EntryListItem
-                title={`${formatTime24(new Date(t.atISO))} · Day ${illnessDayNumber(illness.feverStartISO, new Date(t.atISO))}`}
+                title={`${formatTime24(new Date(t.atISO))}  -  Day ${illnessDayNumber(illness.feverStartISO, new Date(t.atISO))}`}
                 time=""
-                valueLabel={`${t.celsius.toFixed(1)} °C`}
+                valueLabel={`${t.celsius.toFixed(1)}  C`}
                 onPress={() => startEdit(t)}
                 onDelete={() =>
                   confirmDelete(() => actions.removeTemp(t.id), {
@@ -256,7 +258,7 @@ export default function TempScreen() {
       </Card>
 
       <Note>
-        Use paracetamol only for fever. Do not take ibuprofen, diclofenac, mefenamic acid, or aspirin — they raise
+        Use paracetamol only for fever. Do not take ibuprofen, diclofenac, mefenamic acid, or aspirin - they raise
         the risk of bleeding in dengue.
       </Note>
 

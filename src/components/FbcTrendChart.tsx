@@ -20,7 +20,7 @@ const BOTTOM_PAD = 20;
 const AXIS_WIDTH = 34;
 
 const PLATELET_MIN = 0;
-const PLATELET_MAX = 300; // x10^3/uL — dengue-critical threshold sits at 100
+const PLATELET_MAX = 300; // x10^3/uL - dengue-critical threshold sits at 100
 const HCT_MIN = 30;
 const HCT_MAX = 55;
 

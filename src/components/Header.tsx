@@ -2,7 +2,7 @@ import React from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 
 import { colors } from '../theme/colors';
-import { spacing } from '../theme/spacing';
+import { radius, spacing } from '../theme/spacing';
 import { fontFamily, fontSize } from '../theme/typography';
 
 interface HeaderProps {
@@ -16,6 +16,7 @@ export function Header({ kicker, title, subtitle }: HeaderProps) {
     <View style={styles.wrap}>
       {kicker ? <Text style={styles.kicker}>{kicker}</Text> : null}
       <Text style={styles.title}>{title}</Text>
+      <View style={styles.underline} />
       {subtitle ? <Text style={styles.subtitle}>{subtitle}</Text> : null}
     </View>
   );
@@ -39,6 +40,13 @@ const styles = StyleSheet.create({
     fontSize: fontSize.xxl,
     color: colors.textPrimary,
     lineHeight: fontSize.xxl * 1.2,
+  },
+  underline: {
+    width: 42,
+    height: 5,
+    borderRadius: radius.pill,
+    backgroundColor: colors.navActive,
+    marginTop: spacing.sm,
   },
   subtitle: {
     marginTop: spacing.sm,

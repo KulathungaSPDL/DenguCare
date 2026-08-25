@@ -1,8 +1,10 @@
+import { LinearGradient } from 'expo-linear-gradient';
 import React from 'react';
 import { ScrollView, StyleSheet, View, ViewStyle } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { colors } from '../theme/colors';
+import { gradients } from '../theme/gradients';
 import { spacing } from '../theme/spacing';
 
 interface ScreenProps {
@@ -15,6 +17,7 @@ interface ScreenProps {
 export function Screen({ children, scroll = true, footer, contentStyle }: ScreenProps) {
   return (
     <SafeAreaView style={styles.safe} edges={['top', 'left', 'right']}>
+      <LinearGradient colors={gradients.screen} style={StyleSheet.absoluteFill} pointerEvents="none" />
       {scroll ? (
         <ScrollView
           contentContainerStyle={[styles.content, contentStyle]}
@@ -37,8 +40,9 @@ const styles = StyleSheet.create({
     backgroundColor: colors.background,
   },
   content: {
-    padding: spacing.lg,
-    paddingBottom: spacing.xxl * 2,
+    paddingHorizontal: spacing.lg,
+    paddingTop: spacing.lg,
+    paddingBottom: spacing.xxl * 3,
   },
   noScroll: {
     flex: 1,

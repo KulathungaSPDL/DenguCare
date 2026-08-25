@@ -35,7 +35,7 @@ interface Props {
 
 /** Mirrors AmountEntryModal's sheet/preset/DateTimeField layout, but logs an
  * IV bag (volume + optional infusion rate + fluid type) instead of an oral
- * drink — used only in Admitted-to-Ward care mode. */
+ * drink - used only in Admitted-to-Ward care mode. */
 export function IvEntryModal({ visible, initial, onClose, onSave }: Props) {
   const { t } = useTranslation();
   const [volumeText, setVolumeText] = useState('');

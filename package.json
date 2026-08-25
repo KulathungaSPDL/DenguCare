@@ -11,6 +11,7 @@
     "expo-constants": "~56.0.24",
     "expo-font": "~56.0.7",
     "expo-image-picker": "~56.0.24",
+    "expo-linear-gradient": "~14.1.5",
     "expo-linking": "~56.0.17",
     "expo-localization": "~56.0.6",
     "expo-notifications": "~56.0.24",
@@ -21,12 +22,14 @@
     "expo-status-bar": "~56.0.4",
     "i18next": "^26.4.0",
     "react": "19.2.3",
+    "react-dom": "19.2.3",
     "react-i18next": "^17.0.12",
     "react-native": "0.85.3",
     "react-native-gesture-handler": "~2.31.1",
     "react-native-safe-area-context": "~5.7.0",
     "react-native-screens": "~4.26.0",
-    "react-native-svg": "15.15.4"
+    "react-native-svg": "15.15.4",
+    "react-native-web": "^0.21.2"
   },
   "devDependencies": {
     "@types/react": "~19.2.2",

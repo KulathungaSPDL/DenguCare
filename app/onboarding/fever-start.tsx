@@ -2,6 +2,7 @@ import { router } from 'expo-router';
 import React, { useMemo, useState } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 
+import { AppTopBar } from '../../src/components/AppTopBar';
 import { PrimaryButton } from '../../src/components/Buttons';
 import { Card } from '../../src/components/Card';
 import { DateTimeField } from '../../src/components/DateTimeField';
@@ -32,8 +33,12 @@ export default function FeverStartScreen() {
 
   return (
     <Screen>
+      <AppTopBar
+        variant="back"
+        title="Fever Onset"
+        subtitle="Step 2 of 2 - this sets your illness-day tracking."
+      />
       <Header
-        kicker="Step 2 of 2"
         title="When did the fever start?"
         subtitle="Everything in dengue is counted from the first day of fever. Day 1 is the day it began, even if it started at night."
       />
@@ -58,7 +63,7 @@ export default function FeverStartScreen() {
       <Card style={styles.dayCard}>
         <Text style={styles.dayKicker}>You are on</Text>
         <Text style={styles.dayNumber}>Day {dayNumber}</Text>
-        <Text style={styles.daySubtitle}>Fever phase · counted in Asia/Colombo</Text>
+        <Text style={styles.daySubtitle}>Fever phase  -  counted in Asia/Colombo</Text>
       </Card>
 
       <PrimaryButton label="Start tracking" onPress={onStart} />

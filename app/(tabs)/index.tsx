@@ -1,33 +1,28 @@
 import { Ionicons } from '@expo/vector-icons';
+import { LinearGradient } from 'expo-linear-gradient';
 import { router } from 'expo-router';
-import React, { useEffect, useState } from 'react';
-import { Alert, Pressable, StyleSheet, Text, View } from 'react-native';
+import React, { useState } from 'react';
+import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 
 import { AmountEntryModal } from '../../src/components/AmountEntryModal';
 import { Banner } from '../../src/components/Banner';
 import { Card } from '../../src/components/Card';
+import { CircularGauge } from '../../src/components/CircularGauge';
+import { DashboardHero } from '../../src/components/DashboardHero';
 import { DayStrip } from '../../src/components/DayStrip';
 import { DrinkLegendModal } from '../../src/components/DrinkLegendModal';
 import { EmptyState } from '../../src/components/EmptyState';
 import { FbcTrendChart } from '../../src/components/FbcTrendChart';
 import { FeverCurveChart } from '../../src/components/FeverCurveChart';
-import { FluidBalanceGauge } from '../../src/components/FluidBalanceGauge';
 import { InfoDivider, InfoRow } from '../../src/components/InfoRow';
-import { LinkRow } from '../../src/components/LinkRow';
+import { Mascot } from '../../src/components/Mascot';
 import { Note } from '../../src/components/Note';
 import { Screen } from '../../src/components/Screen';
 import { useNow } from '../../src/hooks/useNow';
 import { useSuccessAlert } from '../../src/hooks/useSuccessAlert';
-import {
-  cancelHourlyReminder,
-  isReminderSupported,
-  requestReminderPermissionAsync,
-  scheduleHourlyReminder,
-} from '../../src/notifications/reminders';
 import { sumMl } from '../../src/state/calculations';
 import {
-  ageYears,
   formatTime24,
   formatWeekdayDate,
   hoursAgo,
@@ -40,20 +35,12 @@ import { phaseLabel } from '../../src/state/phase';
 import { filterByDateKey, useFluidSummary, usePlasmaLeakageAlert, useTodayEntries } from '../../src/state/selectors';
 import { useStore } from '../../src/state/store';
 import { colors } from '../../src/theme/colors';
+import { gradients } from '../../src/theme/gradients';
 import { radius, spacing } from '../../src/theme/spacing';
 import { fontFamily, fontSize } from '../../src/theme/typography';
 
 const DRINK_PRESETS = [100, 150, 200, 250];
 const URINE_PRESETS = [50, 100, 150, 200];
-
-function initialsFor(name: string): string {
-  const parts = name.trim().split(/\s+/).filter(Boolean);
-  if (parts.length === 0) return '—';
-  return parts
-    .slice(0, 2)
-    .map((p) => p[0]!.toUpperCase())
-    .join('');
-}
 
 export default function DashboardScreen() {
   const { t } = useTranslation();
@@ -61,78 +48,38 @@ export default function DashboardScreen() {
   const now = useNow();
   const [drinkModal, setDrinkModal] = useState(false);
   const [urineModal, setUrineModal] = useState(false);
-  const [remindersOn, setRemindersOn] = useState(true);
   const [legendVisible, setLegendVisible] = useState(false);
 
   const illness = state.illness!;
-  const { profile } = state;
   const currentDay = illnessDayNumber(illness.feverStartISO, now);
-  const { outMl, targets, behindMl } = useFluidSummary(state, now);
+  const currentPhase = phaseLabel(currentDay);
+  const { inMl, outMl, targets, behindMl } = useFluidSummary(state, now);
   const { drinks } = useTodayEntries(state, now);
   const { atRisk, latestReport } = usePlasmaLeakageAlert(state.reports);
   const { showSuccess, modal: successModal } = useSuccessAlert();
 
-  const drinkSegments: { key: string; ml: number; color: string }[] = DRINK_KINDS.map((k) => ({
-    key: k.key,
-    ml: sumMl(drinks.filter((d) => d.kind === k.key)),
-    color: k.color,
-  }));
-
-  // In Admitted mode, "drunk today" on the gauge is oral + IV combined —
-  // IV fluid is still fluid in, just delivered a different way.
-  if (state.careMode === 'admitted') {
-    const todayIvMl = sumMl(
-      filterByDateKey(state.ivFluids, localDateKey(now)).map((f) => ({ amountMl: f.volumeMl }))
-    );
-    if (todayIvMl > 0) {
-      drinkSegments.push({ key: 'iv', ml: todayIvMl, color: colors.ivFluid });
-    }
-  }
+  // In Admitted mode, intake is oral + IV combined - IV fluid is still fluid in, just delivered differently.
+  const todayIvMl =
+    state.careMode === 'admitted'
+      ? sumMl(filterByDateKey(state.ivFluids, localDateKey(now)).map((f) => ({ amountMl: f.volumeMl })))
+      : 0;
+  const intakeMl = inMl + todayIvMl;
 
   const lastTemp = state.temps[0];
   const lastUrine = state.urine[0];
 
-  const patientMeta = [
-    profile.dobISO ? `${ageYears(profile.dobISO, now)} yrs` : null,
-    profile.sex === 'female' ? 'Female' : 'Male',
-    profile.weightKg ? `${profile.weightKg} kg` : null,
-  ]
-    .filter(Boolean)
-    .join(' · ');
+  const isCritical = currentPhase === 'Critical phase';
 
-  useEffect(() => {
-    let cancelled = false;
-
-    (async () => {
-      if (remindersOn) {
-        if (!isReminderSupported()) {
-          setRemindersOn(false);
-          Alert.alert(
-            'Not available in Expo Go',
-            'Hourly hydration reminders need a development build — they are not supported inside Expo Go.'
-          );
-          return;
+  const fluidStatus = atRisk
+    ? { word: 'At Risk', color: '#FF8A75', subtitle: 'Signs of plasma leakage - show your latest report to a doctor now.' }
+    : behindMl > 0
+      ? {
+          word: 'Behind',
+          color: '#F5C453',
+          subtitle: `About ${behindMl} ml behind - sip ${targets.hourlyGoalMl} ml now to catch up.`,
         }
-        const granted = await requestReminderPermissionAsync();
-        if (cancelled) return;
-        if (!granted) {
-          setRemindersOn(false);
-          Alert.alert(
-            'Notifications disabled',
-            'Turn on notifications for DenguCare in your device settings to get hourly hydration reminders.'
-          );
-          return;
-        }
-        await scheduleHourlyReminder(targets.hourlyGoalMl);
-      } else {
-        await cancelHourlyReminder();
-      }
-    })();
-
-    return () => {
-      cancelled = true;
-    };
-  }, [remindersOn, targets.hourlyGoalMl]);
+      : { word: 'On Track', color: '#6EE7B7', subtitle: "Nice work - you're keeping pace with today's goal." };
+  const gaugePercent = targets.dailyFluidMl > 0 ? intakeMl / targets.dailyFluidMl : 0;
 
   function saveDrink(amountMl: number, kind: string | undefined, atISO: string) {
     const kindDef = DRINK_KINDS.find((k) => k.key === kind) ?? DRINK_KINDS[0];
@@ -149,36 +96,20 @@ export default function DashboardScreen() {
 
   return (
     <Screen>
-      <View style={styles.topRow}>
-        <View style={{ flex: 1 }}>
-          <Text style={styles.dateLabel}>{formatWeekdayDate(now)}</Text>
-          <Text style={styles.title}>
-            Day {currentDay} · {phaseLabel(currentDay)}
-          </Text>
-        </View>
-        <Pressable onPress={() => setRemindersOn((v) => !v)} style={styles.bell} hitSlop={10}>
-          <Ionicons name={remindersOn ? 'notifications' : 'notifications-outline'} size={20} color={colors.textPrimary} />
-        </Pressable>
+      <DashboardHero
+        subtitle="Let's stay on top of today's recovery."
+        needsAttention={atRisk || behindMl > 0}
+      />
+
+      <View style={styles.sectionHeader}>
+        <Text style={styles.pageTitle}>Illness Day</Text>
+        <View style={styles.sectionUnderline} />
+        <Text style={styles.pageSubtitle}>
+          {formatWeekdayDate(now)}  -  {currentPhase}
+        </Text>
       </View>
 
       <DayStrip currentDay={currentDay} />
-
-      <Card style={{ marginTop: spacing.xl }}>
-        <View style={styles.patientRow}>
-          <View style={styles.avatar}>
-            <Text style={styles.avatarText}>{initialsFor(profile.name)}</Text>
-          </View>
-          <View style={{ flex: 1, marginLeft: spacing.md }}>
-            <Text style={styles.patientName}>{profile.name.trim() || 'Patient'}</Text>
-            <Text style={styles.patientMeta}>{patientMeta || '—'}</Text>
-          </View>
-          <View style={[styles.careBadge, state.careMode === 'admitted' && styles.careBadgeAdmitted]}>
-            <Text style={[styles.careBadgeText, state.careMode === 'admitted' && styles.careBadgeTextAdmitted]}>
-              {state.careMode === 'admitted' ? t('careMode.admitted') : t('careMode.home')}
-            </Text>
-          </View>
-        </View>
-      </Card>
 
       {atRisk ? (
         <View style={{ marginTop: spacing.lg }}>
@@ -188,69 +119,151 @@ export default function DashboardScreen() {
         </View>
       ) : null}
 
-      <Card style={{ marginTop: spacing.lg }}>
-        <View style={styles.balanceHeaderRow}>
-          <Text style={styles.cardKicker}>Today&apos;s balance</Text>
-          <Pressable
-            onPress={() => setLegendVisible(true)}
-            hitSlop={10}
-            accessibilityRole="button"
-            accessibilityLabel="What do the ring colours mean?"
-          >
-            <Ionicons name="information-circle-outline" size={20} color={colors.textSecondary} />
-          </Pressable>
-        </View>
+      <View style={styles.gaugeCard}>
+        <LinearGradient colors={gradients.heroTeal} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={StyleSheet.absoluteFill} />
+        <View style={styles.gaugeCardBody}>
+          <View style={styles.gaugeCardLeft}>
+            <View style={styles.gaugeKickerRow}>
+              <Ionicons name="shield-checkmark" size={15} color="rgba(255,255,255,0.85)" />
+              <Text style={styles.gaugeKicker}>Fluid Balance Today</Text>
+            </View>
+            <Text style={[styles.gaugeStatusWord, { color: fluidStatus.color }]}>{fluidStatus.word}</Text>
+            <Text style={styles.gaugeSubtitle}>{fluidStatus.subtitle}</Text>
+            <Text style={styles.gaugeStats}>
+              IN {intakeMl} ml  -  OUT {outMl} ml
+            </Text>
+            <Pressable
+              onPress={() => setLegendVisible(true)}
+              style={styles.gaugeLinkRow}
+              accessibilityRole="button"
+              accessibilityLabel="What counts toward fluid balance?"
+            >
+              <Text style={styles.gaugeLinkText}>View Details</Text>
+              <Ionicons name="arrow-forward" size={13} color="#FFFFFF" />
+            </Pressable>
+          </View>
 
-        <View style={styles.gaugeRow}>
-          <FluidBalanceGauge
-            drinkSegments={drinkSegments}
-            urineMl={outMl}
-            onPressDrinks={() => setDrinkModal(true)}
-            onPressUrine={() => setUrineModal(true)}
+          <CircularGauge
+            percent={gaugePercent}
+            color={fluidStatus.color}
+            trackColor="rgba(255,255,255,0.18)"
+            icon="water"
+            iconColor="#FFFFFF"
+            label={fluidStatus.word}
+            labelColor="#FFFFFF"
           />
         </View>
+      </View>
 
-        <View style={styles.gaugeLegendRow}>
-          <View style={styles.gaugeLegendItem}>
-            <View style={[styles.gaugeLegendDot, { backgroundColor: colors.drinkIn }]} />
-            <Text style={styles.gaugeLegendText}>Drunk today</Text>
+      <Text style={styles.sectionTitle}>Quick Actions</Text>
+      <View style={styles.quickGrid}>
+        <Pressable
+          onPress={() => setDrinkModal(true)}
+          style={({ pressed }) => [styles.quickCard, { backgroundColor: colors.primarySoft }, pressed && styles.actionCardPressed]}
+        >
+          <View style={[styles.quickIconCircle, { backgroundColor: colors.surface }]}>
+            <Ionicons name="water" size={18} color={colors.primary} />
           </View>
-          <View style={styles.gaugeLegendItem}>
-            <View style={[styles.gaugeLegendDot, { backgroundColor: colors.urineOut }]} />
-            <Text style={styles.gaugeLegendText}>Urine passed</Text>
+          <Text style={styles.quickLabel}>Log Drink</Text>
+          <Ionicons name="arrow-forward" size={12} color={colors.primary} />
+        </Pressable>
+        <Pressable
+          onPress={() => setUrineModal(true)}
+          style={({ pressed }) => [styles.quickCard, { backgroundColor: colors.urineOutSoft }, pressed && styles.actionCardPressed]}
+        >
+          <View style={[styles.quickIconCircle, { backgroundColor: colors.surface }]}>
+            <Ionicons name="flask" size={18} color={colors.outputText} />
           </View>
+          <Text style={styles.quickLabel}>Log Urine</Text>
+          <Ionicons name="arrow-forward" size={12} color={colors.outputText} />
+        </Pressable>
+        <Pressable
+          onPress={() => router.push('/(tabs)/temp')}
+          style={({ pressed }) => [styles.quickCard, { backgroundColor: colors.accentPurpleSoft }, pressed && styles.actionCardPressed]}
+        >
+          <View style={[styles.quickIconCircle, { backgroundColor: colors.surface }]}>
+            <Ionicons name="thermometer" size={18} color={colors.accentPurple} />
+          </View>
+          <Text style={styles.quickLabel}>Log Temp</Text>
+          <Ionicons name="arrow-forward" size={12} color={colors.accentPurple} />
+        </Pressable>
+        <Pressable
+          onPress={() => router.push('/(tabs)/safety')}
+          style={({ pressed }) => [styles.quickCard, { backgroundColor: colors.dangerSoft }, pressed && styles.actionCardPressed]}
+        >
+          <View style={[styles.quickIconCircle, { backgroundColor: colors.surface }]}>
+            <Ionicons name="shield-checkmark" size={18} color={colors.danger} />
+          </View>
+          <Text style={styles.quickLabel}>Safety Check</Text>
+          <Ionicons name="arrow-forward" size={12} color={colors.danger} />
+        </Pressable>
+      </View>
+
+      <Pressable
+        onPress={() => router.push('/(tabs)/safety')}
+        style={({ pressed }) => [styles.tipBanner, pressed && styles.actionCardPressed]}
+      >
+        <View style={styles.tipMascotCircle}>
+          <Mascot mood="shield" size={52} animated={false} />
         </View>
-
-        {behindMl > 0 ? (
-          <View style={{ marginTop: spacing.lg }}>
-            <Banner icon="water-outline">
-              You are about <Text style={styles.bold}>{behindMl} ml</Text> behind for this time of day. Sip{' '}
-              <Text style={styles.bold}>{targets.hourlyGoalMl} ml</Text> now — small sips are easier than a big
-              glass.
-            </Banner>
-          </View>
-        ) : null}
-      </Card>
+        <View style={{ flex: 1, marginLeft: spacing.md }}>
+          <Text style={styles.tipTitle}>Know the Warning Signs</Text>
+          <Text style={styles.tipSubtitle}>Spot trouble early - a quick daily check.</Text>
+        </View>
+        <Ionicons name="chevron-forward" size={20} color={colors.textSecondary} />
+      </Pressable>
 
       <Card style={{ marginTop: spacing.lg }}>
-        <View style={styles.balanceHeaderRow}>
-          <Text style={styles.cardKicker}>Temperature</Text>
-          {lastTemp ? (
-            <Text style={[styles.legend, lastTemp.celsius >= 38 ? styles.legendDanger : null]}>
-              {lastTemp.celsius.toFixed(1)} °C now
+        <View style={styles.cardHeaderRow}>
+          <View>
+            <Text style={styles.cardTitle}>Temperature</Text>
+            <Text style={styles.cardSubtitle}>
+              {lastTemp
+                ? hoursAgo(lastTemp.atISO, now) > 0
+                  ? `Last reading ${hoursAgo(lastTemp.atISO, now)}h ago`
+                  : `Last reading ${minutesAgo(lastTemp.atISO, now)}m ago`
+                : 'No readings yet'}
             </Text>
+          </View>
+          {lastTemp ? (
+            <View style={[styles.tempBadge, lastTemp.celsius >= 38 && styles.tempBadgeHot]}>
+              <Ionicons
+                name="thermometer"
+                size={14}
+                color={lastTemp.celsius >= 38 ? colors.danger : colors.textSecondary}
+              />
+              <Text style={[styles.tempBadgeText, lastTemp.celsius >= 38 && styles.tempBadgeTextHot]}>
+                {lastTemp.celsius.toFixed(1)} C
+              </Text>
+            </View>
           ) : null}
         </View>
+        <View style={{ height: spacing.md }} />
         {state.temps.length > 0 ? (
           <FeverCurveChart readings={state.temps} feverStartISO={illness.feverStartISO} />
         ) : (
           <EmptyState
-            icon="thermometer-outline"
             title="No readings yet"
             subtitle="Log your temperature from the Temp tab to see your fever curve here."
           />
         )}
       </Card>
+
+      {isCritical ? (
+        <Card style={{ marginTop: spacing.lg, backgroundColor: colors.dangerSoft, borderWidth: 1, borderColor: colors.borderDanger }}>
+          <View style={styles.alertHeaderRow}>
+            <View style={styles.alertMascotWrap}>
+              <Mascot mood="concerned" size={40} animated={false} />
+            </View>
+            <Text style={styles.alertTitle}>Critical Phase Alert</Text>
+          </View>
+          <Text style={styles.alertBody}>
+            {atRisk
+              ? t('fbc.plasmaLeakageBanner')
+              : `You're in the critical phase (days 3-7), when dengue can turn serious even as the fever settles. Watch closely for warning signs like severe abdominal pain or vomiting.`}
+          </Text>
+        </Card>
+      ) : null}
 
       <Card style={{ marginTop: spacing.lg }}>
         {state.reports.length > 0 ? (
@@ -259,7 +272,6 @@ export default function DashboardScreen() {
           <>
             <Text style={styles.cardKicker}>{t('fbc.chartTitle')}</Text>
             <EmptyState
-              icon="flask-outline"
               title="No blood reports yet"
               subtitle="Add a platelet and haematocrit report from the Reports tab to track the trend here."
             />
@@ -272,7 +284,7 @@ export default function DashboardScreen() {
         <InfoRow
           icon="thermometer-outline"
           label="Last temperature"
-          value={lastTemp ? `${lastTemp.celsius.toFixed(1)} °C · ${formatTime24(new Date(lastTemp.atISO))}` : '—'}
+          value={lastTemp ? `${lastTemp.celsius.toFixed(1)}  C  -  ${formatTime24(new Date(lastTemp.atISO))}` : '-'}
           valueColor={lastTemp && lastTemp.celsius >= 38 ? colors.danger : undefined}
         />
         <InfoDivider />
@@ -291,22 +303,18 @@ export default function DashboardScreen() {
         <InfoRow
           icon="water-outline"
           label="Latest platelets"
-          value={latestReport?.plateletCount != null ? `${latestReport.plateletCount} x10³/µL` : '—'}
+          value={latestReport?.plateletCount != null ? `${latestReport.plateletCount} x10^3/uL` : '-'}
           valueColor={latestReport?.plateletCount != null && latestReport.plateletCount < 100 ? colors.danger : undefined}
         />
         <InfoDivider />
         <InfoRow
           icon="analytics-outline"
           label="Latest haematocrit"
-          value={latestReport?.haematocritPct != null ? `${latestReport.haematocritPct}%` : '—'}
+          value={latestReport?.haematocritPct != null ? `${latestReport.haematocritPct}%` : '-'}
         />
         <InfoDivider />
-        <InfoRow icon="time-outline" label="Hourly reminder" value={`Every hour · ${targets.hourlyGoalMl} ml`} />
+        <InfoRow icon="time-outline" label="Hourly reminder" value={`Every hour  -  ${targets.hourlyGoalMl} ml`} />
       </Card>
-
-      <View style={{ marginTop: spacing.lg }}>
-        <LinkRow icon="shield-outline" tone="dark" label="Check my warning signs" onPress={() => router.push('/(tabs)/safety')} />
-      </View>
 
       <Note>
         These targets are a general guide based on your weight, from national dengue home-care advice. Your doctor
@@ -343,87 +351,181 @@ export default function DashboardScreen() {
 }
 
 const styles = StyleSheet.create({
-  topRow: {
-    flexDirection: 'row',
-    alignItems: 'flex-start',
-    marginBottom: spacing.lg,
+  sectionHeader: {
+    marginTop: spacing.xl,
   },
-  dateLabel: {
-    fontFamily: fontFamily.mono,
-    fontSize: fontSize.xs,
-    letterSpacing: 1,
-    color: colors.textSecondary,
-    marginBottom: spacing.xs,
-  },
-  title: {
-    fontFamily: fontFamily.baseBold,
-    fontWeight: '800',
+  pageTitle: {
+    fontFamily: fontFamily.baseExtraBold,
     fontSize: fontSize.xxl,
     color: colors.textPrimary,
   },
-  bell: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: colors.surface,
-    borderWidth: 1,
-    borderColor: colors.border,
-    alignItems: 'center',
-    justifyContent: 'center',
+  sectionUnderline: {
+    marginTop: spacing.xs,
+    width: 32,
+    height: 4,
+    borderRadius: 2,
+    backgroundColor: colors.primary,
   },
-  patientRow: {
+  pageSubtitle: {
+    marginTop: spacing.sm,
+    fontFamily: fontFamily.base,
+    fontSize: fontSize.sm,
+    color: colors.textSecondary,
+  },
+  sectionTitle: {
+    marginTop: spacing.xl,
+    marginBottom: spacing.md,
+    fontFamily: fontFamily.baseExtraBold,
+    fontSize: fontSize.lg,
+    color: colors.textPrimary,
+  },
+  gaugeCard: {
+    marginTop: spacing.lg,
+    borderRadius: radius.xl,
+    overflow: 'hidden',
+    padding: spacing.lg,
+    shadowColor: colors.shadow,
+    shadowOpacity: 0.16,
+    shadowRadius: 20,
+    shadowOffset: { width: 0, height: 10 },
+    elevation: 5,
+  },
+  gaugeCardBody: {
     flexDirection: 'row',
     alignItems: 'center',
   },
-  avatar: {
-    width: 52,
-    height: 52,
-    borderRadius: 26,
-    backgroundColor: colors.primarySoft,
+  gaugeCardLeft: {
+    flex: 1,
+    marginRight: spacing.md,
+  },
+  gaugeKickerRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+  },
+  gaugeKicker: {
+    fontFamily: fontFamily.baseSemiBold,
+    fontWeight: '700',
+    fontSize: fontSize.sm,
+    color: 'rgba(255,255,255,0.85)',
+  },
+  gaugeStatusWord: {
+    marginTop: spacing.sm,
+    fontFamily: fontFamily.baseExtraBold,
+    fontWeight: '800',
+    fontSize: 26,
+  },
+  gaugeSubtitle: {
+    marginTop: spacing.xs,
+    fontFamily: fontFamily.base,
+    fontSize: fontSize.xs,
+    lineHeight: fontSize.xs * 1.5,
+    color: 'rgba(255,255,255,0.85)',
+  },
+  gaugeStats: {
+    marginTop: spacing.md,
+    fontFamily: fontFamily.mono,
+    fontSize: 11,
+    color: 'rgba(255,255,255,0.7)',
+  },
+  gaugeLinkRow: {
+    marginTop: spacing.sm,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+  },
+  gaugeLinkText: {
+    fontFamily: fontFamily.baseBold,
+    fontWeight: '700',
+    fontSize: fontSize.xs,
+    color: '#FFFFFF',
+  },
+  quickGrid: {
+    flexDirection: 'row',
+    gap: spacing.sm,
+  },
+  quickCard: {
+    flex: 1,
+    minHeight: 118,
+    alignItems: 'flex-start',
+    padding: spacing.sm,
+    borderRadius: radius.lg,
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.86)',
+    shadowColor: colors.shadow,
+    shadowOpacity: 0.06,
+    shadowRadius: 12,
+    shadowOffset: { width: 0, height: 6 },
+    elevation: 2,
+  },
+  quickIconCircle: {
+    width: 34,
+    height: 34,
+    borderRadius: 17,
     alignItems: 'center',
     justifyContent: 'center',
   },
-  avatarText: {
+  quickLabel: {
+    marginTop: spacing.sm,
+    marginBottom: 4,
     fontFamily: fontFamily.baseBold,
-    fontWeight: '800',
-    fontSize: fontSize.lg,
-    color: colors.primary,
+    fontWeight: '700',
+    fontSize: 12,
+    color: colors.textPrimary,
   },
-  patientName: {
+  tipBanner: {
+    marginTop: spacing.lg,
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: colors.surface,
+    borderRadius: radius.xl,
+    padding: spacing.md,
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.92)',
+    shadowColor: colors.shadow,
+    shadowOpacity: 0.06,
+    shadowRadius: 16,
+    shadowOffset: { width: 0, height: 8 },
+    elevation: 2,
+  },
+  tipMascotCircle: {
+    width: 60,
+    height: 60,
+    borderRadius: 30,
+    backgroundColor: colors.primarySoft,
+    alignItems: 'center',
+    justifyContent: 'center',
+    overflow: 'hidden',
+  },
+  tipTitle: {
+    fontFamily: fontFamily.baseBold,
+    fontWeight: '700',
+    fontSize: fontSize.md,
+    color: colors.textPrimary,
+  },
+  tipSubtitle: {
+    marginTop: 2,
+    fontFamily: fontFamily.base,
+    fontSize: fontSize.xs,
+    color: colors.textSecondary,
+  },
+  cardHeaderRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'flex-start',
+    marginBottom: spacing.lg,
+  },
+  cardTitle: {
     fontFamily: fontFamily.baseBold,
     fontWeight: '700',
     fontSize: fontSize.lg,
     color: colors.textPrimary,
   },
-  patientMeta: {
+  cardSubtitle: {
     marginTop: 2,
-    fontFamily: fontFamily.mono,
-    fontSize: fontSize.sm,
-    color: colors.textSecondary,
-  },
-  careBadge: {
-    paddingHorizontal: spacing.md,
-    paddingVertical: spacing.sm,
-    borderRadius: radius.pill,
-    backgroundColor: colors.primarySoft,
-  },
-  careBadgeAdmitted: {
-    backgroundColor: colors.ink,
-  },
-  careBadgeText: {
-    fontFamily: fontFamily.baseBold,
-    fontWeight: '700',
+    fontFamily: fontFamily.base,
     fontSize: fontSize.xs,
-    color: colors.primary,
-  },
-  careBadgeTextAdmitted: {
-    color: colors.textOnDark,
-  },
-  balanceHeaderRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: spacing.lg,
+    color: colors.textSecondary,
   },
   cardKicker: {
     fontFamily: fontFamily.mono,
@@ -433,42 +535,48 @@ const styles = StyleSheet.create({
     textTransform: 'uppercase',
     marginBottom: spacing.xs,
   },
-  legend: {
-    fontFamily: fontFamily.mono,
-    fontSize: fontSize.xs,
-    color: colors.textMuted,
+  actionCardPressed: {
+    opacity: 0.8,
   },
-  legendDanger: {
-    color: colors.danger,
-    fontWeight: '700',
-  },
-  gaugeRow: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-  },
-  gaugeLegendRow: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-    marginTop: spacing.md,
-  },
-  gaugeLegendItem: {
+  tempBadge: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginHorizontal: spacing.md,
+    gap: 4,
+    paddingHorizontal: spacing.md,
+    paddingVertical: 6,
+    borderRadius: radius.pill,
+    backgroundColor: colors.background,
   },
-  gaugeLegendDot: {
-    width: 8,
-    height: 8,
-    borderRadius: 4,
-    marginRight: spacing.xs,
+  tempBadgeHot: {
+    backgroundColor: colors.dangerSoft,
   },
-  gaugeLegendText: {
-    fontFamily: fontFamily.base,
-    fontSize: fontSize.xs,
+  tempBadgeText: {
+    fontFamily: fontFamily.monoBold,
+    fontSize: fontSize.sm,
     color: colors.textSecondary,
   },
-  bold: {
-    fontWeight: '700',
+  tempBadgeTextHot: {
+    color: colors.danger,
+  },
+  alertHeaderRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  alertMascotWrap: {
+    marginRight: spacing.md,
+    marginLeft: -6,
+  },
+  alertTitle: {
+    fontFamily: fontFamily.baseBold,
+    fontWeight: '800',
+    fontSize: fontSize.md,
+    color: colors.danger,
+  },
+  alertBody: {
+    marginTop: spacing.md,
+    fontFamily: fontFamily.base,
+    fontSize: fontSize.sm,
     color: colors.textPrimary,
+    lineHeight: fontSize.sm * 1.5,
   },
 });

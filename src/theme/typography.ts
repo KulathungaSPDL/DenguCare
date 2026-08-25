@@ -1,6 +1,6 @@
 // Screens lean on two families: Inter for headings/body copy, and JetBrains
-// Mono for numbers, dates and times (weights, ml, °C, clock). Both are
-// loaded as static weight files in app/_layout.tsx via useFonts — see
+// Mono for numbers, dates and times (weights, ml,  C, clock). Both are
+// loaded as static weight files in app/_layout.tsx via useFonts - see
 // GOOGLE_FONTS_TO_LOAD below.
 export const fontFamily = {
   base: 'Inter_400Regular',

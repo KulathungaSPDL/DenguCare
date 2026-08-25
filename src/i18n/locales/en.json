@@ -1,4 +1,16 @@
 {
+  "topBar": {
+    "dashboard": "Dashboard",
+    "fluidBalance": "Fluid Balance",
+    "temperature": "Temperature",
+    "bloodReports": "Blood Reports",
+    "safety": "Safety & Emergency",
+    "language": "Language",
+    "patientFallback": "Patient",
+    "sexFemale": "Female",
+    "sexMale": "Male",
+    "yearsSuffix": "yrs"
+  },
   "careMode": {
     "home": "🏠 Home Care Mode",
     "admitted": "🏥 Admitted to Ward Mode"

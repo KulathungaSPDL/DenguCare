@@ -1,8 +1,10 @@
 import React, { useRef } from 'react';
 import { ActivityIndicator, Animated, Pressable, StyleSheet, Text, View, ViewStyle } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { LinearGradient } from 'expo-linear-gradient';
 
 import { colors } from '../theme/colors';
+import { gradients } from '../theme/gradients';
 import { radius, spacing } from '../theme/spacing';
 import { fontFamily, fontSize } from '../theme/typography';
 
@@ -32,8 +34,9 @@ export function PrimaryButton({ label, onPress, disabled, loading, icon, style }
       onPress={disabled || loading ? undefined : onPress}
       onPressIn={onPressIn}
       onPressOut={onPressOut}
-      style={[styles.base, styles.primary, disabled && styles.disabled, style, { transform: [{ scale }] }]}
+      style={[styles.base, disabled && styles.disabled, style, { transform: [{ scale }] }]}
     >
+      <LinearGradient colors={gradients.primaryButton} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.gradientFill} />
       {loading ? (
         <ActivityIndicator color={colors.textOnPrimary} />
       ) : (
@@ -54,8 +57,9 @@ export function DarkButton({ label, onPress, disabled, loading, icon, style }: B
       onPress={disabled || loading ? undefined : onPress}
       onPressIn={onPressIn}
       onPressOut={onPressOut}
-      style={[styles.base, styles.dark, disabled && styles.disabled, style, { transform: [{ scale }] }]}
+      style={[styles.base, disabled && styles.disabled, style, { transform: [{ scale }] }]}
     >
+      <LinearGradient colors={gradients.darkButton} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.gradientFill} />
       {loading ? (
         <ActivityIndicator color={colors.textOnDark} />
       ) : (
@@ -76,8 +80,9 @@ export function DangerButton({ label, onPress, disabled, loading, icon, style }:
       onPress={disabled || loading ? undefined : onPress}
       onPressIn={onPressIn}
       onPressOut={onPressOut}
-      style={[styles.base, styles.danger, disabled && styles.disabled, style, { transform: [{ scale }] }]}
+      style={[styles.base, disabled && styles.disabled, style, { transform: [{ scale }] }]}
     >
+      <LinearGradient colors={['#D14B3B', colors.danger]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.gradientFill} />
       {loading ? (
         <ActivityIndicator color={colors.textOnPrimary} />
       ) : (
@@ -123,6 +128,20 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing.xl,
     alignItems: 'center',
     justifyContent: 'center',
+    overflow: 'hidden',
+    shadowColor: colors.shadow,
+    shadowOpacity: 0.22,
+    shadowRadius: 14,
+    shadowOffset: { width: 0, height: 8 },
+    elevation: 4,
+  },
+  gradientFill: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    borderRadius: radius.pill,
   },
   row: {
     flexDirection: 'row',
@@ -131,24 +150,15 @@ const styles = StyleSheet.create({
   icon: {
     marginRight: spacing.sm,
   },
-  primary: {
-    backgroundColor: colors.primary,
-  },
   primaryLabel: {
     color: colors.textOnPrimary,
     fontFamily: fontFamily.baseBold,
     fontSize: fontSize.lg,
   },
-  dark: {
-    backgroundColor: colors.ink,
-  },
   darkLabel: {
     color: colors.textOnDark,
     fontFamily: fontFamily.baseBold,
     fontSize: fontSize.lg,
-  },
-  danger: {
-    backgroundColor: colors.danger,
   },
   dangerLabel: {
     color: colors.textOnPrimary,

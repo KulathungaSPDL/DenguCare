@@ -1,23 +1,27 @@
-import { router } from 'expo-router';
+﻿import { router } from 'expo-router';
 import * as Print from 'expo-print';
 import * as Sharing from 'expo-sharing';
 import React from 'react';
 import { Alert, Linking, Pressable, StyleSheet, Text, View } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 import { useTranslation } from 'react-i18next';
 
+import { AppTopBar } from '../../src/components/AppTopBar';
 import { Banner } from '../../src/components/Banner';
 import { Card } from '../../src/components/Card';
-import { DarkButton, OutlineButton } from '../../src/components/Buttons';
+import { DangerButton, DarkButton } from '../../src/components/Buttons';
 import { EntryListDivider } from '../../src/components/EntryListItem';
 import { Header } from '../../src/components/Header';
+import { Mascot } from '../../src/components/Mascot';
 import { Note } from '../../src/components/Note';
 import { Screen } from '../../src/components/Screen';
 import { WarningSignRow } from '../../src/components/WarningSignRow';
 import { buildDoctorSummaryHtml } from '../../src/pdf/doctorSummary';
 import { useStore } from '../../src/state/store';
 import { ORDERED_WARNING_SIGN_KEYS, WARNING_SIGN_LABELS } from '../../src/state/warningSigns';
+import { WarningSignKey } from '../../src/state/types';
 import { colors } from '../../src/theme/colors';
-import { spacing } from '../../src/theme/spacing';
+import { radius, spacing } from '../../src/theme/spacing';
 import { fontFamily, fontSize } from '../../src/theme/typography';
 
 const EMERGENCY_NUMBERS = [
@@ -25,6 +29,18 @@ const EMERGENCY_NUMBERS = [
   { label: 'Dengue and health hotline', number: '1999' },
   { label: 'Government Information Centre', number: '1919' },
 ];
+
+const SIGN_STYLE: Record<WarningSignKey, { icon: keyof typeof Ionicons.glyphMap; bg: string; fg: string }> = {
+  abdominal_pain: { icon: 'body-outline', bg: colors.dangerSoft, fg: colors.danger },
+  persistent_vomiting: { icon: 'water-outline', bg: colors.badgeInfoSoft, fg: colors.badgeInfoText },
+  bleeding: { icon: 'water', bg: colors.dangerSoft, fg: colors.danger },
+  confused_restless: { icon: 'help-circle-outline', bg: colors.surfaceMuted, fg: colors.textSecondary },
+  dizzy_faint: { icon: 'body', bg: colors.primarySoft, fg: colors.primary },
+  cold_clammy: { icon: 'snow-outline', bg: colors.primarySoft, fg: colors.primary },
+  no_urine_6h: { icon: 'flask-outline', bg: colors.urineOutSoft, fg: colors.outputText },
+  breathless_swelling: { icon: 'fitness-outline', bg: colors.badgeInfoSoft, fg: colors.badgeInfoText },
+  fever_settled_worse: { icon: 'thermometer-outline', bg: colors.dangerSoft, fg: colors.danger },
+};
 
 export default function SafetyScreen() {
   const { t } = useTranslation();
@@ -42,10 +58,14 @@ export default function SafetyScreen() {
     }
   }
 
+  function callEmergency() {
+    Linking.openURL(`tel:${EMERGENCY_NUMBERS[0].number}`);
+  }
+
   function confirmNewRecord() {
     Alert.alert(
       'Start a new illness record?',
-      'This clears today’s fluid, temperature and warning-sign entries and asks when the new fever started. Your profile stays saved.',
+      "This clears today's fluid, temperature and warning-sign entries and asks when the new fever started. Your profile stays saved.",
       [
         { text: 'Cancel', style: 'cancel' },
         {
@@ -62,30 +82,45 @@ export default function SafetyScreen() {
 
   return (
     <Screen>
+      <AppTopBar icon="shield-checkmark" title={t('topBar.safety')} />
       <Header
-        kicker="Warning signs"
-        title="Any one of these means go now"
-        subtitle="Tick anything you have. Do not wait to see if it passes."
+        title="Safety & Emergency"
+        subtitle="Tick anything you have - do not wait to see if it passes. Review critical warning signs and take immediate action if needed."
       />
+
+      <Card style={styles.introCard}>
+        <View style={styles.introHeaderRow}>
+          <View style={styles.introMascotWrap}>
+            <Mascot mood="shield" size={44} animated={false} />
+          </View>
+          <Text style={styles.introTitle}>Critical Warning Signs</Text>
+        </View>
+        <Text style={styles.introBody}>
+          If you or the patient experience any of these symptoms, seek immediate medical attention.
+        </Text>
+      </Card>
 
       {anyChecked ? (
         <Banner icon="alert-circle-outline" tone="danger">
-          Go to a hospital now. Do not wait to see if it passes — bring this record with you.
+          Go to a hospital now. Do not wait to see if it passes - bring this record with you.
         </Banner>
       ) : null}
 
-      <Card>
-        {ORDERED_WARNING_SIGN_KEYS.map((key, i) => (
-          <React.Fragment key={key}>
-            {i > 0 && <EntryListDivider />}
-            <WarningSignRow
-              label={WARNING_SIGN_LABELS[key]}
-              checked={state.warningSigns[key]}
-              onToggle={() => actions.setWarningSign(key, !state.warningSigns[key])}
-            />
-          </React.Fragment>
+      <View>
+        {ORDERED_WARNING_SIGN_KEYS.map((key) => (
+          <WarningSignRow
+            key={key}
+            label={WARNING_SIGN_LABELS[key]}
+            icon={SIGN_STYLE[key].icon}
+            iconBg={SIGN_STYLE[key].bg}
+            iconColor={SIGN_STYLE[key].fg}
+            checked={state.warningSigns[key]}
+            onToggle={() => actions.setWarningSign(key, !state.warningSigns[key])}
+          />
         ))}
-      </Card>
+      </View>
+
+      <DangerButton label="Call Emergency" icon="call" onPress={callEmergency} style={{ marginTop: spacing.sm }} />
 
       <Card style={{ marginTop: spacing.lg }}>
         <Text style={styles.cardKicker}>Emergency numbers</Text>
@@ -107,11 +142,13 @@ export default function SafetyScreen() {
         style={{ marginTop: spacing.lg }}
       />
 
-      <OutlineButton
-        label="Start a new illness record"
+      <Pressable
         onPress={confirmNewRecord}
-        style={{ marginTop: spacing.lg }}
-      />
+        style={({ pressed }) => [styles.newRecordBtn, pressed && styles.newRecordBtnPressed]}
+      >
+        <Ionicons name="add-circle-outline" size={20} color={colors.primaryDark} />
+        <Text style={styles.newRecordLabel}>Start New Illness Record</Text>
+      </Pressable>
 
       <Note>
         Prototype only. Not a registered medical device. Every number, threshold, and message here must be
@@ -131,6 +168,33 @@ const styles = StyleSheet.create({
     textTransform: 'uppercase',
     marginBottom: spacing.sm,
   },
+  introCard: {
+    backgroundColor: colors.dangerSoft,
+    borderWidth: 1,
+    borderColor: colors.borderDanger,
+    marginBottom: spacing.lg,
+  },
+  introHeaderRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  introMascotWrap: {
+    marginRight: spacing.sm,
+    marginLeft: -6,
+  },
+  introTitle: {
+    fontFamily: fontFamily.baseBold,
+    fontWeight: '800',
+    fontSize: fontSize.lg,
+    color: colors.danger,
+  },
+  introBody: {
+    marginTop: spacing.sm,
+    fontFamily: fontFamily.base,
+    fontSize: fontSize.sm,
+    color: colors.textPrimary,
+    lineHeight: fontSize.sm * 1.5,
+  },
   numberRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -144,6 +208,25 @@ const styles = StyleSheet.create({
   },
   numberValue: {
     fontFamily: fontFamily.mono,
+    fontWeight: '700',
+    fontSize: fontSize.lg,
+    color: colors.primaryDark,
+  },
+  newRecordBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: spacing.sm,
+    borderRadius: radius.pill,
+    paddingVertical: 16,
+    marginTop: spacing.lg,
+    backgroundColor: colors.primarySoft,
+  },
+  newRecordBtnPressed: {
+    opacity: 0.85,
+  },
+  newRecordLabel: {
+    fontFamily: fontFamily.baseBold,
     fontWeight: '700',
     fontSize: fontSize.lg,
     color: colors.primaryDark,

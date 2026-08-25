@@ -1,12 +1,14 @@
+import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
 import React, { useMemo, useState } from 'react';
-import { Text, View } from 'react-native';
+import { StyleSheet, Text, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 
+import { AppTopBar } from '../../src/components/AppTopBar';
 import { PrimaryButton } from '../../src/components/Buttons';
+import { Card } from '../../src/components/Card';
 import { Chip } from '../../src/components/Chip';
 import { DateTimeField } from '../../src/components/DateTimeField';
-import { Header } from '../../src/components/Header';
 import { LabeledInput } from '../../src/components/LabeledInput';
 import { Screen } from '../../src/components/Screen';
 import { SegmentedToggle } from '../../src/components/SegmentedToggle';
@@ -28,6 +30,17 @@ const DEFAULT_DOB = (() => {
   d.setFullYear(d.getFullYear() - 25);
   return d;
 })();
+
+function SectionHeader({ icon, title }: { icon: keyof typeof Ionicons.glyphMap; title: string }) {
+  return (
+    <View style={styles.sectionHeaderRow}>
+      <View style={styles.sectionIconCircle}>
+        <Ionicons name={icon} size={16} color={colors.primaryDark} />
+      </View>
+      <Text style={styles.sectionTitle}>{title}</Text>
+    </View>
+  );
+}
 
 export default function ProfileScreen() {
   const { t } = useTranslation();
@@ -59,109 +72,142 @@ export default function ProfileScreen() {
     <Screen
       footer={
         <View>
-          <PrimaryButton label="Next" disabled={!canContinue} onPress={onContinue} />
+          <PrimaryButton label="Complete Setup" disabled={!canContinue} onPress={onContinue} />
           {!canContinue ? <Text style={hintStyle}>Add your name, date of birth and weight to continue.</Text> : null}
         </View>
       }
     >
-      <Header
-        kicker="Step 1 of 2"
-        title="Tell us about you"
-        subtitle="Your weight and height set how much you should drink and how much urine is enough."
+      <AppTopBar
+        variant="back"
+        title="Patient Profile Setup"
+        subtitle="Step 1 of 2 - please provide accurate information for monitoring."
       />
+      <Card style={{ marginBottom: spacing.lg }}>
+        <SectionHeader icon="person" title="Demographics" />
 
-      <Text style={labelStyle}>
-        Where are you being cared for?<Text style={{ color: colors.danger }}> *</Text>
-      </Text>
-      <SegmentedToggle
-        options={[
-          { value: 'home', label: t('careMode.home') },
-          { value: 'admitted', label: t('careMode.admitted') },
-        ]}
-        value={state.careMode}
-        onChange={(mode: CareMode) => actions.setCareMode(mode)}
-      />
+        <Text style={labelStyle}>
+          Where are you being cared for?<Text style={{ color: colors.danger }}> *</Text>
+        </Text>
+        <SegmentedToggle
+          options={[
+            { value: 'home', label: t('careMode.home') },
+            { value: 'admitted', label: t('careMode.admitted') },
+          ]}
+          value={state.careMode}
+          onChange={(mode: CareMode) => actions.setCareMode(mode)}
+        />
 
-      <View style={{ height: spacing.lg }} />
+        <View style={{ height: spacing.lg }} />
 
-      <LabeledInput
-        label="Name"
-        required
-        placeholder="Your name"
-        value={profile.name}
-        onChangeText={(name) => actions.setProfile({ name })}
-      />
+        <LabeledInput
+          label="Full Name"
+          required
+          placeholder="e.g. Jane Doe"
+          value={profile.name}
+          onChangeText={(name) => actions.setProfile({ name })}
+        />
 
-      <DateTimeField
-        label="Date of birth *"
-        mode="date"
-        value={dob}
-        defaultValue={DEFAULT_DOB}
-        maximumDate={new Date()}
-        onChange={(d) => actions.setProfile({ dobISO: d.toISOString().slice(0, 10) })}
-      />
+        <DateTimeField
+          label="Date of birth *"
+          mode="date"
+          value={dob}
+          defaultValue={DEFAULT_DOB}
+          maximumDate={new Date()}
+          onChange={(d) => actions.setProfile({ dobISO: d.toISOString().slice(0, 10) })}
+        />
 
-      <View style={{ height: spacing.lg }} />
+        <View style={{ height: spacing.lg }} />
 
-      <Text style={labelStyle}>
-        Sex at birth<Text style={{ color: colors.danger }}> *</Text>
-      </Text>
-      <SegmentedToggle
-        options={[
-          { value: 'female', label: 'Female' },
-          { value: 'male', label: 'Male' },
-        ]}
-        value={profile.sex}
-        onChange={(sex) => actions.setProfile({ sex })}
-      />
+        <Text style={labelStyle}>
+          Sex at birth<Text style={{ color: colors.danger }}> *</Text>
+        </Text>
+        <SegmentedToggle
+          options={[
+            { value: 'female', label: 'Female' },
+            { value: 'male', label: 'Male' },
+          ]}
+          value={profile.sex}
+          onChange={(sex) => actions.setProfile({ sex })}
+        />
 
-      <View style={{ height: spacing.lg }} />
+        <View style={{ height: spacing.lg }} />
 
-      <View style={{ flexDirection: 'row', gap: spacing.md }}>
-        <View style={{ flex: 1 }}>
-          <LabeledInput
-            label="Weight (kg)"
-            required
-            keyboardType="decimal-pad"
-            mono
-            value={weightText}
-            onChangeText={setWeightText}
-            placeholder="0"
-          />
+        <View style={{ flexDirection: 'row', gap: spacing.md }}>
+          <View style={{ flex: 1 }}>
+            <LabeledInput
+              label="Weight (kg)"
+              required
+              keyboardType="decimal-pad"
+              mono
+              value={weightText}
+              onChangeText={setWeightText}
+              placeholder="Required for fluid calc"
+            />
+          </View>
+          <View style={{ flex: 1 }}>
+            <LabeledInput
+              label="Height (cm) (optional)"
+              keyboardType="decimal-pad"
+              mono
+              value={heightText}
+              onChangeText={setHeightText}
+              placeholder="0"
+            />
+          </View>
         </View>
-        <View style={{ flex: 1 }}>
-          <LabeledInput
-            label="Height (cm) (optional)"
-            keyboardType="decimal-pad"
-            mono
-            value={heightText}
-            onChangeText={setHeightText}
-            placeholder="0"
-          />
-        </View>
-      </View>
-      <Text style={hintInlineStyle}>Adding your height makes your fluid target more accurate.</Text>
+        <Text style={hintInlineStyle}>Adding your height makes your fluid target more accurate.</Text>
+      </Card>
 
-      <Text style={[labelStyle, { marginTop: spacing.lg }]}>Anything else we should know</Text>
-      <View style={{ flexDirection: 'row', flexWrap: 'wrap', marginTop: spacing.sm }}>
-        {visibleConditions.map((c) => (
-          <Chip
-            key={c.key}
-            label={c.label}
-            selected={profile.conditions.includes(c.key)}
-            onPress={() => actions.toggleCondition(c.key)}
-          />
-        ))}
-      </View>
+      <Card>
+        <SectionHeader icon="medkit" title="Medical History" />
+        <Text style={hintInlineStyle}>Anything else we should know</Text>
+        <View style={{ flexDirection: 'row', flexWrap: 'wrap', marginTop: spacing.sm }}>
+          {visibleConditions.map((c) => (
+            <Chip
+              key={c.key}
+              label={c.label}
+              selected={profile.conditions.includes(c.key)}
+              onPress={() => actions.toggleCondition(c.key)}
+            />
+          ))}
+        </View>
+      </Card>
     </Screen>
   );
 }
+
+const styles = StyleSheet.create({
+  sectionHeaderRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: spacing.lg,
+    paddingBottom: spacing.md,
+    borderBottomWidth: 1,
+    borderBottomColor: colors.border,
+  },
+  sectionIconCircle: {
+    width: 30,
+    height: 30,
+    borderRadius: 15,
+    backgroundColor: colors.primarySoft,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: spacing.md,
+  },
+  sectionTitle: {
+    fontFamily: fontFamily.baseBold,
+    fontWeight: '800',
+    fontSize: fontSize.lg,
+    color: colors.textPrimary,
+  },
+});
 
 const labelStyle = {
   fontFamily: fontFamily.baseBold,
   fontWeight: '600' as const,
   fontSize: fontSize.md,
   color: colors.textPrimary,
+  marginBottom: spacing.sm,
 };
 
 const hintStyle = {
@@ -173,7 +219,6 @@ const hintStyle = {
 };
 
 const hintInlineStyle = {
-  marginTop: -spacing.sm,
   marginBottom: spacing.sm,
   fontFamily: fontFamily.base,
   fontSize: fontSize.sm,

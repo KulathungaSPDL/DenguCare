@@ -1,4 +1,16 @@
 {
+  "topBar": {
+    "dashboard": "උපකරණ පුවරුව",
+    "fluidBalance": "තරල සමතුලිතතාවය",
+    "temperature": "උෂ්ණත්වය",
+    "bloodReports": "රුධිර වාර්තා",
+    "safety": "ආරක්ෂාව සහ හදිසි අවස්ථා",
+    "language": "භාෂාව",
+    "patientFallback": "රෝගියා",
+    "sexFemale": "ගැහැණු",
+    "sexMale": "පිරිමි",
+    "yearsSuffix": "අවු."
+  },
   "careMode": {
     "home": "🏠 නිවසේ රැකවරණ ප්‍රකාරය",
     "admitted": "🏥 රෝහල්ගත රැකවරණ ප්‍රකාරය"

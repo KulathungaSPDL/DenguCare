@@ -56,10 +56,10 @@ function buildArcs(segments: GaugeSegment[], targetMl: number) {
 
 /** Combined fluid-balance gauge: an outer ring for today's drinks (segmented
  * by kind colour) and a concentric inner ring for urine, sharing one open
- * gap at the bottom — a small urine-logging button sits in that gap. */
+ * gap at the bottom - a small urine-logging button sits in that gap. */
 export function FluidBalanceGauge({ drinkSegments, urineMl, onPressDrinks, onPressUrine }: Props) {
   const drinkMl = drinkSegments.reduce((sum, s) => sum + s.ml, 0);
-  // Scale is whichever of drink/urine is larger today, not the daily target —
+  // Scale is whichever of drink/urine is larger today, not the daily target -
   // this gauge exists to show the gap between the two, so the bigger one
   // always reads as a full ring and the other reads short by exactly that
   // gap. E.g. 500 ml drunk with 0 ml urine shows drinks maxed out and urine

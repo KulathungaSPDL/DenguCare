@@ -1,4 +1,16 @@
 {
+  "topBar": {
+    "dashboard": "டாஷ்போர்டு",
+    "fluidBalance": "திரவ சமநிலை",
+    "temperature": "வெப்பநிலை",
+    "bloodReports": "இரத்த அறிக்கைகள்",
+    "safety": "பாதுகாப்பு & அவசரநிலை",
+    "language": "மொழி",
+    "patientFallback": "நோயாளி",
+    "sexFemale": "பெண்",
+    "sexMale": "ஆண்",
+    "yearsSuffix": "வயது"
+  },
   "careMode": {
     "home": "🏠 வீட்டு பராமரிப்பு முறை",
     "admitted": "🏥 மருத்துவமனையில் அனுமதிக்கப்பட்ட முறை"

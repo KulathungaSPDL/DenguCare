@@ -60,7 +60,7 @@ export function DateTimeField({
   return (
     <View style={styles.wrap}>
       <Text style={styles.label}>{label}</Text>
-      <Pressable onPress={openPicker} style={styles.field}>
+      <Pressable onPress={openPicker} style={styles.field} accessibilityRole="button">
         <Text style={[styles.value, !value && styles.placeholder]}>{displayText}</Text>
       </Pressable>
 
@@ -105,10 +105,15 @@ const styles = StyleSheet.create({
   field: {
     backgroundColor: colors.surface,
     borderWidth: 1,
-    borderColor: colors.border,
-    borderRadius: radius.md,
+    borderColor: colors.borderInfo,
+    borderRadius: radius.lg,
     paddingHorizontal: spacing.lg,
     paddingVertical: 14,
+    shadowColor: colors.shadow,
+    shadowOpacity: 0.04,
+    shadowRadius: 10,
+    shadowOffset: { width: 0, height: 4 },
+    elevation: 1,
   },
   value: {
     fontFamily: fontFamily.mono,
@@ -125,8 +130,8 @@ const styles = StyleSheet.create({
   },
   modalSheet: {
     backgroundColor: colors.surface,
-    borderTopLeftRadius: radius.lg,
-    borderTopRightRadius: radius.lg,
+    borderTopLeftRadius: radius.xl,
+    borderTopRightRadius: radius.xl,
     padding: spacing.lg,
   },
 });

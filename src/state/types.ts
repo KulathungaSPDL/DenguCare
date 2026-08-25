@@ -50,6 +50,9 @@ export interface UrineEntry {
 
 export type CareMode = 'home' | 'admitted';
 
+/** null = follow the device's language, falling back to English if unsupported. */
+export type AppLanguage = 'en' | 'si' | 'ta' | null;
+
 export type MedicationName = 'paracetamol';
 
 export interface MedicationDose {
@@ -110,6 +113,8 @@ export interface AppState {
   profile: Profile;
   illness: IllnessRecord | null;
   careMode: CareMode;
+  language: AppLanguage;
+  remindersOn: boolean;
   drinks: DrinkEntry[];
   urine: UrineEntry[];
   temps: TempReading[];

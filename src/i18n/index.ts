@@ -8,11 +8,11 @@ import ta from './locales/ta.json';
 
 // Translations here cover only strings introduced after this scaffold was
 // added (Care Mode, IV fluids, hyponatremia/dark-fluid advisories, the
-// paracetamol guard, the plasma-leakage alert, the doctor summary). Existing
-// screens keep their original English copy — see the app-wide "needs
-// clinical/native-speaker review" disclaimer already used in
-// src/state/calculations.ts; these translations need the same pass before
-// real patients rely on them.
+// paracetamol guard, the plasma-leakage alert, the doctor summary, and the
+// AppTopBar page topics/patient descriptors). Existing screens keep their
+// original English copy — see the app-wide "needs clinical/native-speaker
+// review" disclaimer already used in src/state/calculations.ts; these
+// translations need the same pass before real patients rely on them.
 const SUPPORTED_LANGUAGES = ['en', 'si', 'ta'] as const;
 
 function detectInitialLanguage(): string {

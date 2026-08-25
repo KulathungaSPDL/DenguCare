@@ -4,6 +4,7 @@ import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 import { useTranslation } from 'react-i18next';
 
 import { AmountEntryModal } from '../../src/components/AmountEntryModal';
+import { AppTopBar } from '../../src/components/AppTopBar';
 import { Banner } from '../../src/components/Banner';
 import { Card } from '../../src/components/Card';
 import { DayEntriesModal } from '../../src/components/DayEntriesModal';
@@ -136,7 +137,8 @@ export default function FluidsScreen() {
 
   return (
     <Screen>
-      <Header kicker="Fluid balance" title={`In ${inMl} ml · Out ${outMl} ml`} />
+      <AppTopBar icon="water" title={t('topBar.fluidBalance')} />
+      <Header kicker="Fluid balance" title={`In ${inMl} ml  -  Out ${outMl} ml`} />
 
       {showHyponatremiaWarning ? (
         <Banner icon="warning-outline" tone="warning">
@@ -189,7 +191,6 @@ export default function FluidsScreen() {
           <HourlyBalanceChart buckets={buckets} hourlyGoalMl={targets.hourlyGoalMl} />
         ) : (
           <EmptyState
-            icon="water-outline"
             title="No fluids logged yet"
             subtitle="Log a drink or urine below and this chart will fill in hour by hour."
           />

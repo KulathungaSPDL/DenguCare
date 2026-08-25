@@ -28,9 +28,11 @@ import {
   updateTemp as updateTempRow,
   updateUrine as updateUrineRow,
 } from '../db/repo';
+import i18next from '../i18n';
 import { defaultState, emptyWarningSigns } from './defaultState';
 import { makeId } from './id';
 import {
+  AppLanguage,
   AppState,
   AuthProvider,
   BloodReport,
@@ -56,6 +58,8 @@ type Action =
   | { type: 'SET_PROFILE'; payload: Partial<Profile> }
   | { type: 'TOGGLE_CONDITION'; payload: { condition: Condition } }
   | { type: 'SET_CARE_MODE'; payload: { careMode: CareMode } }
+  | { type: 'SET_LANGUAGE'; payload: { language: AppLanguage } }
+  | { type: 'SET_REMINDERS_ON'; payload: { remindersOn: boolean } }
   | { type: 'START_ILLNESS'; payload: { feverStartISO: string } }
   | { type: 'RESET_ILLNESS' }
   | { type: 'ADD_DRINK'; payload: DrinkEntry }
@@ -98,6 +102,10 @@ function reducer(state: AppState, action: Action): AppState {
     }
     case 'SET_CARE_MODE':
       return { ...state, careMode: action.payload.careMode };
+    case 'SET_LANGUAGE':
+      return { ...state, language: action.payload.language };
+    case 'SET_REMINDERS_ON':
+      return { ...state, remindersOn: action.payload.remindersOn };
     case 'START_ILLNESS':
       return {
         ...state,
@@ -175,6 +183,8 @@ interface StoreContextValue {
     setSex: (sex: Sex) => void;
     toggleCondition: (condition: Condition) => void;
     setCareMode: (careMode: CareMode) => void;
+    setLanguage: (language: AppLanguage) => void;
+    setRemindersOn: (remindersOn: boolean) => void;
     startIllness: (feverStartISO: string) => void;
     resetIllness: () => void;
     addDrink: (amountMl: number, kind: DrinkKind, label: string, atISO?: string) => void;
@@ -242,6 +252,8 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
           profile: parseKv(kv.profile, defaultState.profile),
           illness: parseKv(kv.illness, defaultState.illness),
           careMode: parseKv(kv.careMode, defaultState.careMode),
+          language: parseKv(kv.language, defaultState.language),
+          remindersOn: parseKv(kv.remindersOn, defaultState.remindersOn),
           warningSigns: parseKv(kv.warningSigns, { ...emptyWarningSigns }),
           drinks,
           urine,
@@ -288,6 +300,15 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
     if (!state.hydrated) return;
     setKv('warningSigns', state.warningSigns).catch(() => {});
   }, [state.hydrated, state.warningSigns]);
+  useEffect(() => {
+    if (!state.hydrated) return;
+    setKv('language', state.language).catch(() => {});
+    if (state.language) i18next.changeLanguage(state.language).catch(() => {});
+  }, [state.hydrated, state.language]);
+  useEffect(() => {
+    if (!state.hydrated) return;
+    setKv('remindersOn', state.remindersOn).catch(() => {});
+  }, [state.hydrated, state.remindersOn]);
 
   const actions = useMemo<StoreContextValue['actions']>(
     () => ({
@@ -297,6 +318,8 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
       setSex: (sex) => dispatch({ type: 'SET_PROFILE', payload: { sex } }),
       toggleCondition: (condition) => dispatch({ type: 'TOGGLE_CONDITION', payload: { condition } }),
       setCareMode: (careMode) => dispatch({ type: 'SET_CARE_MODE', payload: { careMode } }),
+      setLanguage: (language) => dispatch({ type: 'SET_LANGUAGE', payload: { language } }),
+      setRemindersOn: (remindersOn) => dispatch({ type: 'SET_REMINDERS_ON', payload: { remindersOn } }),
       startIllness: (feverStartISO) => dispatch({ type: 'START_ILLNESS', payload: { feverStartISO } }),
       resetIllness: () => {
         dispatch({ type: 'RESET_ILLNESS' });

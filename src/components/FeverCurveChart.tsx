@@ -38,7 +38,7 @@ export function FeverCurveChart({ readings, feverStartISO, shadedStart = 3, shad
   const sorted = [...readings].sort((a, b) => new Date(a.atISO).getTime() - new Date(b.atISO).getTime());
 
   // Zoom the Y-axis to the actual readings (padded, rounded to whole degrees)
-  // instead of always spanning the full clinical range — small swings stay readable.
+  // instead of always spanning the full clinical range - small swings stay readable.
   const { yMin, yMax } = useMemo(() => {
     const values = sorted.map((r) => r.celsius).concat(settledLine);
     const lo = Math.min(...values, 37);
@@ -114,9 +114,9 @@ export function FeverCurveChart({ readings, feverStartISO, shadedStart = 3, shad
 
       <Text style={styles.caption}>
         {mode === 'daily'
-          ? `Shaded band: days ${shadedStart}–${shadedEnd}. `
+          ? `Shaded band: days ${shadedStart}-${shadedEnd}. `
           : 'Scroll to see every hour. '}
-        Dashed line: {settledLine} °C, where fever is counted as settled.
+        Dashed line: {settledLine}  C, where fever is counted as settled.
       </Text>
     </View>
   );

@@ -1,27 +1,20 @@
 import React, { useEffect, useRef } from 'react';
-import { Animated, StyleSheet, Text, View } from 'react-native';
+import { Animated, ScrollView, StyleSheet, Text } from 'react-native';
 
 import { colors } from '../theme/colors';
 import { radius, spacing } from '../theme/spacing';
-import { phaseLabel } from '../state/phase';
 import { fontFamily, fontSize } from '../theme/typography';
 
 const TOTAL_DAYS = 10;
-const CRITICAL_DAYS = Array.from({ length: TOTAL_DAYS }, (_, i) => i + 1).filter(
-  (day) => phaseLabel(day) === 'Critical phase'
-);
-const CRITICAL_START = CRITICAL_DAYS[0];
-const CRITICAL_END = CRITICAL_DAYS[CRITICAL_DAYS.length - 1];
 
-/** Row of day-number boxes 1-10, shading the critical-phase window and
- * pulsing the box for the current illness day so it draws the eye. */
+/** Horizontal scroll strip of "DAY N" chips, highlighting the current illness day. */
 export function DayStrip({ currentDay }: { currentDay: number }) {
   const pulse = useRef(new Animated.Value(1)).current;
 
   useEffect(() => {
     const loop = Animated.loop(
       Animated.sequence([
-        Animated.timing(pulse, { toValue: 0.35, duration: 1400, useNativeDriver: true }),
+        Animated.timing(pulse, { toValue: 0.55, duration: 1400, useNativeDriver: true }),
         Animated.timing(pulse, { toValue: 1, duration: 1400, useNativeDriver: true }),
       ])
     );
@@ -30,70 +23,60 @@ export function DayStrip({ currentDay }: { currentDay: number }) {
   }, [pulse]);
 
   return (
-    <View>
-      <View style={styles.row}>
-        {Array.from({ length: TOTAL_DAYS }, (_, i) => i + 1).map((day) => {
-          const isCurrent = day === currentDay;
-          const isCritical = phaseLabel(day) === 'Critical phase';
+    <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.row}>
+      {Array.from({ length: TOTAL_DAYS }, (_, i) => i + 1).map((day) => {
+        const isCurrent = day === currentDay;
 
-          return (
-            <Animated.View
-              key={day}
-              style={[
-                styles.box,
-                isCritical && styles.boxCritical,
-                isCurrent && styles.boxCurrent,
-                isCurrent && { opacity: pulse },
-              ]}
-            >
-              <Text style={[styles.dayText, isCurrent && styles.dayTextCurrent]}>{day}</Text>
-            </Animated.View>
-          );
-        })}
-      </View>
-
-      <Text style={styles.caption}>
-        Shaded days {CRITICAL_START}-{CRITICAL_END}: the window when dengue can turn serious.
-      </Text>
-    </View>
+        return (
+          <Animated.View
+            key={day}
+            style={[styles.box, isCurrent && styles.boxCurrent, isCurrent && { opacity: pulse }]}
+          >
+            <Text style={[styles.dayLabel, isCurrent && styles.dayLabelCurrent]}>DAY</Text>
+            <Text style={[styles.dayNumber, isCurrent && styles.dayNumberCurrent]}>{day}</Text>
+          </Animated.View>
+        );
+      })}
+    </ScrollView>
   );
 }
 
 const styles = StyleSheet.create({
   row: {
-    flexDirection: 'row',
+    paddingVertical: 2,
+    paddingRight: spacing.sm,
   },
   box: {
-    flex: 1,
-    aspectRatio: 1,
-    marginHorizontal: 2,
-    borderRadius: radius.sm,
-    borderWidth: 1,
-    borderColor: colors.border,
-    backgroundColor: colors.surface,
+    width: 68,
+    aspectRatio: 0.85,
+    marginRight: spacing.sm,
+    borderRadius: radius.md,
+    backgroundColor: colors.surfaceMuted,
     alignItems: 'center',
     justifyContent: 'center',
   },
-  boxCritical: {
-    backgroundColor: colors.surfaceMuted,
-    borderColor: colors.surfaceMutedBorder,
-  },
   boxCurrent: {
-    backgroundColor: colors.ink,
-    borderColor: colors.ink,
+    backgroundColor: colors.dangerSoft,
+    borderWidth: 1.5,
+    borderColor: colors.borderDanger,
   },
-  dayText: {
-    fontFamily: fontFamily.baseSemiBold,
-    fontSize: fontSize.md,
+  dayLabel: {
+    fontFamily: fontFamily.baseBold,
+    fontWeight: '700',
+    fontSize: fontSize.xs,
+    letterSpacing: 0.5,
+    color: colors.textSecondary,
+  },
+  dayLabelCurrent: {
+    color: colors.danger,
+  },
+  dayNumber: {
+    marginTop: 2,
+    fontFamily: fontFamily.baseExtraBold,
+    fontSize: fontSize.xl,
     color: colors.textPrimary,
   },
-  dayTextCurrent: {
-    color: colors.textOnDark,
-  },
-  caption: {
-    marginTop: spacing.sm,
-    fontFamily: fontFamily.base,
-    fontSize: fontSize.xs,
-    color: colors.textSecondary,
+  dayNumberCurrent: {
+    color: colors.danger,
   },
 });

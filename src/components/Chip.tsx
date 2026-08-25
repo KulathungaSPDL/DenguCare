@@ -1,5 +1,6 @@
+import { Ionicons } from '@expo/vector-icons';
 import React from 'react';
-import { Pressable, StyleSheet, Text } from 'react-native';
+import { Pressable, StyleSheet, Text, View } from 'react-native';
 
 import { colors } from '../theme/colors';
 import { radius, spacing } from '../theme/spacing';
@@ -17,13 +18,12 @@ export function Chip({ label, selected, onPress }: Props) {
       onPress={onPress}
       accessibilityRole="button"
       accessibilityState={{ selected: !!selected }}
-      style={({ pressed }) => [
-        styles.chip,
-        selected && styles.chipSelected,
-        pressed && styles.pressed,
-      ]}
+      style={({ pressed }) => [styles.chip, selected && styles.chipSelected, pressed && styles.pressed]}
     >
-      <Text style={[styles.label, selected && styles.labelSelected]}>{label}</Text>
+      <View style={styles.content}>
+        {selected ? <Ionicons name="checkmark-circle" size={14} color={colors.textOnPrimary} /> : null}
+        <Text style={[styles.label, selected && styles.labelSelected]}>{label}</Text>
+      </View>
     </Pressable>
   );
 }
@@ -33,9 +33,9 @@ const styles = StyleSheet.create({
     borderRadius: radius.pill,
     paddingVertical: 10,
     paddingHorizontal: spacing.lg,
-    backgroundColor: colors.surface,
+    backgroundColor: 'rgba(255,255,255,0.76)',
     borderWidth: 1,
-    borderColor: colors.border,
+    borderColor: colors.borderInfo,
     marginRight: spacing.sm,
     marginBottom: spacing.sm,
   },
@@ -46,8 +46,13 @@ const styles = StyleSheet.create({
   pressed: {
     opacity: 0.85,
   },
+  content: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+  },
   label: {
-    fontFamily: fontFamily.base,
+    fontFamily: fontFamily.baseSemiBold,
     fontSize: fontSize.sm,
     color: colors.textPrimary,
   },

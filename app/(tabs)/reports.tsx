@@ -4,6 +4,7 @@ import { Alert, Image, Pressable, StyleSheet, Text, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useTranslation } from 'react-i18next';
 
+import { AppTopBar } from '../../src/components/AppTopBar';
 import { Banner } from '../../src/components/Banner';
 import { DarkButton, OutlineButton, PrimaryButton } from '../../src/components/Buttons';
 import { Card } from '../../src/components/Card';
@@ -131,6 +132,7 @@ export default function ReportsScreen() {
 
   return (
     <Screen>
+      <AppTopBar icon="document-text" title={t('topBar.bloodReports')} />
       <Header kicker="Blood reports" title="Photograph it. Type it in." subtitle="Take a picture of your full blood count for your own record, then type the numbers in." />
 
       <View style={styles.actionsRow}>
@@ -142,8 +144,7 @@ export default function ReportsScreen() {
       <OutlineButton label="Enter values manually" onPress={openManual} style={{ marginBottom: spacing.lg }} />
 
       <Banner icon="information-circle-outline" tone="info">
-        Automatic reading needs EXPO_PUBLIC_ANTHROPIC_API_KEY set — see .env.example. Without it, a photo is kept
-        alongside your typed-in values as a reference.
+        Photos stay attached to each report, so you can compare the original lab sheet with the numbers you typed in.
       </Banner>
 
       {atRisk ? (
@@ -172,9 +173,9 @@ export default function ReportsScreen() {
           </View>
 
           <View style={{ height: spacing.md }} />
-          <LabeledInput label="Platelet count (x10³/µL)" keyboardType="decimal-pad" mono value={platelet} onChangeText={setPlatelet} placeholder="e.g. 145" />
+          <LabeledInput label="Platelet count (x10^3/uL)" keyboardType="decimal-pad" mono value={platelet} onChangeText={setPlatelet} placeholder="e.g. 145" />
           <LabeledInput label="Haematocrit (%)" keyboardType="decimal-pad" mono value={haematocrit} onChangeText={setHaematocrit} placeholder="e.g. 42" />
-          <LabeledInput label="WBC count (x10³/µL) (optional)" keyboardType="decimal-pad" mono value={wbc} onChangeText={setWbc} placeholder="e.g. 4.2" />
+          <LabeledInput label="WBC count (x10^3/uL) (optional)" keyboardType="decimal-pad" mono value={wbc} onChangeText={setWbc} placeholder="e.g. 4.2" />
 
           <View style={styles.formActions}>
             <OutlineButton
@@ -194,9 +195,8 @@ export default function ReportsScreen() {
       <Card>
         {state.reports.length === 0 ? (
           <EmptyState
-            icon="document-text-outline"
             title="No reports yet"
-            subtitle="Add your first blood report above — by photo or typed in — and we'll show your platelet and haematocrit trends here."
+            subtitle="Add your first blood report above - by photo or typed in - and we'll show your platelet and haematocrit trends here."
           />
         ) : (
           state.reports.map((r, i) => (
@@ -211,12 +211,12 @@ export default function ReportsScreen() {
                 >
                   <View style={{ flex: 1 }}>
                     <Text style={styles.reportDate}>
-                      {formatDatePretty(new Date(r.atISO))} · {formatTime24(new Date(r.atISO))}
+                      {formatDatePretty(new Date(r.atISO))}  -  {formatTime24(new Date(r.atISO))}
                     </Text>
                     <Text style={styles.reportValues}>
-                      {r.plateletCount != null ? `Platelets ${r.plateletCount}` : 'Platelets —'}
-                      {'  ·  '}
-                      {r.haematocritPct != null ? `HCT ${r.haematocritPct}%` : 'HCT —'}
+                      {r.plateletCount != null ? `Platelets ${r.plateletCount}` : 'Platelets -'}
+                      {'   -   '}
+                      {r.haematocritPct != null ? `HCT ${r.haematocritPct}%` : 'HCT -'}
                     </Text>
                   </View>
                   {r.photoUri ? <Image source={{ uri: r.photoUri }} style={styles.thumb} /> : null}
@@ -254,7 +254,7 @@ const styles = StyleSheet.create({
   preview: {
     width: '100%',
     height: 160,
-    borderRadius: radius.md,
+    borderRadius: radius.lg,
     marginBottom: spacing.md,
     backgroundColor: colors.background,
   },

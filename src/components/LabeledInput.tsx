@@ -19,11 +19,7 @@ export function LabeledInput({ label, required, hint, mono, style, ...rest }: Pr
         {label}
         {required ? <Text style={styles.required}> *</Text> : null}
       </Text>
-      <TextInput
-        style={[styles.input, mono && styles.mono, style]}
-        placeholderTextColor={colors.textMuted}
-        {...rest}
-      />
+      <TextInput style={[styles.input, mono && styles.mono, style]} placeholderTextColor={colors.textMuted} {...rest} />
       {hint ? <Text style={styles.hint}>{hint}</Text> : null}
     </View>
   );
@@ -46,13 +42,18 @@ const styles = StyleSheet.create({
   input: {
     backgroundColor: colors.surface,
     borderWidth: 1,
-    borderColor: colors.border,
-    borderRadius: radius.md,
+    borderColor: colors.borderInfo,
+    borderRadius: radius.lg,
     paddingHorizontal: spacing.lg,
     paddingVertical: 14,
     fontSize: fontSize.lg,
     color: colors.textPrimary,
     fontFamily: fontFamily.base,
+    shadowColor: colors.shadow,
+    shadowOpacity: 0.04,
+    shadowRadius: 10,
+    shadowOffset: { width: 0, height: 4 },
+    elevation: 1,
   },
   mono: {
     fontFamily: fontFamily.mono,
@@ -62,5 +63,6 @@ const styles = StyleSheet.create({
     fontFamily: fontFamily.base,
     fontSize: fontSize.sm,
     color: colors.textSecondary,
+    lineHeight: fontSize.sm * 1.45,
   },
 });

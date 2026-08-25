@@ -27,6 +27,8 @@ export const defaultState: AppState = {
   },
   illness: null,
   careMode: 'home',
+  language: null,
+  remindersOn: true,
   drinks: [],
   urine: [],
   temps: [],

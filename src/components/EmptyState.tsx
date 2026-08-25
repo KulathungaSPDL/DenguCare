@@ -1,23 +1,23 @@
 import React from 'react';
 import { StyleSheet, Text, View } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
 
 import { colors } from '../theme/colors';
 import { spacing } from '../theme/spacing';
 import { fontFamily, fontSize } from '../theme/typography';
+import { Mascot, MascotMood } from './Mascot';
 
 export function EmptyState({
-  icon,
   title,
   subtitle,
+  mood = 'sleepy',
 }: {
-  icon: keyof typeof Ionicons.glyphMap;
   title: string;
   subtitle: string;
+  mood?: MascotMood;
 }) {
   return (
     <View style={styles.wrap}>
-      <Ionicons name={icon} size={28} color={colors.textMuted} />
+      <Mascot mood={mood} size={64} />
       <Text style={styles.title}>{title}</Text>
       <Text style={styles.subtitle}>{subtitle}</Text>
     </View>
@@ -27,7 +27,7 @@ export function EmptyState({
 const styles = StyleSheet.create({
   wrap: {
     alignItems: 'center',
-    paddingVertical: spacing.xxl,
+    paddingVertical: spacing.xl,
     paddingHorizontal: spacing.lg,
   },
   title: {

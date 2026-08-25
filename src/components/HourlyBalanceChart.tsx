@@ -40,7 +40,7 @@ function smoothPath(points: { x: number; y: number }[]): string {
 }
 
 /** Two-curve hourly trend: drinks and urine each as their own smoothed curve
- * across the day, sharing one ml scale — so a balanced day reads as two
+ * across the day, sharing one ml scale - so a balanced day reads as two
  * curves tracking close together, and a gap between them reads as exactly
  * that. */
 export function HourlyBalanceChart({ buckets, hourlyGoalMl, tickHours = [0, 3, 6, 9, 12, 15, 18, 21] }: Props) {

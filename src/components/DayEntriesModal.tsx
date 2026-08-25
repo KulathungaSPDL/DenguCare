@@ -29,7 +29,7 @@ interface Props {
   onDeleteIv: (id: string) => void;
 }
 
-/** Centered popup opened from the hourly chart's info icon — shows every
+/** Centered popup opened from the hourly chart's info icon - shows every
  * entry behind today's chart, split into Drinks / Urine / IV Fluid tabs.
  * Tapping a row edits it; the trash icon deletes it. Only the entry list
  * scrolls; the header and tabs stay put. */
@@ -138,7 +138,7 @@ export function DayEntriesModal({
                       title={t(`ivFluids.fluidTypes.${f.fluidType}`)}
                       time={formatTime24(new Date(f.atISO))}
                       valueLabel={
-                        f.rateMlPerHr != null ? `${f.volumeMl} ml · ${f.rateMlPerHr} ml/hr` : `${f.volumeMl} ml`
+                        f.rateMlPerHr != null ? `${f.volumeMl} ml  -  ${f.rateMlPerHr} ml/hr` : `${f.volumeMl} ml`
                       }
                       onPress={() => onEditIv(f)}
                       onDelete={() => onDeleteIv(f.id)}

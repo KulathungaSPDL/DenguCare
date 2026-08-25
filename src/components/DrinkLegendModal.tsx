@@ -13,7 +13,7 @@ interface Props {
   showIv?: boolean;
 }
 
-/** Explains the colours used in the Today's balance ring — one swatch per
+/** Explains the colours used in the Today's balance ring - one swatch per
  * drink kind, plus urine (and IV fluid, in Admitted mode). */
 export function DrinkLegendModal({ visible, onClose, showIv }: Props) {
   const scale = useRef(new Animated.Value(0.9)).current;

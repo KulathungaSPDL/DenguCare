@@ -2,6 +2,7 @@ import { router } from 'expo-router';
 import React from 'react';
 import { View } from 'react-native';
 
+import { AppTopBar } from '../../src/components/AppTopBar';
 import { DarkButton, OutlineButton, TextLinkButton } from '../../src/components/Buttons';
 import { Header } from '../../src/components/Header';
 import { Note } from '../../src/components/Note';
@@ -20,6 +21,7 @@ export default function SignInScreen() {
 
   return (
     <Screen>
+      <AppTopBar variant="back" title="Sign In" />
       <Header
         kicker="Sign in"
         title="Save your record so nothing is lost."
