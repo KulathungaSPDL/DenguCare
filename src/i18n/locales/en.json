@@ -1,0 +1,53 @@
+{
+  "careMode": {
+    "home": "🏠 Home Care Mode",
+    "admitted": "🏥 Admitted to Ward Mode"
+  },
+  "ivFluids": {
+    "title": "IV fluids",
+    "empty": "No IV fluids logged today yet.",
+    "addButton": "Add IV fluid",
+    "modalTitle": "Log an IV fluid",
+    "volumeLabel": "Volume (ml)",
+    "rateLabel": "Rate (ml/hr) (optional)",
+    "noteLabel": "Note (optional)",
+    "fluidTypes": {
+      "normalSaline": "Normal Saline",
+      "dextroseSaline": "Dextrose Saline",
+      "ringersLactate": "Ringer's Lactate",
+      "other": "Other"
+    },
+    "saveButton": "Save entry"
+  },
+  "fluids": {
+    "kingCoconut": "King Coconut",
+    "hyponatremiaWarning": "More than half of what you've drunk today is plain water. Mix in ORS/Jeevani, King Coconut, or soup as well — water alone can dilute your body's salts.",
+    "darkFluidAdvisory": "Avoid dark or red-coloured drinks — beetroot, blackcurrant, and grape juice can look like blood if you vomit or pass blood, and may cause confusion about internal bleeding."
+  },
+  "paracetamol": {
+    "title": "Paracetamol",
+    "suggestedDose": "Suggested dose: {{doseMg}} mg",
+    "doseHint": "Based on your weight, 10–15 mg/kg per dose.",
+    "logDoseButton": "Log dose",
+    "confirmTitle": "Log this dose?",
+    "confirmMessage": "Confirms {{doseMg}} mg of paracetamol taken now.",
+    "confirmCancel": "Cancel",
+    "confirmOk": "Log dose",
+    "nextSafeDose": "Next safe dose in: {{hours}}h {{minutes}}m",
+    "dailyLimitWarning": "You are close to today's safe paracetamol limit. Do not take more without checking with a doctor or pharmacist.",
+    "dailyLimitExceeded": "Today's paracetamol total is over the safe daily limit. Stop taking more and contact a doctor or pharmacist."
+  },
+  "fbc": {
+    "chartTitle": "Platelets & haematocrit trend",
+    "plateletsAxis": "Platelets (x10³/µL)",
+    "hctAxis": "HCT (%)",
+    "plasmaLeakageTitle": "Possible plasma leakage",
+    "plasmaLeakageMessage": "Signs of plasma leakage detected. Show this report to your doctor immediately.",
+    "plasmaLeakageBanner": "This trend shows a large rise in haematocrit together with a drop in platelets — signs of possible plasma leakage. Show this report to your doctor immediately.",
+    "alertOk": "OK"
+  },
+  "doctorSummary": {
+    "button": "Show my doctor",
+    "shareFailed": "Could not create the summary. Please try again."
+  }
+}

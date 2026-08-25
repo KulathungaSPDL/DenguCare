@@ -1,0 +1,43 @@
+{
+  "expo": {
+    "name": "DenguCare",
+    "slug": "DenguCare",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "scheme": "dengucare",
+    "userInterfaceStyle": "light",
+    "experiments": {
+      "typedRoutes": true
+    },
+    "plugins": [
+      "expo-router",
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "DenguCare uses your photos to attach a blood report image to your record.",
+          "cameraPermission": "DenguCare uses your camera to photograph a blood report for your record."
+        }
+      ],
+      "expo-notifications",
+      "expo-sqlite",
+      "expo-sharing",
+      "expo-localization"
+    ],
+    "ios": {
+      "supportsTablet": true
+    },
+    "android": {
+      "adaptiveIcon": {
+        "backgroundColor": "#E6F4FE",
+        "foregroundImage": "./assets/android-icon-foreground.png",
+        "backgroundImage": "./assets/android-icon-background.png",
+        "monochromeImage": "./assets/android-icon-monochrome.png"
+      },
+      "predictiveBackGestureEnabled": false
+    },
+    "web": {
+      "favicon": "./assets/favicon.png"
+    }
+  }
+}
