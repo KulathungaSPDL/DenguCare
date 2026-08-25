@@ -23,7 +23,6 @@ export default function SignInScreen() {
     <Screen>
       <AppTopBar variant="back" title="Sign In" />
       <Header
-        kicker="Sign in"
         title="Save your record so nothing is lost."
         subtitle="If your phone dies or you are admitted, your chart is still there."
       />

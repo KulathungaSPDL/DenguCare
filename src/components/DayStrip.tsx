@@ -1,13 +1,16 @@
 import React, { useEffect, useRef } from 'react';
-import { Animated, ScrollView, StyleSheet, Text } from 'react-native';
+import { Animated, StyleSheet, Text, View } from 'react-native';
 
+import { phaseLabel } from '../state/phase';
 import { colors } from '../theme/colors';
 import { radius, spacing } from '../theme/spacing';
 import { fontFamily, fontSize } from '../theme/typography';
 
 const TOTAL_DAYS = 10;
 
-/** Horizontal scroll strip of "DAY N" chips, highlighting the current illness day. */
+/** Row of "DAY N" chips spanning the full card width — every day visible at
+ * once, no scrolling. Days 3-7 (the critical phase) are tinted light red;
+ * the rest stay white. The current day gets an extra pulsing border. */
 export function DayStrip({ currentDay }: { currentDay: number }) {
   const pulse = useRef(new Animated.Value(1)).current;
 
@@ -23,60 +26,60 @@ export function DayStrip({ currentDay }: { currentDay: number }) {
   }, [pulse]);
 
   return (
-    <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.row}>
+    <View style={styles.row}>
       {Array.from({ length: TOTAL_DAYS }, (_, i) => i + 1).map((day) => {
         const isCurrent = day === currentDay;
+        const isCritical = phaseLabel(day) === 'Critical phase';
 
         return (
           <Animated.View
             key={day}
-            style={[styles.box, isCurrent && styles.boxCurrent, isCurrent && { opacity: pulse }]}
+            style={[
+              styles.box,
+              isCritical ? styles.boxCritical : styles.boxNeutral,
+              isCurrent && styles.boxCurrent,
+              isCurrent && { opacity: pulse },
+            ]}
           >
-            <Text style={[styles.dayLabel, isCurrent && styles.dayLabelCurrent]}>DAY</Text>
-            <Text style={[styles.dayNumber, isCurrent && styles.dayNumberCurrent]}>{day}</Text>
+            <Text style={[styles.dayNumber, isCritical && styles.dayNumberCritical]}>{day}</Text>
           </Animated.View>
         );
       })}
-    </ScrollView>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
   row: {
-    paddingVertical: 2,
-    paddingRight: spacing.sm,
+    flexDirection: 'row',
+    gap: spacing.xs,
   },
   box: {
-    width: 68,
+    flex: 1,
     aspectRatio: 0.85,
-    marginRight: spacing.sm,
-    borderRadius: radius.md,
-    backgroundColor: colors.surfaceMuted,
+    borderRadius: radius.sm,
+    borderWidth: 1,
     alignItems: 'center',
     justifyContent: 'center',
   },
-  boxCurrent: {
+  boxNeutral: {
+    backgroundColor: colors.surface,
+    borderColor: colors.border,
+  },
+  boxCritical: {
     backgroundColor: colors.dangerSoft,
-    borderWidth: 1.5,
     borderColor: colors.borderDanger,
   },
-  dayLabel: {
-    fontFamily: fontFamily.baseBold,
-    fontWeight: '700',
-    fontSize: fontSize.xs,
-    letterSpacing: 0.5,
-    color: colors.textSecondary,
-  },
-  dayLabelCurrent: {
-    color: colors.danger,
+  boxCurrent: {
+    borderWidth: 2,
+    borderColor: colors.danger,
   },
   dayNumber: {
-    marginTop: 2,
     fontFamily: fontFamily.baseExtraBold,
-    fontSize: fontSize.xl,
+    fontSize: fontSize.md,
     color: colors.textPrimary,
   },
-  dayNumberCurrent: {
+  dayNumberCritical: {
     color: colors.danger,
   },
 });

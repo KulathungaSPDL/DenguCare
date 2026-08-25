@@ -129,7 +129,6 @@ export default function TempScreen() {
     <Screen>
       <AppTopBar icon="thermometer" title={t('topBar.temperature')} />
       <Header
-        kicker="Temperature"
         title={'Track the fever,\nand the fall'}
         subtitle="The dangerous phase usually starts as the fever comes down. That is why the falling line matters as much as the high one."
       />

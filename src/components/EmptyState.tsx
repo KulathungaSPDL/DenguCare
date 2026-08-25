@@ -1,23 +1,25 @@
 import React from 'react';
 import { StyleSheet, Text, View } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 
 import { colors } from '../theme/colors';
 import { spacing } from '../theme/spacing';
 import { fontFamily, fontSize } from '../theme/typography';
-import { Mascot, MascotMood } from './Mascot';
 
 export function EmptyState({
   title,
   subtitle,
-  mood = 'sleepy',
+  icon = 'file-tray-outline',
 }: {
   title: string;
   subtitle: string;
-  mood?: MascotMood;
+  icon?: keyof typeof Ionicons.glyphMap;
 }) {
   return (
     <View style={styles.wrap}>
-      <Mascot mood={mood} size={64} />
+      <View style={styles.iconCircle}>
+        <Ionicons name={icon} size={26} color={colors.textMuted} />
+      </View>
       <Text style={styles.title}>{title}</Text>
       <Text style={styles.subtitle}>{subtitle}</Text>
     </View>
@@ -29,6 +31,14 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingVertical: spacing.xl,
     paddingHorizontal: spacing.lg,
+  },
+  iconCircle: {
+    width: 56,
+    height: 56,
+    borderRadius: 28,
+    backgroundColor: colors.surfaceMuted,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   title: {
     marginTop: spacing.md,

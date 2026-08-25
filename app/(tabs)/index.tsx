@@ -1,8 +1,8 @@
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { router } from 'expo-router';
-import React, { useState } from 'react';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import React, { useEffect, useRef, useState } from 'react';
+import { Animated, Easing, Pressable, StyleSheet, Text, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 
 import { AmountEntryModal } from '../../src/components/AmountEntryModal';
@@ -49,6 +49,19 @@ export default function DashboardScreen() {
   const [drinkModal, setDrinkModal] = useState(false);
   const [urineModal, setUrineModal] = useState(false);
   const [legendVisible, setLegendVisible] = useState(false);
+
+  const warningIconScale = useRef(new Animated.Value(1)).current;
+  useEffect(() => {
+    const loop = Animated.loop(
+      Animated.sequence([
+        Animated.timing(warningIconScale, { toValue: 1.18, duration: 700, easing: Easing.out(Easing.quad), useNativeDriver: true }),
+        Animated.timing(warningIconScale, { toValue: 1, duration: 700, easing: Easing.inOut(Easing.quad), useNativeDriver: true }),
+        Animated.delay(900),
+      ])
+    );
+    loop.start();
+    return () => loop.stop();
+  }, [warningIconScale]);
 
   const illness = state.illness!;
   const currentDay = illnessDayNumber(illness.feverStartISO, now);
@@ -162,40 +175,36 @@ export default function DashboardScreen() {
           style={({ pressed }) => [styles.quickCard, { backgroundColor: colors.primarySoft }, pressed && styles.actionCardPressed]}
         >
           <View style={[styles.quickIconCircle, { backgroundColor: colors.surface }]}>
-            <Ionicons name="water" size={18} color={colors.primary} />
+            <Ionicons name="water" size={17} color={colors.primary} />
           </View>
           <Text style={styles.quickLabel}>Log Drink</Text>
-          <Ionicons name="arrow-forward" size={12} color={colors.primary} />
         </Pressable>
         <Pressable
           onPress={() => setUrineModal(true)}
           style={({ pressed }) => [styles.quickCard, { backgroundColor: colors.urineOutSoft }, pressed && styles.actionCardPressed]}
         >
           <View style={[styles.quickIconCircle, { backgroundColor: colors.surface }]}>
-            <Ionicons name="flask" size={18} color={colors.outputText} />
+            <Ionicons name="flask" size={17} color={colors.outputText} />
           </View>
           <Text style={styles.quickLabel}>Log Urine</Text>
-          <Ionicons name="arrow-forward" size={12} color={colors.outputText} />
         </Pressable>
         <Pressable
           onPress={() => router.push('/(tabs)/temp')}
           style={({ pressed }) => [styles.quickCard, { backgroundColor: colors.accentPurpleSoft }, pressed && styles.actionCardPressed]}
         >
           <View style={[styles.quickIconCircle, { backgroundColor: colors.surface }]}>
-            <Ionicons name="thermometer" size={18} color={colors.accentPurple} />
+            <Ionicons name="thermometer" size={17} color={colors.accentPurple} />
           </View>
           <Text style={styles.quickLabel}>Log Temp</Text>
-          <Ionicons name="arrow-forward" size={12} color={colors.accentPurple} />
         </Pressable>
         <Pressable
           onPress={() => router.push('/(tabs)/safety')}
           style={({ pressed }) => [styles.quickCard, { backgroundColor: colors.dangerSoft }, pressed && styles.actionCardPressed]}
         >
           <View style={[styles.quickIconCircle, { backgroundColor: colors.surface }]}>
-            <Ionicons name="shield-checkmark" size={18} color={colors.danger} />
+            <Ionicons name="shield-checkmark" size={17} color={colors.danger} />
           </View>
           <Text style={styles.quickLabel}>Safety Check</Text>
-          <Ionicons name="arrow-forward" size={12} color={colors.danger} />
         </Pressable>
       </View>
 
@@ -204,10 +213,12 @@ export default function DashboardScreen() {
         style={({ pressed }) => [styles.tipBanner, pressed && styles.actionCardPressed]}
       >
         <View style={styles.tipMascotCircle}>
-          <Mascot mood="shield" size={52} animated={false} />
+          <Animated.View style={{ transform: [{ scale: warningIconScale }] }}>
+            <Ionicons name="shield-checkmark" size={26} color={colors.primary} />
+          </Animated.View>
         </View>
         <View style={{ flex: 1, marginLeft: spacing.md }}>
-          <Text style={styles.tipTitle}>Know the Warning Signs</Text>
+          <Text style={styles.tipTitle}>Check Warning Signs</Text>
           <Text style={styles.tipSubtitle}>Spot trouble early - a quick daily check.</Text>
         </View>
         <Ionicons name="chevron-forward" size={20} color={colors.textSecondary} />
@@ -243,6 +254,7 @@ export default function DashboardScreen() {
           <FeverCurveChart readings={state.temps} feverStartISO={illness.feverStartISO} />
         ) : (
           <EmptyState
+            icon="thermometer-outline"
             title="No readings yet"
             subtitle="Log your temperature from the Temp tab to see your fever curve here."
           />
@@ -272,6 +284,7 @@ export default function DashboardScreen() {
           <>
             <Text style={styles.cardKicker}>{t('fbc.chartTitle')}</Text>
             <EmptyState
+              icon="analytics-outline"
               title="No blood reports yet"
               subtitle="Add a platelet and haematocrit report from the Reports tab to track the trend here."
             />
@@ -446,32 +459,32 @@ const styles = StyleSheet.create({
   },
   quickCard: {
     flex: 1,
-    minHeight: 118,
-    alignItems: 'flex-start',
-    padding: spacing.sm,
+    alignItems: 'center',
+    paddingVertical: spacing.sm,
+    paddingHorizontal: spacing.xs,
     borderRadius: radius.lg,
     borderWidth: 1,
     borderColor: 'rgba(255,255,255,0.86)',
     shadowColor: colors.shadow,
-    shadowOpacity: 0.06,
-    shadowRadius: 12,
-    shadowOffset: { width: 0, height: 6 },
-    elevation: 2,
+    shadowOpacity: 0.05,
+    shadowRadius: 8,
+    shadowOffset: { width: 0, height: 3 },
+    elevation: 1,
   },
   quickIconCircle: {
-    width: 34,
-    height: 34,
-    borderRadius: 17,
+    width: 30,
+    height: 30,
+    borderRadius: 15,
     alignItems: 'center',
     justifyContent: 'center',
   },
   quickLabel: {
-    marginTop: spacing.sm,
-    marginBottom: 4,
+    marginTop: 6,
     fontFamily: fontFamily.baseBold,
     fontWeight: '700',
-    fontSize: 12,
+    fontSize: 11,
     color: colors.textPrimary,
+    textAlign: 'center',
   },
   tipBanner: {
     marginTop: spacing.lg,

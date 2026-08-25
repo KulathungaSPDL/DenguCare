@@ -11,8 +11,6 @@ import { Banner } from '../../src/components/Banner';
 import { Card } from '../../src/components/Card';
 import { DangerButton, DarkButton } from '../../src/components/Buttons';
 import { EntryListDivider } from '../../src/components/EntryListItem';
-import { Header } from '../../src/components/Header';
-import { Mascot } from '../../src/components/Mascot';
 import { Note } from '../../src/components/Note';
 import { Screen } from '../../src/components/Screen';
 import { WarningSignRow } from '../../src/components/WarningSignRow';
@@ -83,20 +81,17 @@ export default function SafetyScreen() {
   return (
     <Screen>
       <AppTopBar icon="shield-checkmark" title={t('topBar.safety')} />
-      <Header
-        title="Safety & Emergency"
-        subtitle="Tick anything you have - do not wait to see if it passes. Review critical warning signs and take immediate action if needed."
-      />
 
       <Card style={styles.introCard}>
         <View style={styles.introHeaderRow}>
-          <View style={styles.introMascotWrap}>
-            <Mascot mood="shield" size={44} animated={false} />
+          <View style={styles.introIconCircle}>
+            <Ionicons name="warning" size={20} color={colors.danger} />
           </View>
           <Text style={styles.introTitle}>Critical Warning Signs</Text>
         </View>
         <Text style={styles.introBody}>
-          If you or the patient experience any of these symptoms, seek immediate medical attention.
+          Tick anything you have — do not wait to see if it passes. If you or the patient experience any of these
+          symptoms, seek immediate medical attention.
         </Text>
       </Card>
 
@@ -178,9 +173,14 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
   },
-  introMascotWrap: {
-    marginRight: spacing.sm,
-    marginLeft: -6,
+  introIconCircle: {
+    width: 34,
+    height: 34,
+    borderRadius: 17,
+    backgroundColor: colors.surface,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: spacing.md,
   },
   introTitle: {
     fontFamily: fontFamily.baseBold,

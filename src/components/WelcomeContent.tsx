@@ -5,7 +5,7 @@ import { Animated, Image, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Svg, { Circle } from 'react-native-svg';
 
-import { Mascot } from './Mascot';
+import { CareBadge } from './CareBadge';
 import { PrimaryButton } from './Buttons';
 import { colors } from '../theme/colors';
 import { gradients } from '../theme/gradients';
@@ -18,7 +18,7 @@ interface WelcomeContentProps {
 
 // Shared visual content for the startup screen, rendered on every cold start
 // from app/index.tsx before the app decides where to send the user next.
-// A warm teal gradient hero with the DenguCare mascot, a real close-up of the
+// A warm teal gradient hero with the care-badge mark, a real close-up of the
 // Aedes mosquito that makes the app necessary, and the CTA doing the rest.
 export function WelcomeContent({ onContinue }: WelcomeContentProps) {
   const fade = useRef(new Animated.Value(0)).current;
@@ -39,7 +39,7 @@ export function WelcomeContent({ onContinue }: WelcomeContentProps) {
 
       <SafeAreaView style={styles.safe} edges={['top', 'left', 'right', 'bottom']}>
         <Animated.View style={[styles.center, { opacity: fade, transform: [{ translateY: fade.interpolate({ inputRange: [0, 1], outputRange: [16, 0] }) }] }]}>
-          <Mascot mood="waving" size={112} />
+          <CareBadge size={112} />
 
           <Text style={styles.brand}>DenguCare</Text>
           <Text style={styles.tagline}>Stay informed. Stay protected.</Text>

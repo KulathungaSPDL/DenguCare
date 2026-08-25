@@ -133,7 +133,7 @@ export default function ReportsScreen() {
   return (
     <Screen>
       <AppTopBar icon="document-text" title={t('topBar.bloodReports')} />
-      <Header kicker="Blood reports" title="Photograph it. Type it in." subtitle="Take a picture of your full blood count for your own record, then type the numbers in." />
+      <Header title="Photograph it. Type it in." subtitle="Take a picture of your full blood count for your own record, then type the numbers in." />
 
       <View style={styles.actionsRow}>
         <DarkButton label="Take photo" icon="camera" onPress={takePhoto} style={{ flex: 1 }} />
@@ -195,6 +195,7 @@ export default function ReportsScreen() {
       <Card>
         {state.reports.length === 0 ? (
           <EmptyState
+            icon="document-text-outline"
             title="No reports yet"
             subtitle="Add your first blood report above - by photo or typed in - and we'll show your platelet and haematocrit trends here."
           />

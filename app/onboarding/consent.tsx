@@ -7,7 +7,6 @@ import { AppTopBar } from '../../src/components/AppTopBar';
 import { PrimaryButton } from '../../src/components/Buttons';
 import { Card } from '../../src/components/Card';
 import { ConsentCheckbox } from '../../src/components/ConsentCheckbox';
-import { Header } from '../../src/components/Header';
 import { Note } from '../../src/components/Note';
 import { Screen } from '../../src/components/Screen';
 import { useStore } from '../../src/state/store';
@@ -40,15 +39,12 @@ export default function ConsentScreen() {
   return (
     <Screen>
       <AppTopBar variant="back" title="Clinical Disclaimer" />
-      <Header
-        title="Clinical Disclaimer"
-        subtitle="Please read carefully before proceeding to use the DenguCare health monitoring platform."
-      />
 
       <Card style={{ marginBottom: spacing.lg }}>
         <Text style={styles.paragraph}>
-          This application is designed to assist in the monitoring and management of dengue-related symptoms and
-          health metrics. It is intended for informational and supplementary tracking purposes only.
+          Please read carefully before proceeding. This application is designed to assist in the monitoring and
+          management of dengue-related symptoms and health metrics. It is intended for informational and
+          supplementary tracking purposes only.
         </Text>
 
         <View style={styles.warningBox}>
