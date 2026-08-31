@@ -8,9 +8,10 @@ interface Props {
 }
 
 /**
- * "Cari" — DenguCare's heart-badge mascot: a caring heart with a friendly
- * face and a small cross pin, used for prominent brand moments (welcome
- * screen) where a full droplet character reads as too playful/large.
+ * DenguCare's brand mark: a heart-and-cross emblem in a seal ring, used for
+ * the app's most prominent brand moment (the welcome screen). Same palette
+ * as the rest of the app - just a clean, non-mascot vector logo rather than
+ * an illustrated character, so it reads as a wordmark, not a mascot.
  */
 export function CareBadge({ size = 112, animated = true }: Props) {
   const bob = useRef(new Animated.Value(0)).current;
@@ -44,9 +45,9 @@ export function CareBadge({ size = 112, animated = true }: Props) {
         {/* soft ground shadow */}
         <Ellipse cx="50" cy="93" rx="26" ry="5" fill="#0B2A2A" opacity={0.12} />
 
-        {/* sparkle accents */}
-        <Path d="M14 24 L16 30 L22 32 L16 34 L14 40 L12 34 L6 32 L12 30 Z" fill="#4CC3C1" opacity={0.7} />
-        <Circle cx="86" cy="20" r="3" fill="#4CC3C1" opacity={0.6} />
+        {/* outer seal ring - reads as an emblem/badge rather than a character */}
+        <Circle cx="50" cy="46" r="47" fill="none" stroke="#FFFFFF" strokeOpacity={0.28} strokeWidth={1.5} />
+        <Circle cx="50" cy="46" r="41" fill="none" stroke="#FFFFFF" strokeOpacity={0.16} strokeWidth={1} />
 
         {/* heart body */}
         <Path
@@ -55,20 +56,14 @@ export function CareBadge({ size = 112, animated = true }: Props) {
         />
 
         {/* gloss highlight */}
-        <Ellipse cx="32" cy="34" rx="9" ry="14" fill="#FFFFFF" opacity={0.32} />
+        <Ellipse cx="32" cy="34" rx="9" ry="14" fill="#FFFFFF" opacity={0.28} />
 
-        {/* face */}
-        <Circle cx="41" cy="46" r="3.2" fill="#0F2E2E" />
-        <Circle cx="59" cy="46" r="3.2" fill="#0F2E2E" />
-        <Path d="M40 55 Q50 63 60 55" stroke="#0F2E2E" strokeWidth={2.8} strokeLinecap="round" fill="none" />
-
-        {/* blush */}
-        <Ellipse cx="33" cy="53" rx="4.5" ry="2.8" fill="#FF9E8A" opacity={0.5} />
-        <Ellipse cx="67" cy="53" rx="4.5" ry="2.8" fill="#FF9E8A" opacity={0.5} />
-
-        {/* small care badge pin */}
-        <Circle cx="50" cy="72" r="12" fill="#FFFFFF" opacity={0.95} />
-        <Path d="M50 66 L50 78 M44 72 L56 72" stroke="#115C5C" strokeWidth={3.4} strokeLinecap="round" />
+        {/* medical cross, centered - the emblem's focal mark */}
+        <Path
+          d="M45 26 L55 26 L55 36 L65 36 L65 46 L55 46 L55 56 L45 56 L45 46 L35 46 L35 36 L45 36 Z"
+          fill="#FFFFFF"
+          opacity={0.96}
+        />
       </Svg>
     </Animated.View>
   );

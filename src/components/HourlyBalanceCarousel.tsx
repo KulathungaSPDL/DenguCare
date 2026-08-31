@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import {
   LayoutChangeEvent,
   NativeScrollEvent,
@@ -10,8 +10,8 @@ import {
 } from 'react-native';
 import { useTranslation } from 'react-i18next';
 
-import { formatDatePretty, localDateKey } from '../state/dateUtils';
-import { filterByDateKey, useHourlyBuckets } from '../state/selectors';
+import { dateFromKey, dateKeysBetween, formatDatePretty, localDateKey } from '../state/dateUtils';
+import { computeHourlyBuckets, filterByDateKey, HourBucket } from '../state/selectors';
 import { DrinkEntry, UrineEntry } from '../state/types';
 import { colors } from '../theme/colors';
 import { spacing } from '../theme/spacing';
@@ -26,35 +26,47 @@ interface Props {
   hourlyGoalMl: number;
 }
 
+interface Panel {
+  key: string;
+  label: string;
+  buckets: HourBucket[];
+}
+
 const DAY_MS = 86400000;
 
-/** Horizontally swipeable set of hourly charts — today plus the two days
- * before it — so the pattern from earlier days stays a swipe away instead
- * of only ever showing "today". Opens on today's panel. */
+/** Horizontally swipeable set of hourly charts — one panel per calendar day
+ * from the very first logged entry through today, so the carousel grows a
+ * page at a time as the record grows instead of always showing a fixed
+ * 3-day window. Opens on today's panel. */
 export function HourlyBalanceCarousel({ allDrinks, allUrine, now, hourlyGoalMl }: Props) {
   const { t } = useTranslation();
   const [width, setWidth] = useState(0);
-  const [pageIndex, setPageIndex] = useState(2);
+  const [pageIndex, setPageIndex] = useState(0);
   const scrollRef = useRef<ScrollView>(null);
 
-  const key0 = localDateKey(now);
-  const key1 = localDateKey(new Date(now.getTime() - DAY_MS));
-  const key2 = localDateKey(new Date(now.getTime() - 2 * DAY_MS));
+  const todayKey = localDateKey(now);
+  const yesterdayKey = localDateKey(new Date(now.getTime() - DAY_MS));
 
-  const buckets0 = useHourlyBuckets(filterByDateKey(allDrinks, key0), filterByDateKey(allUrine, key0));
-  const buckets1 = useHourlyBuckets(filterByDateKey(allDrinks, key1), filterByDateKey(allUrine, key1));
-  const buckets2 = useHourlyBuckets(filterByDateKey(allDrinks, key2), filterByDateKey(allUrine, key2));
+  const panels: Panel[] = useMemo(() => {
+    const allKeys = [...allDrinks, ...allUrine].map((e) => localDateKey(new Date(e.atISO)));
+    const earliestKey = allKeys.length > 0 ? allKeys.reduce((min, k) => (k < min ? k : min)) : todayKey;
+    const startKey = earliestKey < todayKey ? earliestKey : todayKey;
 
-  const panels = [
-    { label: formatDatePretty(new Date(now.getTime() - 2 * DAY_MS)), buckets: buckets2 },
-    { label: t('common.yesterday'), buckets: buckets1 },
-    { label: t('common.today'), buckets: buckets0 },
-  ];
+    return dateKeysBetween(startKey, todayKey).map((key) => ({
+      key,
+      label: key === todayKey ? t('common.today') : key === yesterdayKey ? t('common.yesterday') : formatDatePretty(dateFromKey(key)),
+      buckets: computeHourlyBuckets(filterByDateKey(allDrinks, key), filterByDateKey(allUrine, key)),
+    }));
+  }, [allDrinks, allUrine, todayKey, yesterdayKey]);
 
   function onLayout(e: LayoutChangeEvent) {
     const w = e.nativeEvent.layout.width;
     if (w > 0 && w !== width) setWidth(w);
   }
+
+  useEffect(() => {
+    setPageIndex(panels.length - 1);
+  }, [panels.length]);
 
   // contentOffset alone isn't reliably respected as an *initial* scroll
   // position across platforms (notably Android), so scroll to the last
@@ -80,10 +92,10 @@ export function HourlyBalanceCarousel({ allDrinks, allUrine, now, hourlyGoalMl }
             onMomentumScrollEnd={onScrollEnd}
             contentOffset={{ x: (panels.length - 1) * width, y: 0 }}
           >
-            {panels.map((p, i) => {
+            {panels.map((p) => {
               const hasData = p.buckets.some((b) => b.drinkMl > 0 || b.urineMl > 0);
               return (
-                <View key={i} style={{ width }}>
+                <View key={p.key} style={{ width }}>
                   <Text style={styles.dayLabel}>{p.label}</Text>
                   {hasData ? (
                     <HourlyBalanceChart buckets={p.buckets} hourlyGoalMl={hourlyGoalMl} />
@@ -98,8 +110,8 @@ export function HourlyBalanceCarousel({ allDrinks, allUrine, now, hourlyGoalMl }
       </View>
 
       <View style={styles.dotsRow}>
-        {panels.map((_, i) => (
-          <View key={i} style={[styles.dot, i === pageIndex && styles.dotActive]} />
+        {panels.map((p, i) => (
+          <View key={p.key} style={[styles.dot, i === pageIndex && styles.dotActive]} />
         ))}
       </View>
     </View>

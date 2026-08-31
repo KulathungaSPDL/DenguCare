@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Alert, StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, Text, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 
 import { AppTopBar } from '../../src/components/AppTopBar';
@@ -7,6 +7,7 @@ import { Banner } from '../../src/components/Banner';
 import { PrimaryButton } from '../../src/components/Buttons';
 import { Card } from '../../src/components/Card';
 import { Chip } from '../../src/components/Chip';
+import { ConfirmModal } from '../../src/components/ConfirmModal';
 import { DateTimeField } from '../../src/components/DateTimeField';
 import { EntryListDivider, EntryListItem } from '../../src/components/EntryListItem';
 import { FeverCurveChart } from '../../src/components/FeverCurveChart';
@@ -57,6 +58,7 @@ export default function TempScreen() {
   const [method, setMethod] = useState<TempMethod>('ear');
   const [editingId, setEditingId] = useState<string | null>(null);
   const [doseOverride, setDoseOverride] = useState<string | null>(null);
+  const [doseConfirmVisible, setDoseConfirmVisible] = useState(false);
 
   const temp = Number(tempText);
   const canSave = tempText.trim().length > 0 && !Number.isNaN(temp);
@@ -108,21 +110,14 @@ export default function TempScreen() {
 
   function onLogDose() {
     if (!doseValid) return;
-    Alert.alert(
-      t('paracetamol.confirmTitle'),
-      t('paracetamol.confirmMessage', { doseMg }),
-      [
-        { text: t('paracetamol.confirmCancel'), style: 'cancel' },
-        {
-          text: t('paracetamol.confirmOk'),
-          onPress: () => {
-            actions.addMedicationDose(doseMg);
-            setDoseOverride(null);
-            showSuccess(t('tempScreen.doseLoggedMsg', { mg: doseMg }), t('tempScreen.doseLoggedTitle'));
-          },
-        },
-      ]
-    );
+    setDoseConfirmVisible(true);
+  }
+
+  function confirmLogDose() {
+    setDoseConfirmVisible(false);
+    actions.addMedicationDose(doseMg);
+    setDoseOverride(null);
+    showSuccess(t('tempScreen.doseLoggedMsg', { mg: doseMg }), t('tempScreen.doseLoggedTitle'));
   }
 
   return (
@@ -263,6 +258,18 @@ export default function TempScreen() {
 
       {modals}
       {successModal}
+
+      <ConfirmModal
+        visible={doseConfirmVisible}
+        title={t('paracetamol.confirmTitle')}
+        message={t('paracetamol.confirmMessage', { doseMg })}
+        confirmLabel={t('paracetamol.confirmOk')}
+        cancelLabel={t('paracetamol.confirmCancel')}
+        tone="primary"
+        icon="medical"
+        onConfirm={confirmLogDose}
+        onCancel={() => setDoseConfirmVisible(false)}
+      />
     </Screen>
   );
 }

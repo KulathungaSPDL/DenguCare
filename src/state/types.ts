@@ -106,6 +106,19 @@ export type WarningSignKey = (typeof WARNING_SIGN_KEYS)[number];
 
 export type WarningSignsState = Record<WarningSignKey, boolean>;
 
+/** A snapshot of one completed illness's full log, kept when the user
+ * starts a new record so past data stays reachable instead of being wiped. */
+export interface ArchivedIllness {
+  illness: IllnessRecord; // endedAtISO is always set here
+  drinks: DrinkEntry[];
+  urine: UrineEntry[];
+  temps: TempReading[];
+  reports: BloodReport[];
+  medicationDoses: MedicationDose[];
+  ivFluids: IvFluidEntry[];
+  warningSigns: WarningSignsState;
+}
+
 export interface AppState {
   hydrated: boolean;
   consent: Consent;
@@ -122,4 +135,5 @@ export interface AppState {
   medicationDoses: MedicationDose[];
   ivFluids: IvFluidEntry[];
   warningSigns: WarningSignsState;
+  archivedIllnesses: ArchivedIllness[];
 }

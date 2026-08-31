@@ -1,8 +1,6 @@
 ﻿import { router } from 'expo-router';
-import * as Print from 'expo-print';
-import * as Sharing from 'expo-sharing';
-import React from 'react';
-import { Alert, Linking, Pressable, StyleSheet, Text, View } from 'react-native';
+import React, { useState } from 'react';
+import { Linking, Pressable, StyleSheet, Text, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useTranslation } from 'react-i18next';
 
@@ -10,12 +8,13 @@ import { AppTopBar } from '../../src/components/AppTopBar';
 import { Banner } from '../../src/components/Banner';
 import { Card } from '../../src/components/Card';
 import { DangerButton, DarkButton } from '../../src/components/Buttons';
+import { ConfirmModal } from '../../src/components/ConfirmModal';
+import { DoctorReportModal } from '../../src/components/DoctorReportModal';
 import { EntryListDivider } from '../../src/components/EntryListItem';
 import { LinkRow } from '../../src/components/LinkRow';
 import { Note } from '../../src/components/Note';
 import { Screen } from '../../src/components/Screen';
 import { WarningSignRow } from '../../src/components/WarningSignRow';
-import { buildDoctorSummaryHtml } from '../../src/pdf/doctorSummary';
 import { useStore } from '../../src/state/store';
 import { ORDERED_WARNING_SIGN_KEYS, WARNING_SIGN_LABELS } from '../../src/state/warningSigns';
 import { WarningSignKey } from '../../src/state/types';
@@ -46,37 +45,21 @@ export default function SafetyScreen() {
   const { state, actions } = useStore();
 
   const anyChecked = ORDERED_WARNING_SIGN_KEYS.some((k) => state.warningSigns[k]);
-
-  async function shareDoctorSummary() {
-    try {
-      const html = buildDoctorSummaryHtml(state, new Date());
-      const { uri } = await Print.printToFileAsync({ html });
-      await Sharing.shareAsync(uri, { mimeType: 'application/pdf' });
-    } catch {
-      Alert.alert(t('doctorSummary.shareFailed'));
-    }
-  }
+  const [reportVisible, setReportVisible] = useState(false);
+  const [newRecordConfirmVisible, setNewRecordConfirmVisible] = useState(false);
 
   function callEmergency() {
     Linking.openURL(`tel:${EMERGENCY_NUMBERS[0].number}`);
   }
 
   function confirmNewRecord() {
-    Alert.alert(
-      t('safetyScreen.confirmNewRecordTitle'),
-      t('safetyScreen.confirmNewRecordMsg'),
-      [
-        { text: t('common.cancel'), style: 'cancel' },
-        {
-          text: t('safetyScreen.startNewRecordBtn'),
-          style: 'destructive',
-          onPress: () => {
-            actions.resetIllness();
-            router.replace('/onboarding/fever-start');
-          },
-        },
-      ]
-    );
+    setNewRecordConfirmVisible(true);
+  }
+
+  function startNewRecord() {
+    setNewRecordConfirmVisible(false);
+    actions.resetIllness();
+    router.replace('/onboarding/fever-start');
   }
 
   return (
@@ -138,9 +121,10 @@ export default function SafetyScreen() {
       <DarkButton
         label={t('doctorSummary.button')}
         icon="document-text-outline"
-        onPress={shareDoctorSummary}
+        onPress={() => setReportVisible(true)}
         style={{ marginTop: spacing.lg }}
       />
+      <DoctorReportModal visible={reportVisible} onClose={() => setReportVisible(false)} />
 
       <Pressable
         onPress={confirmNewRecord}
@@ -151,6 +135,18 @@ export default function SafetyScreen() {
       </Pressable>
 
       <Note>{t('safetyScreen.finalNote')}</Note>
+
+      <ConfirmModal
+        visible={newRecordConfirmVisible}
+        title={t('safetyScreen.confirmNewRecordTitle')}
+        message={t('safetyScreen.confirmNewRecordMsg')}
+        confirmLabel={t('safetyScreen.startNewRecordBtn')}
+        cancelLabel={t('common.cancel')}
+        tone="danger"
+        icon="refresh"
+        onConfirm={startNewRecord}
+        onCancel={() => setNewRecordConfirmVisible(false)}
+      />
     </Screen>
   );
 }

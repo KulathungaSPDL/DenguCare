@@ -1,13 +1,15 @@
 import { Ionicons } from '@expo/vector-icons';
 import React, { useState } from 'react';
-import { Alert, Modal, Pressable, StyleSheet, Text, View } from 'react-native';
+import { Modal, Pressable, StyleSheet, Text, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 
 import { useStore } from '../state/store';
-import { AppLanguage } from '../state/types';
+import { AppLanguage, CareMode } from '../state/types';
 import { colors } from '../theme/colors';
 import { radius, spacing } from '../theme/spacing';
 import { fontFamily, fontSize } from '../theme/typography';
+import { ConfirmModal } from './ConfirmModal';
+import { PreviousDataModal } from './PreviousDataModal';
 import { ProfileModal } from './ProfileModal';
 
 const LANGUAGE_OPTIONS: { code: Exclude<AppLanguage, null>; label: string }[] = [
@@ -24,22 +26,26 @@ export function SettingsMenu({ visible, onClose }: { visible: boolean; onClose: 
   const isAdmitted = state.careMode === 'admitted';
   const remindersOn = state.remindersOn;
   const [profileVisible, setProfileVisible] = useState(false);
+  const [previousDataVisible, setPreviousDataVisible] = useState(false);
+  const [careModeConfirm, setCareModeConfirm] = useState<CareMode | null>(null);
 
   function openProfile() {
     onClose();
     setProfileVisible(true);
   }
 
+  function openPreviousData() {
+    onClose();
+    setPreviousDataVisible(true);
+  }
+
   function toggleCareMode() {
-    const next = isAdmitted ? 'home' : 'admitted';
-    Alert.alert(
-      next === 'admitted' ? t('settingsMenu.switchToAdmittedTitle') : t('settingsMenu.switchToHomeTitle'),
-      next === 'admitted' ? t('settingsMenu.switchToAdmittedMsg') : t('settingsMenu.switchToHomeMsg'),
-      [
-        { text: t('common.cancel'), style: 'cancel' },
-        { text: t('settingsMenu.switchButton'), onPress: () => actions.setCareMode(next) },
-      ]
-    );
+    setCareModeConfirm(isAdmitted ? 'home' : 'admitted');
+  }
+
+  function confirmCareModeSwitch() {
+    if (careModeConfirm) actions.setCareMode(careModeConfirm);
+    setCareModeConfirm(null);
   }
 
   return (
@@ -57,6 +63,19 @@ export function SettingsMenu({ visible, onClose }: { visible: boolean; onClose: 
               <View style={styles.modalRowLabelWrap}>
                 <Ionicons name="person-circle-outline" size={20} color={colors.textPrimary} style={styles.modalRowIcon} />
                 <Text style={styles.modalRowText}>{t('settingsMenu.viewProfile')}</Text>
+              </View>
+              <Ionicons name="chevron-forward" size={16} color={colors.textSecondary} />
+            </Pressable>
+
+            <Pressable
+              onPress={openPreviousData}
+              style={styles.modalRow}
+              accessibilityRole="button"
+              accessibilityLabel={t('settingsMenu.previousDataAria')}
+            >
+              <View style={styles.modalRowLabelWrap}>
+                <Ionicons name="time-outline" size={20} color={colors.textPrimary} style={styles.modalRowIcon} />
+                <Text style={styles.modalRowText}>{t('settingsMenu.previousData')}</Text>
               </View>
               <Ionicons name="chevron-forward" size={16} color={colors.textSecondary} />
             </Pressable>
@@ -120,6 +139,18 @@ export function SettingsMenu({ visible, onClose }: { visible: boolean; onClose: 
       </Modal>
 
       <ProfileModal visible={profileVisible} onClose={() => setProfileVisible(false)} />
+      <PreviousDataModal visible={previousDataVisible} onClose={() => setPreviousDataVisible(false)} />
+      <ConfirmModal
+        visible={careModeConfirm != null}
+        title={careModeConfirm === 'admitted' ? t('settingsMenu.switchToAdmittedTitle') : t('settingsMenu.switchToHomeTitle')}
+        message={careModeConfirm === 'admitted' ? t('settingsMenu.switchToAdmittedMsg') : t('settingsMenu.switchToHomeMsg')}
+        confirmLabel={t('settingsMenu.switchButton')}
+        cancelLabel={t('common.cancel')}
+        tone="primary"
+        icon="swap-horizontal"
+        onConfirm={confirmCareModeSwitch}
+        onCancel={() => setCareModeConfirm(null)}
+      />
     </>
   );
 }

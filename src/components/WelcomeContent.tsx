@@ -1,13 +1,15 @@
 import { LinearGradient } from 'expo-linear-gradient';
 import { StatusBar } from 'expo-status-bar';
 import React, { useEffect, useRef } from 'react';
-import { Animated, Image, StyleSheet, Text, View } from 'react-native';
+import { Animated, Pressable, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Svg, { Circle } from 'react-native-svg';
 import { useTranslation } from 'react-i18next';
 
 import { CareBadge } from './CareBadge';
 import { PrimaryButton } from './Buttons';
+import { useStore } from '../state/store';
+import { AppLanguage } from '../state/types';
 import { colors } from '../theme/colors';
 import { gradients } from '../theme/gradients';
 import { spacing } from '../theme/spacing';
@@ -17,12 +19,19 @@ interface WelcomeContentProps {
   onContinue: () => void;
 }
 
+const LANGUAGE_OPTIONS: { code: Exclude<AppLanguage, null>; label: string }[] = [
+  { code: 'en', label: 'English' },
+  { code: 'si', label: 'සිංහල' },
+  { code: 'ta', label: 'தமிழ்' },
+];
+
 // Shared visual content for the startup screen, rendered on every cold start
 // from app/index.tsx before the app decides where to send the user next.
-// A warm teal gradient hero with the care-badge mark, a real close-up of the
-// Aedes mosquito that makes the app necessary, and the CTA doing the rest.
+// A warm teal gradient hero with the brand mark and the CTA doing the rest -
+// deliberately spare, so it reads as a clinical-grade product, not a mascot app.
 export function WelcomeContent({ onContinue }: WelcomeContentProps) {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const { actions } = useStore();
   const fade = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
@@ -40,22 +49,29 @@ export function WelcomeContent({ onContinue }: WelcomeContentProps) {
       </Svg>
 
       <SafeAreaView style={styles.safe} edges={['top', 'left', 'right', 'bottom']}>
+        <View style={styles.langRow}>
+          {LANGUAGE_OPTIONS.map((opt) => {
+            const active = i18n.language === opt.code;
+            return (
+              <Pressable
+                key={opt.code}
+                onPress={() => actions.setLanguage(opt.code)}
+                accessibilityRole="button"
+                accessibilityState={{ selected: active }}
+                style={[styles.langPill, active && styles.langPillActive]}
+              >
+                <Text style={[styles.langPillText, active && styles.langPillTextActive]}>{opt.label}</Text>
+              </Pressable>
+            );
+          })}
+        </View>
+
         <Animated.View style={[styles.center, { opacity: fade, transform: [{ translateY: fade.interpolate({ inputRange: [0, 1], outputRange: [16, 0] }) }] }]}>
-          <CareBadge size={112} />
+          <CareBadge size={128} />
 
           <Text style={styles.brand}>DenguCare</Text>
+          <View style={styles.divider} />
           <Text style={styles.tagline}>{t('welcome.tagline')}</Text>
-
-          <View style={styles.factCard}>
-            <View style={styles.photoRing}>
-              <Image source={require('../../assets/welcome-mosquito.jpg')} style={styles.photo} />
-            </View>
-            <Text style={styles.factText}>
-              {t('welcome.factPrefix')}
-              <Text style={styles.factHighlight}>{t('welcome.factHighlight')}</Text>
-              {t('welcome.factSuffix')}
-            </Text>
-          </View>
         </Animated.View>
 
         <PrimaryButton label={t('welcome.getStarted')} icon="chevron-forward" onPress={onContinue} style={styles.button} />
@@ -81,52 +97,54 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
+  langRow: {
+    flexDirection: 'row',
+    justifyContent: 'flex-end',
+    gap: spacing.xs,
+  },
+  langPill: {
+    paddingVertical: 6,
+    paddingHorizontal: spacing.md,
+    borderRadius: 999,
+    backgroundColor: 'rgba(255,255,255,0.14)',
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.24)',
+  },
+  langPillActive: {
+    backgroundColor: colors.textOnDark,
+    borderColor: colors.textOnDark,
+  },
+  langPillText: {
+    fontFamily: fontFamily.baseSemiBold,
+    fontWeight: '600',
+    fontSize: fontSize.xs,
+    color: '#BFF0EC',
+  },
+  langPillTextActive: {
+    color: colors.primaryDark,
+    fontFamily: fontFamily.baseBold,
+    fontWeight: '700',
+  },
   brand: {
-    marginTop: spacing.lg,
+    marginTop: spacing.xl,
     color: colors.textOnDark,
     fontFamily: fontFamily.baseExtraBold,
     fontSize: fontSize.display,
+    letterSpacing: 0.5,
+  },
+  divider: {
+    marginTop: spacing.md,
+    width: 40,
+    height: 3,
+    borderRadius: 2,
+    backgroundColor: 'rgba(255,255,255,0.35)',
   },
   tagline: {
+    marginTop: spacing.md,
     color: '#BFF0EC',
     fontFamily: fontFamily.baseSemiBold,
     fontSize: fontSize.lg,
-    marginTop: spacing.xs,
     textAlign: 'center',
-  },
-  factCard: {
-    marginTop: spacing.xxl,
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: 'rgba(255,255,255,0.12)',
-    borderRadius: 22,
-    borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.22)',
-    padding: spacing.md,
-  },
-  photoRing: {
-    width: 56,
-    height: 56,
-    borderRadius: 28,
-    padding: 2,
-    backgroundColor: 'rgba(255,255,255,0.5)',
-    marginRight: spacing.md,
-  },
-  photo: {
-    width: '100%',
-    height: '100%',
-    borderRadius: 26,
-  },
-  factText: {
-    flex: 1,
-    color: colors.textOnDark,
-    fontFamily: fontFamily.base,
-    fontSize: fontSize.sm,
-    lineHeight: fontSize.sm * 1.5,
-  },
-  factHighlight: {
-    fontFamily: fontFamily.baseBold,
-    fontWeight: '700',
   },
   button: {
     width: '100%',

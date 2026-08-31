@@ -36,4 +36,5 @@ export const defaultState: AppState = {
   medicationDoses: [],
   ivFluids: [],
   warningSigns: { ...emptyWarningSigns },
+  archivedIllnesses: [],
 };

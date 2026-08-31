@@ -3,10 +3,12 @@ import { Animated, Modal, Pressable, StyleSheet, Text, View } from 'react-native
 import { Ionicons } from '@expo/vector-icons';
 import { useTranslation } from 'react-i18next';
 
-import { DangerButton, OutlineButton } from './Buttons';
+import { DangerButton, OutlineButton, PrimaryButton } from './Buttons';
 import { colors } from '../theme/colors';
 import { radius, spacing } from '../theme/spacing';
 import { fontFamily, fontSize } from '../theme/typography';
+
+type Tone = 'danger' | 'primary';
 
 interface Props {
   visible: boolean;
@@ -16,10 +18,22 @@ interface Props {
   cancelLabel?: string;
   onConfirm: () => void;
   onCancel: () => void;
+  /** 'danger' (default) is for destructive actions — red badge, shaking
+   * warning icon, red confirm button. 'primary' is for routine yes/no
+   * choices (switching a mode, confirming a log) — same card and buttons,
+   * just without the alarming red styling. */
+  tone?: Tone;
+  icon?: keyof typeof Ionicons.glyphMap;
 }
 
-/** Destructive-action confirmation with a shaking warning badge, so a delete
- * reads as deliberately alarming rather than a routine dialog. */
+const TONE_ICON: Record<Tone, keyof typeof Ionicons.glyphMap> = {
+  danger: 'warning',
+  primary: 'help-circle',
+};
+
+/** Themed replacement for a native Alert.alert confirm/cancel dialog, used
+ * for every yes/no/cancel prompt in the app so they share one look instead
+ * of falling back to the OS's own alert styling. */
 export function ConfirmModal({
   visible,
   title,
@@ -28,10 +42,13 @@ export function ConfirmModal({
   cancelLabel,
   onConfirm,
   onCancel,
+  tone = 'danger',
+  icon,
 }: Props) {
   const { t } = useTranslation();
   const resolvedConfirmLabel = confirmLabel ?? t('confirmModal.yesDelete');
   const resolvedCancelLabel = cancelLabel ?? t('confirmModal.noKeepIt');
+  const resolvedIcon = icon ?? TONE_ICON[tone];
   const scale = useRef(new Animated.Value(0.85)).current;
   const opacity = useRef(new Animated.Value(0)).current;
   const wiggle = useRef(new Animated.Value(0)).current;
@@ -45,6 +62,7 @@ export function ConfirmModal({
       Animated.timing(opacity, { toValue: 1, duration: 160, useNativeDriver: true }),
     ]).start();
 
+    if (tone !== 'danger') return undefined;
     const loop = Animated.loop(
       Animated.sequence([
         Animated.delay(500),
@@ -56,18 +74,19 @@ export function ConfirmModal({
     );
     loop.start();
     return () => loop.stop();
-  }, [visible, scale, opacity, wiggle]);
+  }, [visible, scale, opacity, wiggle, tone]);
 
   const rotate = wiggle.interpolate({ inputRange: [-1, 1], outputRange: ['-10deg', '10deg'] });
+  const ConfirmButton = tone === 'danger' ? DangerButton : PrimaryButton;
 
   return (
     <Modal visible={visible} transparent animationType="fade" onRequestClose={onCancel}>
       <View style={styles.backdrop}>
         <Pressable style={StyleSheet.absoluteFill} onPress={onCancel} />
         <Animated.View style={[styles.card, { opacity, transform: [{ scale }] }]}>
-          <View style={styles.iconBadge}>
-            <Animated.View style={{ transform: [{ rotate }] }}>
-              <Ionicons name="warning" size={32} color={colors.danger} />
+          <View style={[styles.iconBadge, tone === 'primary' && styles.iconBadgePrimary]}>
+            <Animated.View style={tone === 'danger' ? { transform: [{ rotate }] } : undefined}>
+              <Ionicons name={resolvedIcon} size={32} color={tone === 'danger' ? colors.danger : colors.primary} />
             </Animated.View>
           </View>
           <Text style={styles.title}>{title}</Text>
@@ -75,7 +94,7 @@ export function ConfirmModal({
           <View style={styles.actions}>
             <OutlineButton label={resolvedCancelLabel} onPress={onCancel} style={{ flex: 1 }} />
             <View style={{ width: spacing.md }} />
-            <DangerButton label={resolvedConfirmLabel} onPress={onConfirm} style={{ flex: 1 }} />
+            <ConfirmButton label={resolvedConfirmLabel} onPress={onConfirm} style={{ flex: 1 }} />
           </View>
         </Animated.View>
       </View>
@@ -107,6 +126,9 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     marginBottom: spacing.lg,
+  },
+  iconBadgePrimary: {
+    backgroundColor: colors.primarySoft,
   },
   title: {
     fontFamily: fontFamily.baseBold,

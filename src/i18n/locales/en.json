@@ -25,7 +25,9 @@
     "deleteEntryMsg": "This will remove it from your record. This can't be undone.",
     "deleteEntrySuccess": "The entry has been removed.",
     "goBackAria": "Go back",
-    "moreOptionsAria": "More options"
+    "moreOptionsAria": "More options",
+    "show": "Show",
+    "hide": "Hide"
   },
   "topBar": {
     "dashboard": "Dashboard",
@@ -125,14 +127,36 @@
     "alertOk": "OK"
   },
   "doctorSummary": {
-    "button": "Show my doctor",
-    "shareFailed": "Could not create the summary. Please try again."
+    "button": "Show my doctor"
+  },
+  "doctorReportModal": {
+    "title": "Doctor Report",
+    "closeAria": "Close",
+    "generatedAt": "Generated {{date}} {{time}}",
+    "dayWithDate": "Day {{day}}  ·  fever started {{date}}",
+    "warningSignsTitle": "Warning signs reported",
+    "noWarningSigns": "No warning signs currently reported.",
+    "fluidBalanceTitle": "Fluid balance by hour",
+    "fluidInLabel": "Fluid in",
+    "fluidOutLabel": "Urine out",
+    "oralIntakeTitle": "Oral intake",
+    "ivFluidsTitle": "IV fluids",
+    "urineOutputTitle": "Urine output",
+    "temperatureHistoryTitle": "Temperature history",
+    "medicationTitle": "Paracetamol doses",
+    "noDoses": "No doses logged.",
+    "bloodReportTitle": "Blood report trend (FBC)",
+    "noteLabel": "Note"
+  },
+  "previousDataModal": {
+    "title": "Previous Data",
+    "backAria": "Back",
+    "emptyTitle": "No previous records",
+    "emptySubtitle": "Records from a past illness will appear here after you start a new one.",
+    "entryCount": "{{count}} entries logged"
   },
   "welcome": {
     "tagline": "Stay informed. Stay protected.",
-    "factPrefix": "The ",
-    "factHighlight": "Aedes mosquito",
-    "factSuffix": " spreads dengue to millions every year. DenguCare helps you track symptoms and hydration so you can respond fast.",
     "getStarted": "Get Started"
   },
   "consent": {
@@ -278,12 +302,6 @@
     "urineTab": "Urine",
     "ivTab": "IV Fluid"
   },
-  "drinkLegendModal": {
-    "title": "Ring colours",
-    "subtitle": "What each colour on the balance ring means.",
-    "urinePassed": "Urine passed",
-    "ivFluid": "IV fluid"
-  },
   "amountEntryModal": {
     "amountLabel": "Amount (ml)"
   },
@@ -303,6 +321,8 @@
   "settingsMenu": {
     "viewProfile": "View Profile",
     "viewProfileAria": "View profile",
+    "previousData": "Previous Data",
+    "previousDataAria": "View previous illness records",
     "hourlyReminders": "Hourly reminders",
     "hourlyRemindersAria": "Toggle hourly hydration reminders",
     "on": "On",
@@ -491,8 +511,8 @@
     },
     "startNewRecord": "Start New Illness Record",
     "confirmNewRecordTitle": "Start a new illness record?",
-    "confirmNewRecordMsg": "This clears today's fluid, temperature and warning-sign entries and asks when the new fever started. Your profile stays saved.",
-    "startNewRecordBtn": "Start new record",
+    "confirmNewRecordMsg": "Your current fluid, temperature and warning-sign entries are saved to Previous Data, then cleared so you can start fresh. It then asks when the new fever started. Your profile stays saved.",
+    "startNewRecordBtn": "Start new",
     "finalNote": "Prototype only. Not a registered medical device. Every number, threshold, and message here must be reviewed and approved by a clinical panel, and the app registered with the relevant regulator, before any patient uses it."
   }
 }

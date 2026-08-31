@@ -94,23 +94,21 @@ export interface HourBucket {
   urineMl: number;
 }
 
-export function useHourlyBuckets(drinks: DrinkEntry[], urine: UrineEntry[], startHour = 0, endHour = 23): HourBucket[] {
-  return useMemo(() => {
-    const buckets: HourBucket[] = [];
-    for (let h = startHour; h <= endHour; h += 1) {
-      buckets.push({ hour: h, drinkMl: 0, urineMl: 0 });
-    }
-    const byHour = new Map(buckets.map((b) => [b.hour, b]));
-    drinks.forEach((d) => {
-      const h = localHour(new Date(d.atISO));
-      const bucket = byHour.get(h);
-      if (bucket) bucket.drinkMl += d.amountMl;
-    });
-    urine.forEach((u) => {
-      const h = localHour(new Date(u.atISO));
-      const bucket = byHour.get(h);
-      if (bucket) bucket.urineMl += u.amountMl;
-    });
-    return buckets;
-  }, [drinks, urine, startHour, endHour]);
+export function computeHourlyBuckets(drinks: DrinkEntry[], urine: UrineEntry[], startHour = 0, endHour = 23): HourBucket[] {
+  const buckets: HourBucket[] = [];
+  for (let h = startHour; h <= endHour; h += 1) {
+    buckets.push({ hour: h, drinkMl: 0, urineMl: 0 });
+  }
+  const byHour = new Map(buckets.map((b) => [b.hour, b]));
+  drinks.forEach((d) => {
+    const h = localHour(new Date(d.atISO));
+    const bucket = byHour.get(h);
+    if (bucket) bucket.drinkMl += d.amountMl;
+  });
+  urine.forEach((u) => {
+    const h = localHour(new Date(u.atISO));
+    const bucket = byHour.get(h);
+    if (bucket) bucket.urineMl += u.amountMl;
+  });
+  return buckets;
 }

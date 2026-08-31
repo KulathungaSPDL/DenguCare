@@ -33,6 +33,32 @@ export function localHour(date: Date): number {
   return partsFor(date).hour;
 }
 
+/** A Date instant safely inside the calendar day named by `key` (yyyy-mm-dd),
+ * for passing to formatters — anchored at UTC noon so it can't drift into
+ * the adjacent day under any timezone offset. */
+export function dateFromKey(key: string): Date {
+  const [y, m, d] = key.split('-').map(Number);
+  return new Date(Date.UTC(y, m - 1, d, 12));
+}
+
+/** Every calendar-date key (yyyy-mm-dd) from `startKey` to `endKey`, inclusive,
+ * in ascending order. Both are already-local date keys, so this is plain
+ * calendar arithmetic — no further timezone conversion needed. */
+export function dateKeysBetween(startKey: string, endKey: string): string[] {
+  const [sy, sm, sd] = startKey.split('-').map(Number);
+  const [ey, em, ed] = endKey.split('-').map(Number);
+  const startUTC = Date.UTC(sy, sm - 1, sd);
+  const endUTC = Date.UTC(ey, em - 1, ed);
+  const spanDays = Math.max(0, Math.round((endUTC - startUTC) / 86400000));
+
+  const keys: string[] = [];
+  for (let i = 0; i <= spanDays; i += 1) {
+    const d = new Date(Date.UTC(sy, sm - 1, sd + i));
+    keys.push(`${d.getUTCFullYear()}-${String(d.getUTCMonth() + 1).padStart(2, '0')}-${String(d.getUTCDate()).padStart(2, '0')}`);
+  }
+  return keys;
+}
+
 /** Whole calendar days between two instants' local dates (b - a), can be negative. */
 export function calendarDayDiff(a: Date, b: Date): number {
   const [ay, am, ad] = localDateKey(a).split('-').map(Number);

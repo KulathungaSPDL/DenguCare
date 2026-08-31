@@ -116,10 +116,26 @@ function reducer(state: AppState, action: Action): AppState {
           endedAtISO: null,
         },
       };
-    case 'RESET_ILLNESS':
+    case 'RESET_ILLNESS': {
+      const archivedIllnesses = state.illness
+        ? [
+            {
+              illness: { ...state.illness, endedAtISO: new Date().toISOString() },
+              drinks: state.drinks,
+              urine: state.urine,
+              temps: state.temps,
+              reports: state.reports,
+              medicationDoses: state.medicationDoses,
+              ivFluids: state.ivFluids,
+              warningSigns: state.warningSigns,
+            },
+            ...state.archivedIllnesses,
+          ]
+        : state.archivedIllnesses;
       return {
         ...state,
         illness: null,
+        archivedIllnesses,
         drinks: [],
         urine: [],
         temps: [],
@@ -128,6 +144,7 @@ function reducer(state: AppState, action: Action): AppState {
         ivFluids: [],
         warningSigns: { ...emptyWarningSigns },
       };
+    }
     case 'ADD_DRINK':
       return { ...state, drinks: [action.payload, ...state.drinks] };
     case 'UPDATE_DRINK':
@@ -255,6 +272,7 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
           language: parseKv(kv.language, defaultState.language),
           remindersOn: parseKv(kv.remindersOn, defaultState.remindersOn),
           warningSigns: parseKv(kv.warningSigns, { ...emptyWarningSigns }),
+          archivedIllnesses: parseKv(kv.archivedIllnesses, defaultState.archivedIllnesses),
           drinks,
           urine,
           temps,
@@ -292,6 +310,10 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
     if (!state.hydrated) return;
     setKv('illness', state.illness).catch(() => {});
   }, [state.hydrated, state.illness]);
+  useEffect(() => {
+    if (!state.hydrated) return;
+    setKv('archivedIllnesses', state.archivedIllnesses).catch(() => {});
+  }, [state.hydrated, state.archivedIllnesses]);
   useEffect(() => {
     if (!state.hydrated) return;
     setKv('careMode', state.careMode).catch(() => {});

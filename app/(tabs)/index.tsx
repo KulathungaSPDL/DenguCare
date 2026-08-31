@@ -11,7 +11,6 @@ import { Card } from '../../src/components/Card';
 import { CircularGauge } from '../../src/components/CircularGauge';
 import { DashboardHero } from '../../src/components/DashboardHero';
 import { DayStrip } from '../../src/components/DayStrip';
-import { DrinkLegendModal } from '../../src/components/DrinkLegendModal';
 import { EmptyState } from '../../src/components/EmptyState';
 import { FbcTrendChart } from '../../src/components/FbcTrendChart';
 import { FeverCurveChart } from '../../src/components/FeverCurveChart';
@@ -47,7 +46,6 @@ export default function DashboardScreen() {
   const now = useNow();
   const [drinkModal, setDrinkModal] = useState(false);
   const [urineModal, setUrineModal] = useState(false);
-  const [legendVisible, setLegendVisible] = useState(false);
 
   const warningIconScale = useRef(new Animated.Value(1)).current;
   useEffect(() => {
@@ -143,7 +141,7 @@ export default function DashboardScreen() {
             <Text style={styles.gaugeSubtitle}>{fluidStatus.subtitle}</Text>
             <Text style={styles.gaugeStats}>{t('dashboard.inOut', { inMl: intakeMl, outMl })}</Text>
             <Pressable
-              onPress={() => setLegendVisible(true)}
+              onPress={() => router.push('/fluids')}
               style={styles.gaugeLinkRow}
               accessibilityRole="button"
               accessibilityLabel={t('dashboard.viewDetailsAria')}
@@ -342,12 +340,6 @@ export default function DashboardScreen() {
         accentColor={colors.urineOut}
         onClose={() => setUrineModal(false)}
         onSave={saveUrine}
-      />
-
-      <DrinkLegendModal
-        visible={legendVisible}
-        onClose={() => setLegendVisible(false)}
-        showIv={state.careMode === 'admitted'}
       />
 
       {successModal}

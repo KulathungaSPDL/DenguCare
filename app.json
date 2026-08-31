@@ -21,7 +21,6 @@
       ],
       "expo-notifications",
       "expo-sqlite",
-      "expo-sharing",
       "expo-localization"
     ],
     "ios": {
