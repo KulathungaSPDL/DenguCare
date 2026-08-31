@@ -1,5 +1,5 @@
-﻿import { Ionicons } from '@expo/vector-icons';
-import React from 'react';
+import { Ionicons } from '@expo/vector-icons';
+import React, { useState } from 'react';
 import { Alert, Modal, Pressable, StyleSheet, Text, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 
@@ -8,95 +8,119 @@ import { AppLanguage } from '../state/types';
 import { colors } from '../theme/colors';
 import { radius, spacing } from '../theme/spacing';
 import { fontFamily, fontSize } from '../theme/typography';
+import { ProfileModal } from './ProfileModal';
 
 const LANGUAGE_OPTIONS: { code: Exclude<AppLanguage, null>; label: string }[] = [
   { code: 'en', label: 'English' },
-  { code: 'si', label: '\u0dc3\u0dd2\u0d82\u0dc4\u0dbd' },
-  { code: 'ta', label: '\u0ba4\u0bae\u0bbf\u0bb4\u0bcd' },
+  { code: 'si', label: 'සිංහල' },
+  { code: 'ta', label: 'தமிழ்' },
 ];
 
-/** Shared language / reminders / care-mode menu, opened from the three-dot
- * button on both AppTopBar and DashboardHero. */
+/** Shared language / reminders / care-mode / profile menu, opened from the
+ * three-dot button on both AppTopBar and DashboardHero. */
 export function SettingsMenu({ visible, onClose }: { visible: boolean; onClose: () => void }) {
   const { t, i18n } = useTranslation();
   const { state, actions } = useStore();
   const isAdmitted = state.careMode === 'admitted';
   const remindersOn = state.remindersOn;
+  const [profileVisible, setProfileVisible] = useState(false);
+
+  function openProfile() {
+    onClose();
+    setProfileVisible(true);
+  }
 
   function toggleCareMode() {
     const next = isAdmitted ? 'home' : 'admitted';
     Alert.alert(
-      next === 'admitted' ? 'Switch to Admitted to Ward Mode?' : 'Switch to Home Care Mode?',
-      next === 'admitted'
-        ? 'This adds IV fluid tracking to your fluid balance for while you are in hospital.'
-        : 'This turns off IV fluid tracking and goes back to oral-intake-only fluid balance.',
+      next === 'admitted' ? t('settingsMenu.switchToAdmittedTitle') : t('settingsMenu.switchToHomeTitle'),
+      next === 'admitted' ? t('settingsMenu.switchToAdmittedMsg') : t('settingsMenu.switchToHomeMsg'),
       [
-        { text: 'Cancel', style: 'cancel' },
-        { text: 'Switch', onPress: () => actions.setCareMode(next) },
+        { text: t('common.cancel'), style: 'cancel' },
+        { text: t('settingsMenu.switchButton'), onPress: () => actions.setCareMode(next) },
       ]
     );
   }
 
   return (
-    <Modal visible={visible} transparent animationType="fade" onRequestClose={onClose}>
-      <View style={styles.modalBackdrop}>
-        <Pressable style={StyleSheet.absoluteFill} onPress={onClose} />
-        <View style={styles.modalCard}>
-          <Text style={styles.modalSectionLabel}>{t('topBar.language')}</Text>
-          {LANGUAGE_OPTIONS.map((opt) => {
-            const active = i18n.language === opt.code;
-            return (
-              <Pressable
-                key={opt.code}
-                onPress={() => actions.setLanguage(opt.code)}
-                style={[styles.modalRow, active && styles.modalRowActive]}
-              >
-                <Text style={[styles.modalRowText, active && styles.modalRowTextActive]}>{opt.label}</Text>
-                {active ? <Ionicons name="checkmark-circle" size={18} color={colors.primary} /> : null}
-              </Pressable>
-            );
-          })}
+    <>
+      <Modal visible={visible} transparent animationType="fade" onRequestClose={onClose}>
+        <View style={styles.modalBackdrop}>
+          <Pressable style={StyleSheet.absoluteFill} onPress={onClose} />
+          <View style={styles.modalCard}>
+            <Pressable
+              onPress={openProfile}
+              style={styles.modalRow}
+              accessibilityRole="button"
+              accessibilityLabel={t('settingsMenu.viewProfileAria')}
+            >
+              <View style={styles.modalRowLabelWrap}>
+                <Ionicons name="person-circle-outline" size={20} color={colors.textPrimary} style={styles.modalRowIcon} />
+                <Text style={styles.modalRowText}>{t('settingsMenu.viewProfile')}</Text>
+              </View>
+              <Ionicons name="chevron-forward" size={16} color={colors.textSecondary} />
+            </Pressable>
 
-          <View style={styles.modalDivider} />
+            <View style={styles.modalDivider} />
 
-          <Pressable
-            onPress={() => actions.setRemindersOn(!remindersOn)}
-            style={styles.modalRow}
-            accessibilityRole="button"
-            accessibilityLabel="Toggle hourly hydration reminders"
-          >
-            <View style={styles.modalRowLabelWrap}>
-              <Ionicons
-                name={remindersOn ? 'notifications' : 'notifications-off-outline'}
-                size={18}
-                color={colors.textPrimary}
-                style={styles.modalRowIcon}
-              />
-              <Text style={styles.modalRowText}>Hourly reminders</Text>
-            </View>
-            <View style={[styles.pillIndicator, remindersOn && styles.pillIndicatorOn]}>
-              <Text style={[styles.pillIndicatorText, remindersOn && styles.pillIndicatorTextOn]}>
-                {remindersOn ? 'On' : 'Off'}
-              </Text>
-            </View>
-          </Pressable>
+            <Text style={styles.modalSectionLabel}>{t('topBar.language')}</Text>
+            {LANGUAGE_OPTIONS.map((opt) => {
+              const active = i18n.language === opt.code;
+              return (
+                <Pressable
+                  key={opt.code}
+                  onPress={() => actions.setLanguage(opt.code)}
+                  style={[styles.modalRow, active && styles.modalRowActive]}
+                >
+                  <Text style={[styles.modalRowText, active && styles.modalRowTextActive]}>{opt.label}</Text>
+                  {active ? <Ionicons name="checkmark-circle" size={18} color={colors.primary} /> : null}
+                </Pressable>
+              );
+            })}
 
-          <View style={styles.modalDivider} />
+            <View style={styles.modalDivider} />
 
-          <Pressable
-            onPress={toggleCareMode}
-            style={styles.modalRow}
-            accessibilityRole="button"
-            accessibilityLabel="Toggle admitted-to-ward mode"
-          >
-            <View style={styles.modalRowLabelWrap}>
-              <Text style={styles.modalRowText}>{isAdmitted ? t('careMode.admitted') : t('careMode.home')}</Text>
-            </View>
-            <Ionicons name="swap-horizontal" size={16} color={colors.primaryDark} />
-          </Pressable>
+            <Pressable
+              onPress={() => actions.setRemindersOn(!remindersOn)}
+              style={styles.modalRow}
+              accessibilityRole="button"
+              accessibilityLabel={t('settingsMenu.hourlyRemindersAria')}
+            >
+              <View style={styles.modalRowLabelWrap}>
+                <Ionicons
+                  name={remindersOn ? 'notifications' : 'notifications-off-outline'}
+                  size={18}
+                  color={colors.textPrimary}
+                  style={styles.modalRowIcon}
+                />
+                <Text style={styles.modalRowText}>{t('settingsMenu.hourlyReminders')}</Text>
+              </View>
+              <View style={[styles.pillIndicator, remindersOn && styles.pillIndicatorOn]}>
+                <Text style={[styles.pillIndicatorText, remindersOn && styles.pillIndicatorTextOn]}>
+                  {remindersOn ? t('settingsMenu.on') : t('settingsMenu.off')}
+                </Text>
+              </View>
+            </Pressable>
+
+            <View style={styles.modalDivider} />
+
+            <Pressable
+              onPress={toggleCareMode}
+              style={styles.modalRow}
+              accessibilityRole="button"
+              accessibilityLabel={t('settingsMenu.careModeAria')}
+            >
+              <View style={styles.modalRowLabelWrap}>
+                <Text style={styles.modalRowText}>{isAdmitted ? t('careMode.admitted') : t('careMode.home')}</Text>
+              </View>
+              <Ionicons name="swap-horizontal" size={16} color={colors.primaryDark} />
+            </Pressable>
+          </View>
         </View>
-      </View>
-    </Modal>
+      </Modal>
+
+      <ProfileModal visible={profileVisible} onClose={() => setProfileVisible(false)} />
+    </>
   );
 }
 

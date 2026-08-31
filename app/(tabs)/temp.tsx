@@ -31,11 +31,11 @@ import { colors } from '../../src/theme/colors';
 import { radius, spacing } from '../../src/theme/spacing';
 import { fontFamily, fontSize } from '../../src/theme/typography';
 
-const METHODS: { key: TempMethod; label: string }[] = [
-  { key: 'mouth', label: 'Mouth' },
-  { key: 'armpit', label: 'Armpit' },
-  { key: 'ear', label: 'Ear' },
-  { key: 'forehead', label: 'Forehead' },
+const METHODS: { key: TempMethod; labelKey: string }[] = [
+  { key: 'mouth', labelKey: 'tempScreen.methods.mouth' },
+  { key: 'armpit', labelKey: 'tempScreen.methods.armpit' },
+  { key: 'ear', labelKey: 'tempScreen.methods.ear' },
+  { key: 'forehead', labelKey: 'tempScreen.methods.forehead' },
 ];
 
 function combine(date: Date, time: Date): Date {
@@ -79,10 +79,10 @@ export default function TempScreen() {
     if (!canSave) return;
     if (editingId) {
       actions.updateTemp(editingId, temp, method, when.toISOString());
-      showSuccess('Temperature reading updated.', 'Saved');
+      showSuccess(t('tempScreen.readingUpdated'), t('logging.savedTitle'));
     } else {
       actions.addTemp(temp, method, when.toISOString());
-      showSuccess('Temperature reading saved.', 'Saved');
+      showSuccess(t('tempScreen.readingSaved'), t('logging.savedTitle'));
     }
     resetForm();
   }
@@ -118,7 +118,7 @@ export default function TempScreen() {
           onPress: () => {
             actions.addMedicationDose(doseMg);
             setDoseOverride(null);
-            showSuccess(`${doseMg} mg of paracetamol logged.`, 'Dose logged');
+            showSuccess(t('tempScreen.doseLoggedMsg', { mg: doseMg }), t('tempScreen.doseLoggedTitle'));
           },
         },
       ]
@@ -129,8 +129,8 @@ export default function TempScreen() {
     <Screen>
       <AppTopBar icon="thermometer" title={t('topBar.temperature')} />
       <Header
-        title={'Track the fever,\nand the fall'}
-        subtitle="The dangerous phase usually starts as the fever comes down. That is why the falling line matters as much as the high one."
+        title={t('tempScreen.headerTitle')}
+        subtitle={t('tempScreen.headerSubtitle')}
       />
 
       <Card>
@@ -158,8 +158,8 @@ export default function TempScreen() {
         ) : (
           <>
             <LabeledInput
-              label="Dose to log (mg)"
-              hint={`System suggestion: ${suggestedDoseMg} mg, based on weight, age and health conditions. You can adjust it before logging.`}
+              label={t('tempScreen.doseLabel')}
+              hint={t('tempScreen.doseHint', { mg: suggestedDoseMg })}
               keyboardType="decimal-pad"
               mono
               value={doseMgText}
@@ -167,7 +167,7 @@ export default function TempScreen() {
             />
             {doseOverride !== null && doseOverride !== String(suggestedDoseMg) ? (
               <Text style={[styles.cancelEdit, styles.resetDose]} onPress={() => setDoseOverride(null)}>
-                Use suggested dose
+                {t('tempScreen.useSuggestedDose')}
               </Text>
             ) : null}
             <PrimaryButton
@@ -181,32 +181,32 @@ export default function TempScreen() {
       </Card>
 
       <Card style={{ marginTop: spacing.lg }}>
-        <Text style={styles.cardKicker}>Fever curve</Text>
+        <Text style={styles.cardKicker}>{t('tempScreen.feverCurve')}</Text>
         <View style={{ height: spacing.md }} />
         <FeverCurveChart readings={state.temps} feverStartISO={illness.feverStartISO} />
       </Card>
 
       <Card style={{ marginTop: spacing.lg }}>
         <View style={styles.hourHeaderRow}>
-          <Text style={styles.cardKicker}>{editingId ? 'Edit reading' : 'Add a reading'}</Text>
+          <Text style={styles.cardKicker}>{editingId ? t('tempScreen.editReading') : t('tempScreen.addReading')}</Text>
           {editingId ? (
             <Text style={styles.cancelEdit} onPress={resetForm}>
-              Cancel
+              {t('common.cancel')}
             </Text>
           ) : null}
         </View>
         <View style={{ height: spacing.lg }} />
 
         <View style={styles.row}>
-          <DateTimeField label="Date" mode="date" value={when} maximumDate={new Date()} onChange={(d) => setWhen((p) => combine(d, p))} />
+          <DateTimeField label={t('common.date')} mode="date" value={when} maximumDate={new Date()} onChange={(d) => setWhen((p) => combine(d, p))} />
           <View style={{ width: spacing.md }} />
-          <DateTimeField label="Time" mode="time" value={when} onChange={(t) => setWhen((p) => combine(p, t))} />
+          <DateTimeField label={t('common.time')} mode="time" value={when} onChange={(t) => setWhen((p) => combine(p, t))} />
         </View>
 
         <View style={{ height: spacing.lg }} />
 
         <LabeledInput
-          label="Temperature ( C)"
+          label={t('tempScreen.temperatureLabel')}
           keyboardType="decimal-pad"
           mono
           value={tempText}
@@ -216,12 +216,12 @@ export default function TempScreen() {
 
         <View style={styles.chipsRow}>
           {METHODS.map((m) => (
-            <Chip key={m.key} label={m.label} selected={method === m.key} onPress={() => setMethod(m.key)} />
+            <Chip key={m.key} label={t(m.labelKey)} selected={method === m.key} onPress={() => setMethod(m.key)} />
           ))}
         </View>
 
         <PrimaryButton
-          label={editingId ? 'Save changes' : 'Save reading'}
+          label={editingId ? t('common.saveChanges') : t('tempScreen.saveReading')}
           icon={editingId ? undefined : 'add'}
           disabled={!canSave}
           onPress={onSave}
@@ -230,24 +230,27 @@ export default function TempScreen() {
       </Card>
 
       <Card style={{ marginTop: spacing.lg }}>
-        <Text style={styles.cardKicker}>History</Text>
+        <Text style={styles.cardKicker}>{t('tempScreen.history')}</Text>
         <View style={{ height: spacing.sm }} />
         {state.temps.length === 0 ? (
-          <Text style={styles.empty}>No readings yet.</Text>
+          <Text style={styles.empty}>{t('tempScreen.noReadingsYet')}</Text>
         ) : (
-          state.temps.map((t, i) => (
-            <React.Fragment key={t.id}>
+          state.temps.map((reading, i) => (
+            <React.Fragment key={reading.id}>
               {i > 0 && <EntryListDivider />}
               <EntryListItem
-                title={`${formatTime24(new Date(t.atISO))}  -  Day ${illnessDayNumber(illness.feverStartISO, new Date(t.atISO))}`}
+                title={t('tempScreen.readingRow', {
+                  time: formatTime24(new Date(reading.atISO)),
+                  day: illnessDayNumber(illness.feverStartISO, new Date(reading.atISO)),
+                })}
                 time=""
-                valueLabel={`${t.celsius.toFixed(1)}  C`}
-                onPress={() => startEdit(t)}
+                valueLabel={`${reading.celsius.toFixed(1)}  C`}
+                onPress={() => startEdit(reading)}
                 onDelete={() =>
-                  confirmDelete(() => actions.removeTemp(t.id), {
-                    title: 'Delete this reading?',
-                    message: "This temperature reading will be removed from your fever curve. This can't be undone.",
-                    successMessage: 'The temperature reading has been removed.',
+                  confirmDelete(() => actions.removeTemp(reading.id), {
+                    title: t('tempScreen.deleteReadingTitle'),
+                    message: t('tempScreen.deleteReadingMsg'),
+                    successMessage: t('tempScreen.deleteReadingSuccess'),
                   })
                 }
               />
@@ -256,10 +259,7 @@ export default function TempScreen() {
         )}
       </Card>
 
-      <Note>
-        Use paracetamol only for fever. Do not take ibuprofen, diclofenac, mefenamic acid, or aspirin - they raise
-        the risk of bleeding in dengue.
-      </Note>
+      <Note>{t('tempScreen.note')}</Note>
 
       {modals}
       {successModal}

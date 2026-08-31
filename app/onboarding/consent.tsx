@@ -2,6 +2,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
 import React from 'react';
 import { StyleSheet, Text, View } from 'react-native';
+import { useTranslation } from 'react-i18next';
 
 import { AppTopBar } from '../../src/components/AppTopBar';
 import { PrimaryButton } from '../../src/components/Buttons';
@@ -14,14 +15,10 @@ import { colors } from '../../src/theme/colors';
 import { spacing } from '../../src/theme/spacing';
 import { fontFamily, fontSize } from '../../src/theme/typography';
 
-const BULLETS = [
-  'The data insights and trends provided by DenguCare are based on user input and general algorithms, which may not account for your specific medical history.',
-  'Any decisions made regarding your health, treatment, or medication must be consulted with your doctor.',
-  'The developers and affiliated partners of DenguCare hold no liability for any adverse health outcomes resulting from the misuse of information provided within this app.',
-  'Your personal health data is processed in accordance with our Privacy Policy to provide monitoring services.',
-];
+const BULLET_KEYS = ['consent.bullet1', 'consent.bullet2', 'consent.bullet3', 'consent.bullet4'];
 
 export default function ConsentScreen() {
+  const { t } = useTranslation();
   const { state, actions } = useStore();
   const { consent } = state;
 
@@ -38,63 +35,49 @@ export default function ConsentScreen() {
 
   return (
     <Screen>
-      <AppTopBar variant="back" title="Clinical Disclaimer" />
+      <AppTopBar variant="back" title={t('consent.title')} />
 
       <Card style={{ marginBottom: spacing.lg }}>
-        <Text style={styles.paragraph}>
-          Please read carefully before proceeding. This application is designed to assist in the monitoring and
-          management of dengue-related symptoms and health metrics. It is intended for informational and
-          supplementary tracking purposes only.
-        </Text>
+        <Text style={styles.paragraph}>{t('consent.intro')}</Text>
 
         <View style={styles.warningBox}>
           <View style={styles.warningHeaderRow}>
             <Ionicons name="warning" size={18} color={colors.danger} />
-            <Text style={styles.warningTitle}>Not a Substitute for Professional Medical Advice</Text>
+            <Text style={styles.warningTitle}>{t('consent.warningTitle')}</Text>
           </View>
-          <Text style={styles.warningBody}>
-            DenguCare is NOT a diagnostic tool and does NOT replace consultation with qualified healthcare
-            professionals. If you experience severe symptoms, seek immediate emergency medical care.
-          </Text>
+          <Text style={styles.warningBody}>{t('consent.warningBody')}</Text>
         </View>
 
-        <Text style={[styles.paragraph, { marginTop: spacing.lg }]}>
-          By using this application, you acknowledge and agree that:
-        </Text>
+        <Text style={[styles.paragraph, { marginTop: spacing.lg }]}>{t('consent.ackIntro')}</Text>
 
         <View style={{ marginTop: spacing.sm }}>
-          {BULLETS.map((b) => (
-            <View key={b} style={styles.bulletRow}>
+          {BULLET_KEYS.map((key) => (
+            <View key={key} style={styles.bulletRow}>
               <Text style={styles.bulletDot}>-</Text>
-              <Text style={styles.bulletText}>{b}</Text>
+              <Text style={styles.bulletText}>{t(key)}</Text>
             </View>
           ))}
         </View>
 
-        <Text style={[styles.paragraph, { marginTop: spacing.lg }]}>
-          In cases of rapid symptom deterioration, such as severe abdominal pain, persistent vomiting, or bleeding
-          gums, do not rely on app notifications. Proceed to the nearest hospital immediately.
-        </Text>
+        <Text style={[styles.paragraph, { marginTop: spacing.lg }]}>{t('consent.finalWarning')}</Text>
       </Card>
 
       <View style={{ marginBottom: spacing.md }}>
         <ConsentCheckbox checked={consent.understandGuidance} onToggle={() => toggle('understandGuidance')}>
-          I understand this app gives general guidance only. It is not a diagnosis and it does not replace a
-          doctor.
+          {t('consent.checkbox1')}
         </ConsentCheckbox>
         <ConsentCheckbox checked={consent.willGoToHospital} onToggle={() => toggle('willGoToHospital')}>
-          I will go to a hospital straight away if I get any warning sign, no matter what the app says.
+          {t('consent.checkbox2')}
         </ConsentCheckbox>
         <ConsentCheckbox checked={consent.agreeTerms} onToggle={() => toggle('agreeTerms')}>
-          I agree to the Terms of Use and the Privacy Notice, including storing my health records on this device
-          and in my account.
+          {t('consent.checkbox3')}
         </ConsentCheckbox>
       </View>
 
-      <Note>Emergency in Sri Lanka: call 1990 (Suwa Seriya ambulance). Dengue hotline: 1999.</Note>
+      <Note>{t('consent.emergencyNote')}</Note>
 
       <View style={{ marginTop: spacing.xl }}>
-        <PrimaryButton label="Agree and Continue" disabled={!allChecked} onPress={onContinue} />
+        <PrimaryButton label={t('consent.continueButton')} disabled={!allChecked} onPress={onContinue} />
       </View>
     </Screen>
   );

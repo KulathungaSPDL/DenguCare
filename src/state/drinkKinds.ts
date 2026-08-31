@@ -9,13 +9,15 @@ interface DrinkKindDef {
 
 // Centralized so the "Log a drink" chips, the balance gauge's stacked
 // segments, and each entry-list row all agree on the same colour per kind.
+// `label` holds an i18n key (under the "drinkKinds" namespace), not display
+// text — translate it with t(k.label) at render time.
 export const DRINK_KINDS: DrinkKindDef[] = [
-  { key: 'water', label: 'Water', color: colors.water },
-  { key: 'ors', label: 'ORS / Jeevani', color: colors.primary },
-  { key: 'king_coconut', label: 'King Coconut', color: colors.kingCoconut },
-  { key: 'juice', label: 'Juice', color: colors.juice },
-  { key: 'soup', label: 'Soup', color: colors.soup },
-  { key: 'other', label: 'Other', color: colors.other },
+  { key: 'water', label: 'drinkKinds.water', color: colors.water },
+  { key: 'ors', label: 'drinkKinds.ors', color: colors.primary },
+  { key: 'king_coconut', label: 'drinkKinds.king_coconut', color: colors.kingCoconut },
+  { key: 'juice', label: 'drinkKinds.juice', color: colors.juice },
+  { key: 'soup', label: 'drinkKinds.soup', color: colors.soup },
+  { key: 'other', label: 'drinkKinds.other', color: colors.other },
 ];
 
 export function drinkKindColor(kind: DrinkKind): string {

@@ -1,7 +1,7 @@
 import React, { useEffect, useRef } from 'react';
 import { Animated, StyleSheet, Text, View } from 'react-native';
 
-import { phaseLabel } from '../state/phase';
+import { isCriticalPhase } from '../state/phase';
 import { colors } from '../theme/colors';
 import { radius, spacing } from '../theme/spacing';
 import { fontFamily, fontSize } from '../theme/typography';
@@ -29,7 +29,7 @@ export function DayStrip({ currentDay }: { currentDay: number }) {
     <View style={styles.row}>
       {Array.from({ length: TOTAL_DAYS }, (_, i) => i + 1).map((day) => {
         const isCurrent = day === currentDay;
-        const isCritical = phaseLabel(day) === 'Critical phase';
+        const isCritical = isCriticalPhase(day);
 
         return (
           <Animated.View

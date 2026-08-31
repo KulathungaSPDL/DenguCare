@@ -1,6 +1,7 @@
 import { router } from 'expo-router';
 import React, { useMemo, useState } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
+import { useTranslation } from 'react-i18next';
 
 import { AppTopBar } from '../../src/components/AppTopBar';
 import { PrimaryButton } from '../../src/components/Buttons';
@@ -21,6 +22,7 @@ function combine(date: Date, time: Date): Date {
 }
 
 export default function FeverStartScreen() {
+  const { t } = useTranslation();
   const { actions } = useStore();
   const [feverStart, setFeverStart] = useState(new Date());
 
@@ -35,17 +37,17 @@ export default function FeverStartScreen() {
     <Screen>
       <AppTopBar
         variant="back"
-        title="Fever Onset"
-        subtitle="Step 2 of 2 - this sets your illness-day tracking."
+        title={t('feverStart.title')}
+        subtitle={t('feverStart.subtitle')}
       />
       <Header
-        title="When did the fever start?"
-        subtitle="Everything in dengue is counted from the first day of fever. Day 1 is the day it began, even if it started at night."
+        title={t('feverStart.headerTitle')}
+        subtitle={t('feverStart.headerSubtitle')}
       />
 
       <View style={styles.row}>
         <DateTimeField
-          label="First day of fever"
+          label={t('feverStart.firstDayLabel')}
           mode="date"
           value={feverStart}
           maximumDate={new Date()}
@@ -53,20 +55,20 @@ export default function FeverStartScreen() {
         />
         <View style={{ width: spacing.md }} />
         <DateTimeField
-          label="Time"
+          label={t('common.time')}
           mode="time"
           value={feverStart}
-          onChange={(t) => setFeverStart((prev) => combine(prev, t))}
+          onChange={(tm) => setFeverStart((prev) => combine(prev, tm))}
         />
       </View>
 
       <Card style={styles.dayCard}>
-        <Text style={styles.dayKicker}>You are on</Text>
-        <Text style={styles.dayNumber}>Day {dayNumber}</Text>
-        <Text style={styles.daySubtitle}>Fever phase  -  counted in Asia/Colombo</Text>
+        <Text style={styles.dayKicker}>{t('feverStart.youAreOn')}</Text>
+        <Text style={styles.dayNumber}>{t('feverStart.day', { day: dayNumber })}</Text>
+        <Text style={styles.daySubtitle}>{t('feverStart.daySubtitle')}</Text>
       </Card>
 
-      <PrimaryButton label="Start tracking" onPress={onStart} />
+      <PrimaryButton label={t('feverStart.startButton')} onPress={onStart} />
     </Screen>
   );
 }

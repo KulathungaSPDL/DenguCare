@@ -4,6 +4,7 @@ import { router } from 'expo-router';
 import React, { useState } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import Svg, { Circle, Path } from 'react-native-svg';
+import { useTranslation } from 'react-i18next';
 
 import { colors } from '../theme/colors';
 import { gradients } from '../theme/gradients';
@@ -26,6 +27,7 @@ interface Props {
  * dashboard — leads with the page topic, and on tab screens carries the
  * shared settings menu (language, reminders, care mode). */
 export function AppTopBar({ variant = 'root', onBack, icon, title, subtitle }: Props) {
+  const { t } = useTranslation();
   const [menuVisible, setMenuVisible] = useState(false);
 
   return (
@@ -44,7 +46,7 @@ export function AppTopBar({ variant = 'root', onBack, icon, title, subtitle }: P
             hitSlop={10}
             style={styles.iconBtn}
             accessibilityRole="button"
-            accessibilityLabel="Go back"
+            accessibilityLabel={t('common.goBackAria')}
           >
             <Ionicons name="arrow-back" size={20} color={colors.ink} />
           </Pressable>
@@ -65,7 +67,7 @@ export function AppTopBar({ variant = 'root', onBack, icon, title, subtitle }: P
             hitSlop={8}
             style={styles.menuBtn}
             accessibilityRole="button"
-            accessibilityLabel="More options"
+            accessibilityLabel={t('common.moreOptionsAria')}
           >
             <Ionicons name="ellipsis-vertical" size={18} color={colors.primaryDark} />
           </Pressable>

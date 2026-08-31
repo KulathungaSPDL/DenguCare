@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Modal, Pressable, StyleSheet, Text, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { useTranslation } from 'react-i18next';
 
 import { colors } from '../theme/colors';
 import { radius, spacing } from '../theme/spacing';
@@ -39,6 +40,7 @@ interface Props {
 }
 
 export function AmountEntryModal({ visible, title, presets, accentColor, kindOptions, initial, onClose, onSave }: Props) {
+  const { t } = useTranslation();
   const [amountText, setAmountText] = useState('');
   const [kind, setKind] = useState(kindOptions?.[0]?.key);
   const [when, setWhen] = useState(new Date());
@@ -88,7 +90,7 @@ export function AmountEntryModal({ visible, title, presets, accentColor, kindOpt
           </View>
 
           <LabeledInput
-            label="Amount (ml)"
+            label={t('amountEntryModal.amountLabel')}
             keyboardType="number-pad"
             mono
             value={amountText}
@@ -98,14 +100,14 @@ export function AmountEntryModal({ visible, title, presets, accentColor, kindOpt
           />
 
           <View style={styles.row}>
-            <DateTimeField label="Date" mode="date" value={when} maximumDate={new Date()} onChange={(d) => setWhen((p) => combine(d, p))} />
+            <DateTimeField label={t('common.date')} mode="date" value={when} maximumDate={new Date()} onChange={(d) => setWhen((p) => combine(d, p))} />
             <View style={{ width: spacing.md }} />
-            <DateTimeField label="Time" mode="time" value={when} onChange={(t) => setWhen((p) => combine(p, t))} />
+            <DateTimeField label={t('common.time')} mode="time" value={when} onChange={(tm) => setWhen((p) => combine(p, tm))} />
           </View>
           <View style={{ height: spacing.md }} />
 
           <PrimaryButton
-            label={initial ? 'Save changes' : 'Save entry'}
+            label={initial ? t('common.saveChanges') : t('common.saveEntry')}
             disabled={!canSave}
             onPress={save}
             style={{ backgroundColor: accentColor }}

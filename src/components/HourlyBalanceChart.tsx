@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { LayoutChangeEvent, StyleSheet, Text, View } from 'react-native';
 import Svg, { Circle, Line, Path } from 'react-native-svg';
+import { useTranslation } from 'react-i18next';
 
 import { colors } from '../theme/colors';
 import { spacing } from '../theme/spacing';
@@ -44,6 +45,7 @@ function smoothPath(points: { x: number; y: number }[]): string {
  * curves tracking close together, and a gap between them reads as exactly
  * that. */
 export function HourlyBalanceChart({ buckets, hourlyGoalMl, tickHours = [0, 3, 6, 9, 12, 15, 18, 21] }: Props) {
+  const { t } = useTranslation();
   const [width, setWidth] = useState(300);
   function onLayout(e: LayoutChangeEvent) {
     setWidth(e.nativeEvent.layout.width);
@@ -122,15 +124,15 @@ export function HourlyBalanceChart({ buckets, hourlyGoalMl, tickHours = [0, 3, 6
       <View style={styles.legendRow}>
         <View style={styles.legendItem}>
           <View style={[styles.dot, { backgroundColor: colors.drinkIn }]} />
-          <Text style={styles.legendText}>Drinks</Text>
+          <Text style={styles.legendText}>{t('dayEntriesModal.drinksTab')}</Text>
         </View>
         <View style={styles.legendItem}>
           <View style={[styles.dot, { backgroundColor: colors.urineOut }]} />
-          <Text style={styles.legendText}>Urine</Text>
+          <Text style={styles.legendText}>{t('dayEntriesModal.urineTab')}</Text>
         </View>
         <View style={styles.legendItem}>
           <View style={styles.dashLegend} />
-          <Text style={styles.legendText}>Hourly goal, {hourlyGoalMl} ml</Text>
+          <Text style={styles.legendText}>{t('fluidsScreen.hourlyGoalLegend', { ml: hourlyGoalMl })}</Text>
         </View>
       </View>
     </View>

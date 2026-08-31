@@ -1,6 +1,7 @@
 import React, { useMemo, useState } from 'react';
 import { LayoutChangeEvent, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import Svg, { Circle, Line, Polyline, Rect } from 'react-native-svg';
+import { useTranslation } from 'react-i18next';
 
 import { colors } from '../theme/colors';
 import { radius, spacing } from '../theme/spacing';
@@ -29,6 +30,7 @@ const ABS_Y_MIN = 35;
 const ABS_Y_MAX = 41;
 
 export function FeverCurveChart({ readings, feverStartISO, shadedStart = 3, shadedEnd = 7, settledLine = 37.5 }: Props) {
+  const { t } = useTranslation();
   const [mode, setMode] = useState<ChartMode>('daily');
   const [width, setWidth] = useState(300);
   function onLayout(e: LayoutChangeEvent) {
@@ -64,10 +66,10 @@ export function FeverCurveChart({ readings, feverStartISO, shadedStart = 3, shad
       <View style={styles.modeRow}>
         <View style={styles.modeToggle}>
           <Pressable onPress={() => setMode('daily')} style={[styles.modeBtn, mode === 'daily' && styles.modeBtnActive]}>
-            <Text style={[styles.modeBtnText, mode === 'daily' && styles.modeBtnTextActive]}>Daily</Text>
+            <Text style={[styles.modeBtnText, mode === 'daily' && styles.modeBtnTextActive]}>{t('tempScreen.dailyToggle')}</Text>
           </Pressable>
           <Pressable onPress={() => setMode('hourly')} style={[styles.modeBtn, mode === 'hourly' && styles.modeBtnActive]}>
-            <Text style={[styles.modeBtnText, mode === 'hourly' && styles.modeBtnTextActive]}>Hourly</Text>
+            <Text style={[styles.modeBtnText, mode === 'hourly' && styles.modeBtnTextActive]}>{t('tempScreen.hourlyToggle')}</Text>
           </Pressable>
         </View>
       </View>
@@ -114,9 +116,8 @@ export function FeverCurveChart({ readings, feverStartISO, shadedStart = 3, shad
 
       <Text style={styles.caption}>
         {mode === 'daily'
-          ? `Shaded band: days ${shadedStart}-${shadedEnd}. `
-          : 'Scroll to see every hour. '}
-        Dashed line: {settledLine}  C, where fever is counted as settled.
+          ? t('tempScreen.dailyModeCaption', { start: shadedStart, end: shadedEnd, temp: settledLine })
+          : t('tempScreen.hourlyModeCaption', { temp: settledLine })}
       </Text>
     </View>
   );

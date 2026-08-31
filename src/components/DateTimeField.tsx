@@ -1,6 +1,7 @@
 import DateTimePicker, { DateTimePickerAndroid } from '@react-native-community/datetimepicker';
 import React, { useState } from 'react';
 import { Modal, Platform, Pressable, StyleSheet, Text, View } from 'react-native';
+import { useTranslation } from 'react-i18next';
 
 import { colors } from '../theme/colors';
 import { radius, spacing } from '../theme/spacing';
@@ -29,6 +30,7 @@ export function DateTimeField({
   placeholder,
   defaultValue,
 }: Props) {
+  const { t } = useTranslation();
   const [iosVisible, setIosVisible] = useState(false);
   const openValue = value ?? defaultValue ?? new Date();
   const [draft, setDraft] = useState(openValue);
@@ -37,7 +39,7 @@ export function DateTimeField({
     ? mode === 'date'
       ? formatDatePretty(value)
       : formatTime24(value)
-    : placeholder ?? (mode === 'date' ? 'Select a date' : 'Select a time');
+    : placeholder ?? (mode === 'date' ? t('common.selectDate') : t('common.selectTime'));
 
   function openPicker() {
     if (Platform.OS === 'android') {
@@ -77,7 +79,7 @@ export function DateTimeField({
                 onChange={(_, selected) => selected && setDraft(selected)}
               />
               <PrimaryButton
-                label="Done"
+                label={t('common.done')}
                 onPress={() => {
                   onChange(draft);
                   setIosVisible(false);

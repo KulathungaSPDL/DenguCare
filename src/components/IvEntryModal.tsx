@@ -69,7 +69,7 @@ export function IvEntryModal({ visible, initial, onClose, onSave }: Props) {
         <Pressable style={StyleSheet.absoluteFill} onPress={onClose} />
         <View style={styles.sheet}>
           <View style={styles.headerRow}>
-            <Text style={styles.title}>{initial ? 'Edit IV fluid' : t('ivFluids.modalTitle')}</Text>
+            <Text style={styles.title}>{initial ? t('ivFluids.editTitle') : t('ivFluids.modalTitle')}</Text>
             <Pressable onPress={onClose} hitSlop={12}>
               <Ionicons name="close" size={22} color={colors.textSecondary} />
             </Pressable>
@@ -105,14 +105,14 @@ export function IvEntryModal({ visible, initial, onClose, onSave }: Props) {
           />
 
           <View style={styles.row}>
-            <DateTimeField label="Date" mode="date" value={when} maximumDate={new Date()} onChange={(d) => setWhen((p) => combine(d, p))} />
+            <DateTimeField label={t('common.date')} mode="date" value={when} maximumDate={new Date()} onChange={(d) => setWhen((p) => combine(d, p))} />
             <View style={{ width: spacing.md }} />
-            <DateTimeField label="Time" mode="time" value={when} onChange={(tm) => setWhen((p) => combine(p, tm))} />
+            <DateTimeField label={t('common.time')} mode="time" value={when} onChange={(tm) => setWhen((p) => combine(p, tm))} />
           </View>
           <View style={{ height: spacing.md }} />
 
           <PrimaryButton
-            label={initial ? 'Save changes' : t('ivFluids.saveButton')}
+            label={initial ? t('common.saveChanges') : t('ivFluids.saveButton')}
             disabled={!canSave}
             onPress={save}
             style={{ backgroundColor: colors.ivFluid }}

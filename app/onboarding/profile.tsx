@@ -12,18 +12,12 @@ import { DateTimeField } from '../../src/components/DateTimeField';
 import { LabeledInput } from '../../src/components/LabeledInput';
 import { Screen } from '../../src/components/Screen';
 import { SegmentedToggle } from '../../src/components/SegmentedToggle';
+import { CONDITIONS } from '../../src/state/conditions';
 import { useStore } from '../../src/state/store';
 import { colors } from '../../src/theme/colors';
 import { spacing } from '../../src/theme/spacing';
 import { fontFamily, fontSize } from '../../src/theme/typography';
-import { CareMode, Condition } from '../../src/state/types';
-
-const CONDITIONS: { key: Condition; label: string; sexOnly?: 'female' }[] = [
-  { key: 'pregnant', label: 'Pregnant', sexOnly: 'female' },
-  { key: 'diabetes', label: 'Diabetes' },
-  { key: 'heart_kidney', label: 'Heart or kidney disease' },
-  { key: 'blood_thinners', label: 'On blood thinners' },
-];
+import { CareMode } from '../../src/state/types';
 
 const DEFAULT_DOB = (() => {
   const d = new Date();
@@ -72,21 +66,21 @@ export default function ProfileScreen() {
     <Screen
       footer={
         <View>
-          <PrimaryButton label="Complete Setup" disabled={!canContinue} onPress={onContinue} />
-          {!canContinue ? <Text style={hintStyle}>Add your name, date of birth and weight to continue.</Text> : null}
+          <PrimaryButton label={t('profileSetup.continueButton')} disabled={!canContinue} onPress={onContinue} />
+          {!canContinue ? <Text style={hintStyle}>{t('profileSetup.continueHint')}</Text> : null}
         </View>
       }
     >
       <AppTopBar
         variant="back"
-        title="Patient Profile Setup"
-        subtitle="Step 1 of 2 - please provide accurate information for monitoring."
+        title={t('profileSetup.title')}
+        subtitle={t('profileSetup.subtitle')}
       />
       <Card style={{ marginBottom: spacing.lg }}>
-        <SectionHeader icon="person" title="Demographics" />
+        <SectionHeader icon="person" title={t('profileSetup.demographics')} />
 
         <Text style={labelStyle}>
-          Where are you being cared for?<Text style={{ color: colors.danger }}> *</Text>
+          {t('profileSetup.careModeQuestion')}<Text style={{ color: colors.danger }}> *</Text>
         </Text>
         <SegmentedToggle
           options={[
@@ -100,15 +94,15 @@ export default function ProfileScreen() {
         <View style={{ height: spacing.lg }} />
 
         <LabeledInput
-          label="Full Name"
+          label={t('profileSetup.fullName')}
           required
-          placeholder="e.g. Jane Doe"
+          placeholder={t('profileSetup.fullNamePlaceholder')}
           value={profile.name}
           onChangeText={(name) => actions.setProfile({ name })}
         />
 
         <DateTimeField
-          label="Date of birth *"
+          label={t('profileSetup.dob')}
           mode="date"
           value={dob}
           defaultValue={DEFAULT_DOB}
@@ -119,12 +113,12 @@ export default function ProfileScreen() {
         <View style={{ height: spacing.lg }} />
 
         <Text style={labelStyle}>
-          Sex at birth<Text style={{ color: colors.danger }}> *</Text>
+          {t('profileSetup.sexAtBirth')}<Text style={{ color: colors.danger }}> *</Text>
         </Text>
         <SegmentedToggle
           options={[
-            { value: 'female', label: 'Female' },
-            { value: 'male', label: 'Male' },
+            { value: 'female', label: t('profileSetup.female') },
+            { value: 'male', label: t('profileSetup.male') },
           ]}
           value={profile.sex}
           onChange={(sex) => actions.setProfile({ sex })}
@@ -135,18 +129,18 @@ export default function ProfileScreen() {
         <View style={{ flexDirection: 'row', gap: spacing.md }}>
           <View style={{ flex: 1 }}>
             <LabeledInput
-              label="Weight (kg)"
+              label={t('profileSetup.weight')}
               required
               keyboardType="decimal-pad"
               mono
               value={weightText}
               onChangeText={setWeightText}
-              placeholder="Required for fluid calc"
+              placeholder={t('profileSetup.weightPlaceholder')}
             />
           </View>
           <View style={{ flex: 1 }}>
             <LabeledInput
-              label="Height (cm) (optional)"
+              label={t('profileSetup.height')}
               keyboardType="decimal-pad"
               mono
               value={heightText}
@@ -155,17 +149,17 @@ export default function ProfileScreen() {
             />
           </View>
         </View>
-        <Text style={hintInlineStyle}>Adding your height makes your fluid target more accurate.</Text>
+        <Text style={hintInlineStyle}>{t('profileSetup.heightHint')}</Text>
       </Card>
 
       <Card>
-        <SectionHeader icon="medkit" title="Medical History" />
-        <Text style={hintInlineStyle}>Anything else we should know</Text>
+        <SectionHeader icon="medkit" title={t('profileSetup.medicalHistory')} />
+        <Text style={hintInlineStyle}>{t('profileSetup.medicalHistoryHint')}</Text>
         <View style={{ flexDirection: 'row', flexWrap: 'wrap', marginTop: spacing.sm }}>
           {visibleConditions.map((c) => (
             <Chip
               key={c.key}
-              label={c.label}
+              label={t(c.label)}
               selected={profile.conditions.includes(c.key)}
               onPress={() => actions.toggleCondition(c.key)}
             />

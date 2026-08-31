@@ -1,6 +1,7 @@
 import React, { useEffect, useRef } from 'react';
 import { Animated, Modal, Pressable, StyleSheet, Text, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { useTranslation } from 'react-i18next';
 
 import { colors } from '../theme/colors';
 import { radius, spacing } from '../theme/spacing';
@@ -16,6 +17,7 @@ interface Props {
 /** Explains the colours used in the Today's balance ring - one swatch per
  * drink kind, plus urine (and IV fluid, in Admitted mode). */
 export function DrinkLegendModal({ visible, onClose, showIv }: Props) {
+  const { t } = useTranslation();
   const scale = useRef(new Animated.Value(0.9)).current;
   const opacity = useRef(new Animated.Value(0)).current;
 
@@ -30,9 +32,9 @@ export function DrinkLegendModal({ visible, onClose, showIv }: Props) {
   }, [visible, scale, opacity]);
 
   const items = [
-    ...DRINK_KINDS.map((k) => ({ key: k.key, label: k.label, color: k.color })),
-    { key: 'urine', label: 'Urine passed', color: colors.urineOut },
-    ...(showIv ? [{ key: 'iv', label: 'IV fluid', color: colors.ivFluid }] : []),
+    ...DRINK_KINDS.map((k) => ({ key: k.key, label: t(k.label), color: k.color })),
+    { key: 'urine', label: t('drinkLegendModal.urinePassed'), color: colors.urineOut },
+    ...(showIv ? [{ key: 'iv', label: t('drinkLegendModal.ivFluid'), color: colors.ivFluid }] : []),
   ];
 
   return (
@@ -41,12 +43,12 @@ export function DrinkLegendModal({ visible, onClose, showIv }: Props) {
         <Pressable style={StyleSheet.absoluteFill} onPress={onClose} />
         <Animated.View style={[styles.card, { opacity, transform: [{ scale }] }]}>
           <View style={styles.headerRow}>
-            <Text style={styles.title}>Ring colours</Text>
+            <Text style={styles.title}>{t('drinkLegendModal.title')}</Text>
             <Pressable onPress={onClose} hitSlop={10}>
               <Ionicons name="close" size={20} color={colors.textSecondary} />
             </Pressable>
           </View>
-          <Text style={styles.subtitle}>What each colour on the balance ring means.</Text>
+          <Text style={styles.subtitle}>{t('drinkLegendModal.subtitle')}</Text>
 
           <View style={{ height: spacing.md }} />
           {items.map((item) => (

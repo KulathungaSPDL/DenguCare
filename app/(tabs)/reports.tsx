@@ -81,9 +81,9 @@ export default function ReportsScreen() {
 
   function deleteReport(id: string) {
     confirmDelete(() => actions.removeReport(id), {
-      title: 'Delete this report?',
-      message: "This blood report will be removed from your platelet and haematocrit trends. This can't be undone.",
-      successMessage: 'The blood report has been removed.',
+      title: t('reportsScreen.deleteReportTitle'),
+      message: t('reportsScreen.deleteReportMsg'),
+      successMessage: t('reportsScreen.deleteReportSuccess'),
     });
   }
 
@@ -120,10 +120,10 @@ export default function ReportsScreen() {
     };
     if (editingId) {
       actions.updateReport(editingId, report);
-      showSuccess('Blood report updated.', 'Saved');
+      showSuccess(t('reportsScreen.reportUpdated'), t('logging.savedTitle'));
     } else {
       actions.addReport(report);
-      showSuccess('Blood report saved.', 'Saved');
+      showSuccess(t('reportsScreen.reportSaved'), t('logging.savedTitle'));
     }
     setFormOpen(false);
     setPhotoUri(null);
@@ -133,18 +133,18 @@ export default function ReportsScreen() {
   return (
     <Screen>
       <AppTopBar icon="document-text" title={t('topBar.bloodReports')} />
-      <Header title="Photograph it. Type it in." subtitle="Take a picture of your full blood count for your own record, then type the numbers in." />
+      <Header title={t('reportsScreen.headerTitle')} subtitle={t('reportsScreen.headerSubtitle')} />
 
       <View style={styles.actionsRow}>
-        <DarkButton label="Take photo" icon="camera" onPress={takePhoto} style={{ flex: 1 }} />
+        <DarkButton label={t('reportsScreen.takePhoto')} icon="camera" onPress={takePhoto} style={{ flex: 1 }} />
         <View style={{ width: spacing.md }} />
-        <OutlineButton label="Choose file" icon="cloud-upload-outline" onPress={chooseFile} style={{ flex: 1 }} />
+        <OutlineButton label={t('reportsScreen.chooseFile')} icon="cloud-upload-outline" onPress={chooseFile} style={{ flex: 1 }} />
       </View>
 
-      <OutlineButton label="Enter values manually" onPress={openManual} style={{ marginBottom: spacing.lg }} />
+      <OutlineButton label={t('reportsScreen.enterManually')} onPress={openManual} style={{ marginBottom: spacing.lg }} />
 
       <Banner icon="information-circle-outline" tone="info">
-        Photos stay attached to each report, so you can compare the original lab sheet with the numbers you typed in.
+        {t('reportsScreen.photoBannerNote')}
       </Banner>
 
       {atRisk ? (
@@ -161,25 +161,25 @@ export default function ReportsScreen() {
 
       {formOpen ? (
         <Card style={{ marginBottom: spacing.lg }}>
-          <Text style={styles.cardKicker}>{editingId ? 'Edit report' : 'New report'}</Text>
+          <Text style={styles.cardKicker}>{editingId ? t('reportsScreen.editReport') : t('reportsScreen.newReport')}</Text>
           <View style={{ height: spacing.md }} />
 
           {photoUri ? <Image source={{ uri: photoUri }} style={styles.preview} /> : null}
 
           <View style={styles.row}>
-            <DateTimeField label="Date" mode="date" value={when} maximumDate={new Date()} onChange={(d) => setWhen((p) => combine(d, p))} />
+            <DateTimeField label={t('common.date')} mode="date" value={when} maximumDate={new Date()} onChange={(d) => setWhen((p) => combine(d, p))} />
             <View style={{ width: spacing.md }} />
-            <DateTimeField label="Time" mode="time" value={when} onChange={(t) => setWhen((p) => combine(p, t))} />
+            <DateTimeField label={t('common.time')} mode="time" value={when} onChange={(t) => setWhen((p) => combine(p, t))} />
           </View>
 
           <View style={{ height: spacing.md }} />
-          <LabeledInput label="Platelet count (x10^3/uL)" keyboardType="decimal-pad" mono value={platelet} onChangeText={setPlatelet} placeholder="e.g. 145" />
-          <LabeledInput label="Haematocrit (%)" keyboardType="decimal-pad" mono value={haematocrit} onChangeText={setHaematocrit} placeholder="e.g. 42" />
-          <LabeledInput label="WBC count (x10^3/uL) (optional)" keyboardType="decimal-pad" mono value={wbc} onChangeText={setWbc} placeholder="e.g. 4.2" />
+          <LabeledInput label={t('reportsScreen.plateletLabel')} keyboardType="decimal-pad" mono value={platelet} onChangeText={setPlatelet} placeholder={t('reportsScreen.plateletPlaceholder')} />
+          <LabeledInput label={t('reportsScreen.haematocritLabel')} keyboardType="decimal-pad" mono value={haematocrit} onChangeText={setHaematocrit} placeholder={t('reportsScreen.haematocritPlaceholder')} />
+          <LabeledInput label={t('reportsScreen.wbcLabel')} keyboardType="decimal-pad" mono value={wbc} onChangeText={setWbc} placeholder={t('reportsScreen.wbcPlaceholder')} />
 
           <View style={styles.formActions}>
             <OutlineButton
-              label="Cancel"
+              label={t('common.cancel')}
               onPress={() => {
                 setFormOpen(false);
                 resetForm();
@@ -187,7 +187,7 @@ export default function ReportsScreen() {
               style={{ flex: 1 }}
             />
             <View style={{ width: spacing.md }} />
-            <PrimaryButton label={editingId ? 'Save changes' : 'Save report'} onPress={saveReport} style={{ flex: 1 }} />
+            <PrimaryButton label={editingId ? t('common.saveChanges') : t('reportsScreen.saveReport')} onPress={saveReport} style={{ flex: 1 }} />
           </View>
         </Card>
       ) : null}
@@ -196,8 +196,8 @@ export default function ReportsScreen() {
         {state.reports.length === 0 ? (
           <EmptyState
             icon="document-text-outline"
-            title="No reports yet"
-            subtitle="Add your first blood report above - by photo or typed in - and we'll show your platelet and haematocrit trends here."
+            title={t('reportsScreen.noReportsYet')}
+            subtitle={t('reportsScreen.noReportsSubtitle')}
           />
         ) : (
           state.reports.map((r, i) => (
@@ -208,16 +208,16 @@ export default function ReportsScreen() {
                   onPress={() => startEdit(r)}
                   style={({ pressed }) => [styles.reportPressArea, pressed && styles.reportPressAreaPressed]}
                   accessibilityRole="button"
-                  accessibilityLabel="Edit report"
+                  accessibilityLabel={t('reportsScreen.editReportAria')}
                 >
                   <View style={{ flex: 1 }}>
                     <Text style={styles.reportDate}>
                       {formatDatePretty(new Date(r.atISO))}  -  {formatTime24(new Date(r.atISO))}
                     </Text>
                     <Text style={styles.reportValues}>
-                      {r.plateletCount != null ? `Platelets ${r.plateletCount}` : 'Platelets -'}
+                      {r.plateletCount != null ? t('reportsScreen.plateletsValue', { value: r.plateletCount }) : t('reportsScreen.plateletsDash')}
                       {'   -   '}
-                      {r.haematocritPct != null ? `HCT ${r.haematocritPct}%` : 'HCT -'}
+                      {r.haematocritPct != null ? t('reportsScreen.hctValue', { value: r.haematocritPct }) : t('reportsScreen.hctDash')}
                     </Text>
                   </View>
                   {r.photoUri ? <Image source={{ uri: r.photoUri }} style={styles.thumb} /> : null}

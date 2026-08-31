@@ -11,6 +11,7 @@ import { Banner } from '../../src/components/Banner';
 import { Card } from '../../src/components/Card';
 import { DangerButton, DarkButton } from '../../src/components/Buttons';
 import { EntryListDivider } from '../../src/components/EntryListItem';
+import { LinkRow } from '../../src/components/LinkRow';
 import { Note } from '../../src/components/Note';
 import { Screen } from '../../src/components/Screen';
 import { WarningSignRow } from '../../src/components/WarningSignRow';
@@ -23,9 +24,9 @@ import { radius, spacing } from '../../src/theme/spacing';
 import { fontFamily, fontSize } from '../../src/theme/typography';
 
 const EMERGENCY_NUMBERS = [
-  { label: 'Suwa Seriya ambulance', number: '1990' },
-  { label: 'Dengue and health hotline', number: '1999' },
-  { label: 'Government Information Centre', number: '1919' },
+  { labelKey: 'safetyScreen.emergency.suwaSeriya', number: '1990' },
+  { labelKey: 'safetyScreen.emergency.dengueHotline', number: '1999' },
+  { labelKey: 'safetyScreen.emergency.govInfoCentre', number: '1919' },
 ];
 
 const SIGN_STYLE: Record<WarningSignKey, { icon: keyof typeof Ionicons.glyphMap; bg: string; fg: string }> = {
@@ -62,12 +63,12 @@ export default function SafetyScreen() {
 
   function confirmNewRecord() {
     Alert.alert(
-      'Start a new illness record?',
-      "This clears today's fluid, temperature and warning-sign entries and asks when the new fever started. Your profile stays saved.",
+      t('safetyScreen.confirmNewRecordTitle'),
+      t('safetyScreen.confirmNewRecordMsg'),
       [
-        { text: 'Cancel', style: 'cancel' },
+        { text: t('common.cancel'), style: 'cancel' },
         {
-          text: 'Start new record',
+          text: t('safetyScreen.startNewRecordBtn'),
           style: 'destructive',
           onPress: () => {
             actions.resetIllness();
@@ -82,22 +83,26 @@ export default function SafetyScreen() {
     <Screen>
       <AppTopBar icon="shield-checkmark" title={t('topBar.safety')} />
 
+      <LinkRow
+        icon="book-outline"
+        label={t('guidelines.button')}
+        onPress={() => router.push('/guidelines')}
+      />
+      <View style={{ height: spacing.lg }} />
+
       <Card style={styles.introCard}>
         <View style={styles.introHeaderRow}>
           <View style={styles.introIconCircle}>
             <Ionicons name="warning" size={20} color={colors.danger} />
           </View>
-          <Text style={styles.introTitle}>Critical Warning Signs</Text>
+          <Text style={styles.introTitle}>{t('safetyScreen.criticalWarningSigns')}</Text>
         </View>
-        <Text style={styles.introBody}>
-          Tick anything you have — do not wait to see if it passes. If you or the patient experience any of these
-          symptoms, seek immediate medical attention.
-        </Text>
+        <Text style={styles.introBody}>{t('safetyScreen.introBody')}</Text>
       </Card>
 
       {anyChecked ? (
         <Banner icon="alert-circle-outline" tone="danger">
-          Go to a hospital now. Do not wait to see if it passes - bring this record with you.
+          {t('safetyScreen.goToHospitalBanner')}
         </Banner>
       ) : null}
 
@@ -105,7 +110,7 @@ export default function SafetyScreen() {
         {ORDERED_WARNING_SIGN_KEYS.map((key) => (
           <WarningSignRow
             key={key}
-            label={WARNING_SIGN_LABELS[key]}
+            label={t(WARNING_SIGN_LABELS[key])}
             icon={SIGN_STYLE[key].icon}
             iconBg={SIGN_STYLE[key].bg}
             iconColor={SIGN_STYLE[key].fg}
@@ -115,15 +120,15 @@ export default function SafetyScreen() {
         ))}
       </View>
 
-      <DangerButton label="Call Emergency" icon="call" onPress={callEmergency} style={{ marginTop: spacing.sm }} />
+      <DangerButton label={t('safetyScreen.callEmergency')} icon="call" onPress={callEmergency} style={{ marginTop: spacing.sm }} />
 
       <Card style={{ marginTop: spacing.lg }}>
-        <Text style={styles.cardKicker}>Emergency numbers</Text>
+        <Text style={styles.cardKicker}>{t('safetyScreen.emergencyNumbers')}</Text>
         {EMERGENCY_NUMBERS.map((e, i) => (
           <React.Fragment key={e.number}>
             {i > 0 && <EntryListDivider />}
             <Pressable style={styles.numberRow} onPress={() => Linking.openURL(`tel:${e.number}`)}>
-              <Text style={styles.numberLabel}>{e.label}</Text>
+              <Text style={styles.numberLabel}>{t(e.labelKey)}</Text>
               <Text style={styles.numberValue}>{e.number}</Text>
             </Pressable>
           </React.Fragment>
@@ -142,14 +147,10 @@ export default function SafetyScreen() {
         style={({ pressed }) => [styles.newRecordBtn, pressed && styles.newRecordBtnPressed]}
       >
         <Ionicons name="add-circle-outline" size={20} color={colors.primaryDark} />
-        <Text style={styles.newRecordLabel}>Start New Illness Record</Text>
+        <Text style={styles.newRecordLabel}>{t('safetyScreen.startNewRecord')}</Text>
       </Pressable>
 
-      <Note>
-        Prototype only. Not a registered medical device. Every number, threshold, and message here must be
-        reviewed and approved by a clinical panel, and the app registered with the relevant regulator, before any
-        patient uses it.
-      </Note>
+      <Note>{t('safetyScreen.finalNote')}</Note>
     </Screen>
   );
 }

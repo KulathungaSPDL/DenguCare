@@ -69,7 +69,7 @@ export function DashboardHero({ subtitle, needsAttention }: Props) {
             hitSlop={8}
             style={styles.bellBtn}
             accessibilityRole="button"
-            accessibilityLabel="Toggle hourly hydration reminders"
+            accessibilityLabel={t('settingsMenu.hourlyRemindersAria')}
           >
             <Ionicons name={state.remindersOn ? 'notifications' : 'notifications-outline'} size={19} color={colors.primaryDark} />
             {needsAttention ? <View style={styles.badgeDot} /> : null}
@@ -79,7 +79,7 @@ export function DashboardHero({ subtitle, needsAttention }: Props) {
             hitSlop={8}
             style={styles.menuBtn}
             accessibilityRole="button"
-            accessibilityLabel="More options"
+            accessibilityLabel={t('common.moreOptionsAria')}
           >
             <Ionicons name="ellipsis-vertical" size={18} color={colors.primaryDark} />
           </Pressable>
@@ -87,7 +87,7 @@ export function DashboardHero({ subtitle, needsAttention }: Props) {
       </View>
 
       <View style={styles.greetingBlock}>
-        <Text style={styles.greeting}>Welcome back!</Text>
+        <Text style={styles.greeting}>{t('dashboard.greeting')}</Text>
         <Text style={styles.subtitle}>{subtitle}</Text>
       </View>
 

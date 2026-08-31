@@ -8,9 +8,8 @@ import { AppTopBar } from '../../src/components/AppTopBar';
 import { Banner } from '../../src/components/Banner';
 import { Card } from '../../src/components/Card';
 import { DayEntriesModal } from '../../src/components/DayEntriesModal';
-import { EmptyState } from '../../src/components/EmptyState';
 import { Header } from '../../src/components/Header';
-import { HourlyBalanceChart } from '../../src/components/HourlyBalanceChart';
+import { HourlyBalanceCarousel } from '../../src/components/HourlyBalanceCarousel';
 import { IvEntryModal } from '../../src/components/IvEntryModal';
 import { Note } from '../../src/components/Note';
 import { Screen } from '../../src/components/Screen';
@@ -19,7 +18,7 @@ import { useNow } from '../../src/hooks/useNow';
 import { useSuccessAlert } from '../../src/hooks/useSuccessAlert';
 import { localDateKey } from '../../src/state/dateUtils';
 import { DRINK_KINDS } from '../../src/state/drinkKinds';
-import { filterByDateKey, useFluidSummary, useHourlyBuckets, useHyponatremiaWarning, useTodayEntries } from '../../src/state/selectors';
+import { filterByDateKey, useFluidSummary, useHyponatremiaWarning, useTodayEntries } from '../../src/state/selectors';
 import { useStore } from '../../src/state/store';
 import { DrinkEntry, IvFluidEntry, UrineEntry } from '../../src/state/types';
 import { colors } from '../../src/theme/colors';
@@ -46,28 +45,26 @@ export default function FluidsScreen() {
 
   const { drinks, urine } = useTodayEntries(state, now);
   const { inMl, outMl, targets, thisHourMl } = useFluidSummary(state, now);
-  const buckets = useHourlyBuckets(drinks, urine);
   const goalMet = thisHourMl >= targets.hourlyGoalMl;
   const showHyponatremiaWarning = useHyponatremiaWarning(state, now);
-  const hasHourlyData = buckets.some((b) => b.drinkMl > 0 || b.urineMl > 0);
   const todayIvFluids = filterByDateKey(state.ivFluids, localDateKey(now));
   const isAdmitted = state.careMode === 'admitted';
 
   function saveEntry(amountMl: number, kind: string | undefined, atISO: string) {
     if (editingAmount?.kind === 'drink') {
       const kindDef = DRINK_KINDS.find((k) => k.key === kind) ?? DRINK_KINDS[0];
-      actions.updateDrink(editingAmount.entry.id, amountMl, kindDef.key, kindDef.label, atISO);
-      showSuccess('Drink entry updated.', 'Saved');
+      actions.updateDrink(editingAmount.entry.id, amountMl, kindDef.key, t(kindDef.label), atISO);
+      showSuccess(t('logging.drinkUpdated'), t('logging.savedTitle'));
     } else if (editingAmount?.kind === 'urine') {
       actions.updateUrine(editingAmount.entry.id, amountMl, atISO);
-      showSuccess('Urine entry updated.', 'Saved');
+      showSuccess(t('logging.urineUpdated'), t('logging.savedTitle'));
     } else if (tab === 'drinks') {
       const kindDef = DRINK_KINDS.find((k) => k.key === kind) ?? DRINK_KINDS[0];
-      actions.addDrink(amountMl, kindDef.key, kindDef.label, atISO);
-      showSuccess(`${amountMl} ml of ${kindDef.label.toLowerCase()} logged.`, 'Drink logged');
+      actions.addDrink(amountMl, kindDef.key, t(kindDef.label), atISO);
+      showSuccess(t('logging.drinkLogged', { amount: amountMl, kind: t(kindDef.label).toLowerCase() }), t('logging.drinkLoggedTitle'));
     } else {
       actions.addUrine(amountMl, atISO);
-      showSuccess(`${amountMl} ml of urine logged.`, 'Urine logged');
+      showSuccess(t('logging.urineLogged', { amount: amountMl }), t('logging.urineLoggedTitle'));
     }
     setModalOpen(false);
     setEditingAmount(null);
@@ -76,10 +73,10 @@ export default function FluidsScreen() {
   function saveIvEntry(volumeMl: number, rateMlPerHr: number | null, fluidType: string, note: string, atISO: string) {
     if (editingIv) {
       actions.updateIvFluid(editingIv.id, volumeMl, rateMlPerHr, fluidType, note, atISO);
-      showSuccess('IV fluid entry updated.', 'Saved');
+      showSuccess(t('logging.ivUpdated'), t('logging.savedTitle'));
     } else {
       actions.addIvFluid(volumeMl, rateMlPerHr, fluidType, note, atISO);
-      showSuccess(`${volumeMl} ml IV fluid logged.`, 'IV fluid logged');
+      showSuccess(t('logging.ivLogged', { amount: volumeMl }), t('logging.ivLoggedTitle'));
     }
     setIvModalOpen(false);
     setEditingIv(null);
@@ -113,25 +110,25 @@ export default function FluidsScreen() {
 
   function deleteDrink(id: string) {
     confirmDelete(() => actions.removeDrink(id), {
-      title: 'Delete this drink entry?',
-      message: "This will remove it from today's fluid balance. This can't be undone.",
-      successMessage: 'The drink entry has been removed.',
+      title: t('fluidsScreen.deleteDrinkTitle'),
+      message: t('fluidsScreen.deleteEntryMsg'),
+      successMessage: t('fluidsScreen.deleteDrinkSuccess'),
     });
   }
 
   function deleteUrine(id: string) {
     confirmDelete(() => actions.removeUrine(id), {
-      title: 'Delete this urine entry?',
-      message: "This will remove it from today's fluid balance. This can't be undone.",
-      successMessage: 'The urine entry has been removed.',
+      title: t('fluidsScreen.deleteUrineTitle'),
+      message: t('fluidsScreen.deleteEntryMsg'),
+      successMessage: t('fluidsScreen.deleteUrineSuccess'),
     });
   }
 
   function deleteIvFluid(id: string) {
     confirmDelete(() => actions.removeIvFluid(id), {
-      title: 'Delete this IV fluid entry?',
-      message: "This will remove it from today's fluid balance. This can't be undone.",
-      successMessage: 'The IV fluid entry has been removed.',
+      title: t('fluidsScreen.deleteIvTitle'),
+      message: t('fluidsScreen.deleteEntryMsg'),
+      successMessage: t('fluidsScreen.deleteIvSuccess'),
     });
   }
 
@@ -148,10 +145,10 @@ export default function FluidsScreen() {
 
       <Card>
         <View style={styles.hourHeaderRow}>
-          <Text style={styles.cardKicker}>This hour</Text>
+          <Text style={styles.cardKicker}>{t('fluidsScreen.thisHour')}</Text>
           {goalMet ? (
             <View style={styles.goalPill}>
-              <Text style={styles.goalPillText}>Goal met</Text>
+              <Text style={styles.goalPillText}>{t('fluidsScreen.goalMet')}</Text>
             </View>
           ) : null}
         </View>
@@ -176,26 +173,18 @@ export default function FluidsScreen() {
 
       <Card style={{ marginTop: spacing.lg }}>
         <View style={styles.hourHeaderRow}>
-          <Text style={styles.cardKicker}>Fluid balance by hour</Text>
+          <Text style={styles.cardKicker}>{t('fluidsScreen.fluidBalanceByHour')}</Text>
           <Pressable
             onPress={() => setEntriesVisible(true)}
             hitSlop={10}
             accessibilityRole="button"
-            accessibilityLabel="View today's entries"
+            accessibilityLabel={t('fluidsScreen.viewTodayEntriesAria')}
           >
             <MaterialCommunityIcons name="eye-circle-outline" size={20} color={colors.textSecondary} />
           </Pressable>
         </View>
         <View style={{ height: spacing.md }} />
-        {hasHourlyData ? (
-          <HourlyBalanceChart buckets={buckets} hourlyGoalMl={targets.hourlyGoalMl} />
-        ) : (
-          <EmptyState
-            icon="water-outline"
-            title="No fluids logged yet"
-            subtitle="Log a drink or urine below and this chart will fill in hour by hour."
-          />
-        )}
+        <HourlyBalanceCarousel allDrinks={state.drinks} allUrine={state.urine} now={now} hourlyGoalMl={targets.hourlyGoalMl} />
       </Card>
 
       <View style={styles.addRow}>
@@ -206,7 +195,7 @@ export default function FluidsScreen() {
           <View style={[styles.addBtnIcon, { backgroundColor: colors.drinkIn }]}>
             <Ionicons name="water-outline" size={16} color={colors.textOnPrimary} />
           </View>
-          <Text style={styles.addBtnLabel}>Drink</Text>
+          <Text style={styles.addBtnLabel}>{t('fluidsScreen.drink')}</Text>
         </Pressable>
         <Pressable
           onPress={() => openAdd('urine')}
@@ -215,7 +204,7 @@ export default function FluidsScreen() {
           <View style={[styles.addBtnIcon, { backgroundColor: colors.urineOut }]}>
             <Ionicons name="flask-outline" size={16} color={colors.textOnPrimary} />
           </View>
-          <Text style={styles.addBtnLabel}>Urine</Text>
+          <Text style={styles.addBtnLabel}>{t('fluidsScreen.urine')}</Text>
         </Pressable>
         {isAdmitted ? (
           <Pressable
@@ -228,7 +217,7 @@ export default function FluidsScreen() {
             <View style={[styles.addBtnIcon, { backgroundColor: colors.ivFluid }]}>
               <Ionicons name="medkit-outline" size={16} color={colors.textOnPrimary} />
             </View>
-            <Text style={styles.addBtnLabel}>IV Fluid</Text>
+            <Text style={styles.addBtnLabel}>{t('fluidsScreen.ivFluid')}</Text>
           </Pressable>
         ) : null}
       </View>
@@ -239,12 +228,12 @@ export default function FluidsScreen() {
         visible={modalOpen}
         title={
           editingAmount
-            ? tab === 'drinks' ? 'Edit a drink' : 'Edit urine'
-            : tab === 'drinks' ? 'Log a drink' : 'Log urine'
+            ? tab === 'drinks' ? t('fluidsScreen.editDrink') : t('fluidsScreen.editUrine')
+            : tab === 'drinks' ? t('fluidsScreen.logDrink') : t('fluidsScreen.logUrine')
         }
         presets={tab === 'drinks' ? DRINK_PRESETS : URINE_PRESETS}
         accentColor={tab === 'drinks' ? colors.drinkIn : colors.urineOut}
-        kindOptions={tab === 'drinks' ? DRINK_KINDS : undefined}
+        kindOptions={tab === 'drinks' ? DRINK_KINDS.map((k) => ({ key: k.key, label: t(k.label) })) : undefined}
         initial={
           editingAmount
             ? {

@@ -1,4 +1,32 @@
 {
+  "common": {
+    "cancel": "Cancel",
+    "save": "Save",
+    "saveChanges": "Save changes",
+    "saveEntry": "Save entry",
+    "edit": "Edit",
+    "delete": "Delete",
+    "close": "Close",
+    "none": "None",
+    "ok": "OK",
+    "selectDate": "Select a date",
+    "selectTime": "Select a time",
+    "done": "Done",
+    "deleted": "Deleted",
+    "saved": "Saved",
+    "date": "Date",
+    "time": "Time",
+    "yesterday": "Yesterday",
+    "today": "Today",
+    "hoursAgo": "{{count}}h ago",
+    "minutesAgo": "{{count}}m ago",
+    "editAria": "Edit {{title}}",
+    "deleteEntryTitle": "Delete this entry?",
+    "deleteEntryMsg": "This will remove it from your record. This can't be undone.",
+    "deleteEntrySuccess": "The entry has been removed.",
+    "goBackAria": "Go back",
+    "moreOptionsAria": "More options"
+  },
   "topBar": {
     "dashboard": "Dashboard",
     "fluidBalance": "Fluid Balance",
@@ -15,11 +43,49 @@
     "home": "🏠 Home Care Mode",
     "admitted": "🏥 Admitted to Ward Mode"
   },
+  "bottomNav": {
+    "dashboard": "Dashboard",
+    "fluids": "Fluids",
+    "history": "History",
+    "report": "Report",
+    "safety": "Safety"
+  },
+  "conditions": {
+    "pregnant": "Pregnant",
+    "diabetes": "Diabetes",
+    "heart_kidney": "Heart or kidney disease",
+    "blood_thinners": "On blood thinners"
+  },
+  "drinkKinds": {
+    "water": "Water",
+    "ors": "ORS / Jeevani",
+    "king_coconut": "King Coconut",
+    "juice": "Juice",
+    "soup": "Soup",
+    "other": "Other"
+  },
+  "warningSigns": {
+    "abdominal_pain": "Bad tummy pain or tenderness",
+    "persistent_vomiting": "Vomiting again and again",
+    "bleeding": "Bleeding from gums, nose, gut, or heavy periods",
+    "confused_restless": "Very drowsy, confused, or restless",
+    "dizzy_faint": "Dizzy or faint when standing up",
+    "cold_clammy": "Cold, clammy hands and feet",
+    "no_urine_6h": "Passed no urine for 6 hours or more",
+    "breathless_swelling": "Breathless, or puffy face, legs, or tummy",
+    "fever_settled_worse": "Fever has settled but I feel worse, not better"
+  },
+  "phase": {
+    "fever": "Fever phase",
+    "critical": "Critical phase",
+    "recovery": "Recovery phase"
+  },
   "ivFluids": {
     "title": "IV fluids",
     "empty": "No IV fluids logged today yet.",
     "addButton": "Add IV fluid",
     "modalTitle": "Log an IV fluid",
+    "editTitle": "Edit IV fluid",
     "volumeLabel": "Volume (ml)",
     "rateLabel": "Rate (ml/hr) (optional)",
     "noteLabel": "Note (optional)",
@@ -61,5 +127,372 @@
   "doctorSummary": {
     "button": "Show my doctor",
     "shareFailed": "Could not create the summary. Please try again."
+  },
+  "welcome": {
+    "tagline": "Stay informed. Stay protected.",
+    "factPrefix": "The ",
+    "factHighlight": "Aedes mosquito",
+    "factSuffix": " spreads dengue to millions every year. DenguCare helps you track symptoms and hydration so you can respond fast.",
+    "getStarted": "Get Started"
+  },
+  "consent": {
+    "title": "Clinical Disclaimer",
+    "intro": "Please read carefully before proceeding. This application is designed to assist in the monitoring and management of dengue-related symptoms and health metrics. It is intended for informational and supplementary tracking purposes only.",
+    "warningTitle": "Not a Substitute for Professional Medical Advice",
+    "warningBody": "DenguCare is NOT a diagnostic tool and does NOT replace consultation with qualified healthcare professionals. If you experience severe symptoms, seek immediate emergency medical care.",
+    "ackIntro": "By using this application, you acknowledge and agree that:",
+    "bullet1": "The data insights and trends provided by DenguCare are based on user input and general algorithms, which may not account for your specific medical history.",
+    "bullet2": "Any decisions made regarding your health, treatment, or medication must be consulted with your doctor.",
+    "bullet3": "The developers and affiliated partners of DenguCare hold no liability for any adverse health outcomes resulting from the misuse of information provided within this app.",
+    "bullet4": "Your personal health data is processed in accordance with our Privacy Policy to provide monitoring services.",
+    "finalWarning": "In cases of rapid symptom deterioration, such as severe abdominal pain, persistent vomiting, or bleeding gums, do not rely on app notifications. Proceed to the nearest hospital immediately.",
+    "checkbox1": "I understand this app gives general guidance only. It is not a diagnosis and it does not replace a doctor.",
+    "checkbox2": "I will go to a hospital straight away if I get any warning sign, no matter what the app says.",
+    "checkbox3": "I agree to the Terms of Use and the Privacy Notice, including storing my health records on this device and in my account.",
+    "emergencyNote": "Emergency in Sri Lanka: call 1990 (Suwa Seriya ambulance). Dengue hotline: 1999.",
+    "continueButton": "Agree and Continue"
+  },
+  "signin": {
+    "title": "Sign In",
+    "headerTitle": "Save your record so nothing is lost.",
+    "headerSubtitle": "If your phone dies or you are admitted, your chart is still there.",
+    "google": "Continue with Google",
+    "apple": "Continue with Apple",
+    "mobile": "Continue with mobile number",
+    "skip": "Skip for now",
+    "note": "Prototype: sign-in is simulated. In production this is Firebase Auth or Supabase Auth with Google, Apple, and OTP."
+  },
+  "profileSetup": {
+    "title": "Patient Profile Setup",
+    "subtitle": "Step 1 of 2 - please provide accurate information for monitoring.",
+    "demographics": "Demographics",
+    "careModeQuestion": "Where are you being cared for?",
+    "fullName": "Full Name",
+    "fullNamePlaceholder": "e.g. Jane Doe",
+    "dob": "Date of birth *",
+    "sexAtBirth": "Sex at birth",
+    "female": "Female",
+    "male": "Male",
+    "weight": "Weight (kg)",
+    "weightPlaceholder": "Required for fluid calc",
+    "height": "Height (cm) (optional)",
+    "heightHint": "Adding your height makes your fluid target more accurate.",
+    "medicalHistory": "Medical History",
+    "medicalHistoryHint": "Anything else we should know",
+    "continueButton": "Complete Setup",
+    "continueHint": "Add your name, date of birth and weight to continue."
+  },
+  "feverStart": {
+    "title": "Fever Onset",
+    "subtitle": "Step 2 of 2 - this sets your illness-day tracking.",
+    "headerTitle": "When did the fever start?",
+    "headerSubtitle": "Everything in dengue is counted from the first day of fever. Day 1 is the day it began, even if it started at night.",
+    "firstDayLabel": "First day of fever",
+    "youAreOn": "You are on",
+    "day": "Day {{day}}",
+    "daySubtitle": "Fever phase  -  counted in Asia/Colombo",
+    "startButton": "Start tracking"
+  },
+  "logging": {
+    "savedTitle": "Saved",
+    "drinkUpdated": "Drink entry updated.",
+    "urineUpdated": "Urine entry updated.",
+    "ivUpdated": "IV fluid entry updated.",
+    "drinkLogged": "{{amount}} ml of {{kind}} logged.",
+    "drinkLoggedTitle": "Drink logged",
+    "urineLogged": "{{amount}} ml of urine logged.",
+    "urineLoggedTitle": "Urine logged",
+    "ivLogged": "{{amount}} ml IV fluid logged.",
+    "ivLoggedTitle": "IV fluid logged"
+  },
+  "dashboard": {
+    "greeting": "Welcome back!",
+    "heroSubtitle": "Let's stay on top of today's recovery.",
+    "illnessDay": "Illness Day",
+    "fluidBalanceToday": "Fluid Balance Today",
+    "atRisk": "At Risk",
+    "atRiskSubtitle": "Signs of plasma leakage - show your latest report to a doctor now.",
+    "behind": "Behind",
+    "behindSubtitle": "About {{ml}} ml behind - sip {{goal}} ml now to catch up.",
+    "onTrack": "On Track",
+    "onTrackSubtitle": "Nice work - you're keeping pace with today's goal.",
+    "inOut": "IN {{inMl}} ml  -  OUT {{outMl}} ml",
+    "viewDetails": "View Details",
+    "viewDetailsAria": "What counts toward fluid balance?",
+    "quickActions": "Quick Actions",
+    "logDrink": "Log Drink",
+    "logUrine": "Log Urine",
+    "logTemp": "Log Temp",
+    "safetyCheck": "Safety Check",
+    "checkWarningSigns": "Check Warning Signs",
+    "checkWarningSignsSubtitle": "Spot trouble early - a quick daily check.",
+    "temperature": "Temperature",
+    "lastReadingHoursAgo": "Last reading {{count}}h ago",
+    "lastReadingMinutesAgo": "Last reading {{count}}m ago",
+    "noReadingsYet": "No readings yet",
+    "noReadingsSubtitle": "Log your temperature from the Temp tab to see your fever curve here.",
+    "criticalPhaseAlert": "Critical Phase Alert",
+    "criticalPhaseBody": "You're in the critical phase (days 3-7), when dengue can turn serious even as the fever settles. Watch closely for warning signs like severe abdominal pain or vomiting.",
+    "noReportsYet": "No blood reports yet",
+    "noReportsSubtitle": "Add a platelet and haematocrit report from the Reports tab to track the trend here.",
+    "quickInfo": "Quick info",
+    "lastTemperature": "Last temperature",
+    "lastUrinePassed": "Last urine passed",
+    "noEntryYet": "No entry yet",
+    "latestPlatelets": "Latest platelets",
+    "latestHaematocrit": "Latest haematocrit",
+    "hourlyReminder": "Hourly reminder",
+    "everyHour": "Every hour  -  {{ml}} ml",
+    "footerNote": "These targets are a general guide based on your weight, from national dengue home-care advice. Your doctor may set different amounts, and their instructions come first.",
+    "logDrinkTitle": "Log a drink",
+    "logUrineTitle": "Log urine"
+  },
+  "fluidsScreen": {
+    "thisHour": "This hour",
+    "goalMet": "Goal met",
+    "fluidBalanceByHour": "Fluid balance by hour",
+    "viewTodayEntriesAria": "View today's entries",
+    "drink": "Drink",
+    "urine": "Urine",
+    "ivFluid": "IV Fluid",
+    "editDrink": "Edit a drink",
+    "editUrine": "Edit urine",
+    "logDrink": "Log a drink",
+    "logUrine": "Log urine",
+    "deleteDrinkTitle": "Delete this drink entry?",
+    "deleteEntryMsg": "This will remove it from today's fluid balance. This can't be undone.",
+    "deleteDrinkSuccess": "The drink entry has been removed.",
+    "deleteUrineTitle": "Delete this urine entry?",
+    "deleteUrineSuccess": "The urine entry has been removed.",
+    "deleteIvTitle": "Delete this IV fluid entry?",
+    "deleteIvSuccess": "The IV fluid entry has been removed.",
+    "noFluidsLogged": "No fluids logged",
+    "noFluidsLoggedSubtitle": "Nothing was logged on this day.",
+    "hourlyGoalLegend": "Hourly goal, {{ml}} ml"
+  },
+  "dayEntriesModal": {
+    "title": "Today's entries",
+    "noDrinks": "No drinks logged today yet.",
+    "noUrine": "No urine passes logged today yet.",
+    "drinksTab": "Drinks",
+    "urineTab": "Urine",
+    "ivTab": "IV Fluid"
+  },
+  "drinkLegendModal": {
+    "title": "Ring colours",
+    "subtitle": "What each colour on the balance ring means.",
+    "urinePassed": "Urine passed",
+    "ivFluid": "IV fluid"
+  },
+  "amountEntryModal": {
+    "amountLabel": "Amount (ml)"
+  },
+  "confirmModal": {
+    "yesDelete": "Yes, delete",
+    "noKeepIt": "No, keep it"
+  },
+  "reminders": {
+    "expoGoTitle": "Not available in Expo Go",
+    "expoGoMsg": "Hourly hydration reminders need a development build — they are not supported inside Expo Go.",
+    "disabledTitle": "Notifications disabled",
+    "disabledMsg": "Turn on notifications for DenguCare in your device settings to get hourly hydration reminders.",
+    "channelName": "Hourly hydration reminders",
+    "notificationTitle": "Time to hydrate",
+    "notificationBody": "Sip {{ml}} ml now to stay on track this hour."
+  },
+  "settingsMenu": {
+    "viewProfile": "View Profile",
+    "viewProfileAria": "View profile",
+    "hourlyReminders": "Hourly reminders",
+    "hourlyRemindersAria": "Toggle hourly hydration reminders",
+    "on": "On",
+    "off": "Off",
+    "careModeAria": "Toggle admitted-to-ward mode",
+    "switchToAdmittedTitle": "Switch to Admitted to Ward Mode?",
+    "switchToHomeTitle": "Switch to Home Care Mode?",
+    "switchToAdmittedMsg": "This adds IV fluid tracking to your fluid balance for while you are in hospital.",
+    "switchToHomeMsg": "This turns off IV fluid tracking and goes back to oral-intake-only fluid balance.",
+    "switchButton": "Switch"
+  },
+  "profileModal": {
+    "editProfile": "Edit Profile",
+    "myProfile": "My Profile",
+    "closeAria": "Close",
+    "dob": "Date of birth",
+    "age": "Age",
+    "weight": "Weight",
+    "height": "Height",
+    "medicalHistory": "Medical history",
+    "updateProfile": "Update Profile",
+    "fullName": "Full name",
+    "fullNamePlaceholder": "e.g. Jane Doe",
+    "sexAtBirth": "Sex at birth",
+    "weightLabel": "Weight (kg)",
+    "heightLabel": "Height (cm)"
+  },
+  "tempScreen": {
+    "headerTitle": "Track the fever,\nand the fall",
+    "headerSubtitle": "The dangerous phase usually starts as the fever comes down. That is why the falling line matters as much as the high one.",
+    "doseLabel": "Dose to log (mg)",
+    "doseHint": "System suggestion: {{mg}} mg, based on weight, age and health conditions. You can adjust it before logging.",
+    "useSuggestedDose": "Use suggested dose",
+    "doseLoggedMsg": "{{mg}} mg of paracetamol logged.",
+    "doseLoggedTitle": "Dose logged",
+    "feverCurve": "Fever curve",
+    "editReading": "Edit reading",
+    "addReading": "Add a reading",
+    "temperatureLabel": "Temperature ( C)",
+    "saveReading": "Save reading",
+    "history": "History",
+    "noReadingsYet": "No readings yet.",
+    "readingRow": "{{time}}  -  Day {{day}}",
+    "deleteReadingTitle": "Delete this reading?",
+    "deleteReadingMsg": "This temperature reading will be removed from your fever curve. This can't be undone.",
+    "deleteReadingSuccess": "The temperature reading has been removed.",
+    "readingUpdated": "Temperature reading updated.",
+    "readingSaved": "Temperature reading saved.",
+    "note": "Use paracetamol only for fever. Do not take ibuprofen, diclofenac, mefenamic acid, or aspirin - they raise the risk of bleeding in dengue.",
+    "dailyToggle": "Daily",
+    "hourlyToggle": "Hourly",
+    "dailyModeCaption": "Shaded band: days {{start}}-{{end}}. Dashed line: {{temp}}  C, where fever is counted as settled.",
+    "hourlyModeCaption": "Scroll to see every hour. Dashed line: {{temp}}  C, where fever is counted as settled.",
+    "methods": {
+      "mouth": "Mouth",
+      "armpit": "Armpit",
+      "ear": "Ear",
+      "forehead": "Forehead"
+    }
+  },
+  "reportsScreen": {
+    "headerTitle": "Photograph it. Type it in.",
+    "headerSubtitle": "Take a picture of your full blood count for your own record, then type the numbers in.",
+    "takePhoto": "Take photo",
+    "chooseFile": "Choose file",
+    "enterManually": "Enter values manually",
+    "photoBannerNote": "Photos stay attached to each report, so you can compare the original lab sheet with the numbers you typed in.",
+    "editReport": "Edit report",
+    "newReport": "New report",
+    "plateletLabel": "Platelet count (x10^3/uL)",
+    "plateletPlaceholder": "e.g. 145",
+    "haematocritLabel": "Haematocrit (%)",
+    "haematocritPlaceholder": "e.g. 42",
+    "wbcLabel": "WBC count (x10^3/uL) (optional)",
+    "wbcPlaceholder": "e.g. 4.2",
+    "saveReport": "Save report",
+    "noReportsYet": "No reports yet",
+    "noReportsSubtitle": "Add your first blood report above - by photo or typed in - and we'll show your platelet and haematocrit trends here.",
+    "editReportAria": "Edit report",
+    "plateletsValue": "Platelets {{value}}",
+    "plateletsDash": "Platelets -",
+    "hctValue": "HCT {{value}}%",
+    "hctDash": "HCT -",
+    "deleteReportTitle": "Delete this report?",
+    "deleteReportMsg": "This blood report will be removed from your platelet and haematocrit trends. This can't be undone.",
+    "deleteReportSuccess": "The blood report has been removed.",
+    "reportUpdated": "Blood report updated.",
+    "reportSaved": "Blood report saved."
+  },
+  "guidelines": {
+    "button": "Dengue Prevention & Care Guide",
+    "screenTitle": "Dengue Guide",
+    "screenSubtitle": "Prevention, symptoms, and care - all in one place.",
+    "disclaimer": "This guide is general public-health information, not medical advice. Always follow your doctor's instructions.",
+    "mosquito": {
+      "title": "The Aedes Mosquito",
+      "intro": "Knowing the mosquito that spreads dengue is the first step to avoiding it.",
+      "bullets": [
+        "The Aedes mosquito usually bites during the day - especially in the early morning and late afternoon - not just at night.",
+        "It has distinctive black-and-white stripes on its body and legs.",
+        "It breeds in small amounts of clean, still water - buckets, flower pots, gutters, discarded tyres, and water-storage containers.",
+        "Eggs can hatch in water that has been sitting for less than a week, so containers need emptying or covering often.",
+        "It doesn't travel far from where it hatches, so one infected home is often the source for the whole street."
+      ]
+    },
+    "prevention": {
+      "title": "Preventing Dengue",
+      "intro": "Protect yourself and stop the mosquito from breeding around you.",
+      "bullets": [
+        "Use mosquito repellent on exposed skin, especially during the day.",
+        "Wear long sleeves and long trousers where practical, especially at dawn and dusk.",
+        "Fit mosquito nets or screens on windows, doors, and beds.",
+        "Use a mosquito coil or plug-in repellent indoors, especially in shaded rooms.",
+        "Empty, scrub, or cover anything that can hold still water around your home at least once a week.",
+        "Support fogging and inspection visits from your local health authority."
+      ]
+    },
+    "symptoms": {
+      "title": "Recognizing Symptoms",
+      "intro": "Dengue symptoms usually start 4-10 days after being bitten.",
+      "bullets": [
+        "Sudden high fever, often 39-40°C.",
+        "Severe headache and pain behind the eyes.",
+        "Muscle, joint, and bone pain - sometimes called \"breakbone fever\".",
+        "Nausea, vomiting, and loss of appetite.",
+        "A skin rash that can appear a few days after the fever starts.",
+        "Mild bleeding - nosebleeds, bleeding gums, or easy bruising."
+      ]
+    },
+    "careSteps": {
+      "title": "If You Suspect Dengue",
+      "intro": "What to do from the very first day of fever.",
+      "bullets": [
+        "See a doctor promptly for a blood test to confirm the diagnosis.",
+        "Rest as much as possible and avoid strenuous activity.",
+        "Drink plenty of fluids to prevent dehydration - track your intake in the Fluids tab.",
+        "Use paracetamol only for fever and pain. Never take aspirin, ibuprofen, diclofenac, or other NSAIDs - they raise the risk of bleeding.",
+        "Log your temperature and symptoms daily in this app so changes are easy to spot.",
+        "Watch closely for warning signs, especially from day 3 onward as the fever starts to settle."
+      ]
+    },
+    "diet": {
+      "title": "Food & Drinks Guide",
+      "intro": "What to eat and drink - and what to avoid - while recovering.",
+      "preferTitle": "Prefer",
+      "preferBullets": [
+        "Water, ORS/Jeevani, king coconut water, and clear soups to stay hydrated.",
+        "Soft, easy-to-digest foods - porridge, rice with soup, mashed vegetables.",
+        "Fruits rich in vitamin C, such as oranges and papaya, to support recovery."
+      ],
+      "avoidTitle": "Avoid",
+      "avoidBullets": [
+        "Dark or red-coloured drinks - beetroot, blackcurrant, and grape juice can look like blood if you vomit or pass blood.",
+        "Alcohol and caffeinated drinks - both can worsen dehydration.",
+        "Oily, spicy, or fried food, which can be harder to digest while unwell.",
+        "Aspirin, ibuprofen, diclofenac, mefenamic acid, and other NSAIDs - paracetamol only."
+      ]
+    },
+    "warningSigns": {
+      "title": "Emergency Warning Signs",
+      "intro": "If you or someone you're caring for has any of these signs, go to a hospital immediately - do not wait.",
+      "checklistButton": "Open the warning-sign checklist"
+    },
+    "community": {
+      "title": "Community Prevention",
+      "intro": "Dengue control works best as a shared effort.",
+      "bullets": [
+        "Empty, scrub, cover, or dispose of containers that collect water at least once a week.",
+        "Get rid of unused tyres, bottles, cans, and other rubbish that can collect rainwater.",
+        "Clean roof gutters and drains so water can't pool.",
+        "Cover water-storage tanks and barrels tightly.",
+        "Report mosquito breeding sites in your area to your local health authority."
+      ]
+    }
+  },
+  "safetyScreen": {
+    "criticalWarningSigns": "Critical Warning Signs",
+    "introBody": "Tick anything you have — do not wait to see if it passes. If you or the patient experience any of these symptoms, seek immediate medical attention.",
+    "goToHospitalBanner": "Go to a hospital now. Do not wait to see if it passes - bring this record with you.",
+    "callEmergency": "Call Emergency",
+    "emergencyNumbers": "Emergency numbers",
+    "emergency": {
+      "suwaSeriya": "Suwa Seriya ambulance",
+      "dengueHotline": "Dengue and health hotline",
+      "govInfoCentre": "Government Information Centre"
+    },
+    "startNewRecord": "Start New Illness Record",
+    "confirmNewRecordTitle": "Start a new illness record?",
+    "confirmNewRecordMsg": "This clears today's fluid, temperature and warning-sign entries and asks when the new fever started. Your profile stays saved.",
+    "startNewRecordBtn": "Start new record",
+    "finalNote": "Prototype only. Not a registered medical device. Every number, threshold, and message here must be reviewed and approved by a clinical panel, and the app registered with the relevant regulator, before any patient uses it."
   }
 }

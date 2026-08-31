@@ -1,4 +1,5 @@
 import React, { useCallback, useRef, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 
 import { ConfirmModal } from '../components/ConfirmModal';
 import { SuccessModal } from '../components/SuccessModal';
@@ -12,12 +13,13 @@ interface Options {
 /** Wraps any destructive action behind a "Yes / No" warning modal, then shows
  * a brief animated success confirmation once the action actually runs. */
 export function useDeleteConfirmation() {
+  const { t } = useTranslation();
   const [confirmVisible, setConfirmVisible] = useState(false);
   const [successVisible, setSuccessVisible] = useState(false);
   const [copy, setCopy] = useState<Required<Options>>({
-    title: 'Delete this entry?',
-    message: "This will remove it from your record. This can't be undone.",
-    successMessage: 'The entry has been removed.',
+    title: t('common.deleteEntryTitle'),
+    message: t('common.deleteEntryMsg'),
+    successMessage: t('common.deleteEntrySuccess'),
   });
   const pendingAction = useRef<(() => void) | null>(null);
 

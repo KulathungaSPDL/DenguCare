@@ -1,6 +1,7 @@
 import React, { useEffect, useRef } from 'react';
 import { Animated, Modal, Pressable, StyleSheet, Text, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { useTranslation } from 'react-i18next';
 
 import { colors } from '../theme/colors';
 import { radius, spacing } from '../theme/spacing';
@@ -16,7 +17,9 @@ interface Props {
 
 /** Brief self-dismissing confirmation with a bouncing checkmark and an
  * expanding "ping" ring, used after a destructive action completes. */
-export function SuccessModal({ visible, title = 'Deleted', message, onDone, autoDismissMs = 1300 }: Props) {
+export function SuccessModal({ visible, title, message, onDone, autoDismissMs = 1300 }: Props) {
+  const { t } = useTranslation();
+  const resolvedTitle = title ?? t('common.deleted');
   const scale = useRef(new Animated.Value(0.6)).current;
   const opacity = useRef(new Animated.Value(0)).current;
   const ring = useRef(new Animated.Value(0)).current;
@@ -50,7 +53,7 @@ export function SuccessModal({ visible, title = 'Deleted', message, onDone, auto
               <Ionicons name="checkmark" size={30} color={colors.success} />
             </View>
           </View>
-          <Text style={styles.title}>{title}</Text>
+          <Text style={styles.title}>{resolvedTitle}</Text>
           <Text style={styles.message}>{message}</Text>
         </Animated.View>
       </View>

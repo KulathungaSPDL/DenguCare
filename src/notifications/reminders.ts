@@ -36,13 +36,13 @@ export function isReminderSupported(): boolean {
   return !isExpoGo;
 }
 
-export async function requestReminderPermissionAsync(): Promise<boolean> {
+export async function requestReminderPermissionAsync(channelName: string): Promise<boolean> {
   const Notifications = await loadNotifications();
   if (!Notifications) return false;
 
   if (Platform.OS === 'android') {
     await Notifications.setNotificationChannelAsync(ANDROID_CHANNEL_ID, {
-      name: 'Hourly hydration reminders',
+      name: channelName,
       importance: Notifications.AndroidImportance.DEFAULT,
     });
   }
@@ -54,17 +54,14 @@ export async function requestReminderPermissionAsync(): Promise<boolean> {
   return requested.granted;
 }
 
-export async function scheduleHourlyReminder(hourlyGoalMl: number): Promise<void> {
+export async function scheduleHourlyReminder(title: string, body: string): Promise<void> {
   const Notifications = await loadNotifications();
   if (!Notifications) return;
 
   await Notifications.cancelScheduledNotificationAsync(HOURLY_REMINDER_ID).catch(() => {});
   await Notifications.scheduleNotificationAsync({
     identifier: HOURLY_REMINDER_ID,
-    content: {
-      title: 'Time to hydrate',
-      body: `Sip ${hourlyGoalMl} ml now to stay on track this hour.`,
-    },
+    content: { title, body },
     trigger: {
       type: Notifications.SchedulableTriggerInputTypes.TIME_INTERVAL,
       seconds: 3600,

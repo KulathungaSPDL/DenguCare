@@ -64,9 +64,9 @@ export function DayEntriesModal({
   }, [visible, scale, opacity]);
 
   const options: { value: EntryTab; label: string }[] = [
-    { value: 'drinks', label: 'Drinks' },
-    { value: 'urine', label: 'Urine' },
-    ...(showIv ? [{ value: 'iv' as const, label: 'IV Fluid' }] : []),
+    { value: 'drinks', label: t('dayEntriesModal.drinksTab') },
+    { value: 'urine', label: t('dayEntriesModal.urineTab') },
+    ...(showIv ? [{ value: 'iv' as const, label: t('dayEntriesModal.ivTab') }] : []),
   ];
 
   return (
@@ -75,7 +75,7 @@ export function DayEntriesModal({
         <Pressable style={StyleSheet.absoluteFill} onPress={onClose} />
         <Animated.View style={[styles.card, { opacity, transform: [{ scale }] }]}>
           <View style={styles.headerRow}>
-            <Text style={styles.title}>Today&apos;s entries</Text>
+            <Text style={styles.title}>{t('dayEntriesModal.title')}</Text>
             <Pressable onPress={onClose} hitSlop={12}>
               <Ionicons name="close" size={22} color={colors.textSecondary} />
             </Pressable>
@@ -87,7 +87,7 @@ export function DayEntriesModal({
           <ScrollView style={styles.list} showsVerticalScrollIndicator={false}>
             {tab === 'drinks' &&
               (drinks.length === 0 ? (
-                <Text style={styles.empty}>No drinks logged today yet.</Text>
+                <Text style={styles.empty}>{t('dayEntriesModal.noDrinks')}</Text>
               ) : (
                 drinks.map((d, i) => (
                   <React.Fragment key={d.id}>
@@ -95,7 +95,7 @@ export function DayEntriesModal({
                     <EntryListItem
                       icon="water-outline"
                       iconColor={drinkKindColor(d.kind)}
-                      title={d.label}
+                      title={t(`drinkKinds.${d.kind}`)}
                       time={formatTime24(new Date(d.atISO))}
                       valueLabel={`${d.amountMl} ml`}
                       onPress={() => onEditDrink(d)}
@@ -107,7 +107,7 @@ export function DayEntriesModal({
 
             {tab === 'urine' &&
               (urine.length === 0 ? (
-                <Text style={styles.empty}>No urine passes logged today yet.</Text>
+                <Text style={styles.empty}>{t('dayEntriesModal.noUrine')}</Text>
               ) : (
                 urine.map((u, i) => (
                   <React.Fragment key={u.id}>
@@ -115,7 +115,7 @@ export function DayEntriesModal({
                     <EntryListItem
                       icon="flask-outline"
                       iconColor={colors.urineOut}
-                      title="Urine"
+                      title={t('dayEntriesModal.urineTab')}
                       time={formatTime24(new Date(u.atISO))}
                       valueLabel={`${u.amountMl} ml`}
                       onPress={() => onEditUrine(u)}

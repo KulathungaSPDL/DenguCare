@@ -4,6 +4,7 @@ import React, { useEffect, useRef } from 'react';
 import { Animated, Image, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Svg, { Circle } from 'react-native-svg';
+import { useTranslation } from 'react-i18next';
 
 import { CareBadge } from './CareBadge';
 import { PrimaryButton } from './Buttons';
@@ -21,6 +22,7 @@ interface WelcomeContentProps {
 // A warm teal gradient hero with the care-badge mark, a real close-up of the
 // Aedes mosquito that makes the app necessary, and the CTA doing the rest.
 export function WelcomeContent({ onContinue }: WelcomeContentProps) {
+  const { t } = useTranslation();
   const fade = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
@@ -42,20 +44,21 @@ export function WelcomeContent({ onContinue }: WelcomeContentProps) {
           <CareBadge size={112} />
 
           <Text style={styles.brand}>DenguCare</Text>
-          <Text style={styles.tagline}>Stay informed. Stay protected.</Text>
+          <Text style={styles.tagline}>{t('welcome.tagline')}</Text>
 
           <View style={styles.factCard}>
             <View style={styles.photoRing}>
               <Image source={require('../../assets/welcome-mosquito.jpg')} style={styles.photo} />
             </View>
             <Text style={styles.factText}>
-              The <Text style={styles.factHighlight}>Aedes mosquito</Text> spreads dengue to millions every year.
-              DenguCare helps you track symptoms and hydration so you can respond fast.
+              {t('welcome.factPrefix')}
+              <Text style={styles.factHighlight}>{t('welcome.factHighlight')}</Text>
+              {t('welcome.factSuffix')}
             </Text>
           </View>
         </Animated.View>
 
-        <PrimaryButton label="Get Started" icon="chevron-forward" onPress={onContinue} style={styles.button} />
+        <PrimaryButton label={t('welcome.getStarted')} icon="chevron-forward" onPress={onContinue} style={styles.button} />
       </SafeAreaView>
     </View>
   );

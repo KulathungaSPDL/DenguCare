@@ -1,6 +1,7 @@
 import React, { useEffect, useRef } from 'react';
 import { Animated, Modal, Pressable, StyleSheet, Text, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { useTranslation } from 'react-i18next';
 
 import { DangerButton, OutlineButton } from './Buttons';
 import { colors } from '../theme/colors';
@@ -23,11 +24,14 @@ export function ConfirmModal({
   visible,
   title,
   message,
-  confirmLabel = 'Yes, delete',
-  cancelLabel = 'No, keep it',
+  confirmLabel,
+  cancelLabel,
   onConfirm,
   onCancel,
 }: Props) {
+  const { t } = useTranslation();
+  const resolvedConfirmLabel = confirmLabel ?? t('confirmModal.yesDelete');
+  const resolvedCancelLabel = cancelLabel ?? t('confirmModal.noKeepIt');
   const scale = useRef(new Animated.Value(0.85)).current;
   const opacity = useRef(new Animated.Value(0)).current;
   const wiggle = useRef(new Animated.Value(0)).current;
@@ -69,9 +73,9 @@ export function ConfirmModal({
           <Text style={styles.title}>{title}</Text>
           <Text style={styles.message}>{message}</Text>
           <View style={styles.actions}>
-            <OutlineButton label={cancelLabel} onPress={onCancel} style={{ flex: 1 }} />
+            <OutlineButton label={resolvedCancelLabel} onPress={onCancel} style={{ flex: 1 }} />
             <View style={{ width: spacing.md }} />
-            <DangerButton label={confirmLabel} onPress={onConfirm} style={{ flex: 1 }} />
+            <DangerButton label={resolvedConfirmLabel} onPress={onConfirm} style={{ flex: 1 }} />
           </View>
         </Animated.View>
       </View>

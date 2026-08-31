@@ -3,6 +3,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import React, { useEffect, useRef } from 'react';
 import { Animated, Pressable, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useTranslation } from 'react-i18next';
 
 import { colors } from '../theme/colors';
 import { gradients } from '../theme/gradients';
@@ -17,12 +18,12 @@ const ICONS: Record<string, keyof typeof Ionicons.glyphMap> = {
   safety: 'book-outline',
 };
 
-const LABELS: Record<string, string> = {
-  index: 'Dashboard',
-  fluids: 'Fluids',
-  temp: 'History',
-  reports: 'Report',
-  safety: 'Safety',
+const LABEL_KEYS: Record<string, string> = {
+  index: 'bottomNav.dashboard',
+  fluids: 'bottomNav.fluids',
+  temp: 'bottomNav.history',
+  reports: 'bottomNav.report',
+  safety: 'bottomNav.safety',
 };
 
 interface TabBarProps {
@@ -34,6 +35,7 @@ interface TabBarProps {
 }
 
 export function BottomNav({ state, navigation }: TabBarProps) {
+  const { t } = useTranslation();
   const insets = useSafeAreaInsets();
 
   return (
@@ -53,7 +55,7 @@ export function BottomNav({ state, navigation }: TabBarProps) {
               onPress={onPress}
               isFocused={isFocused}
               iconName={ICONS[route.name] ?? 'ellipse-outline'}
-              label={LABELS[route.name] ?? route.name}
+              label={LABEL_KEYS[route.name] ? t(LABEL_KEYS[route.name]) : route.name}
             />
           );
         })}

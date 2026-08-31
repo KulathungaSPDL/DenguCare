@@ -16,7 +16,6 @@ import { EmptyState } from '../../src/components/EmptyState';
 import { FbcTrendChart } from '../../src/components/FbcTrendChart';
 import { FeverCurveChart } from '../../src/components/FeverCurveChart';
 import { InfoDivider, InfoRow } from '../../src/components/InfoRow';
-import { Mascot } from '../../src/components/Mascot';
 import { Note } from '../../src/components/Note';
 import { Screen } from '../../src/components/Screen';
 import { useNow } from '../../src/hooks/useNow';
@@ -31,7 +30,7 @@ import {
   minutesAgo,
 } from '../../src/state/dateUtils';
 import { DRINK_KINDS } from '../../src/state/drinkKinds';
-import { phaseLabel } from '../../src/state/phase';
+import { isCriticalPhase, phaseLabel } from '../../src/state/phase';
 import { filterByDateKey, useFluidSummary, usePlasmaLeakageAlert, useTodayEntries } from '../../src/state/selectors';
 import { useStore } from '../../src/state/store';
 import { colors } from '../../src/theme/colors';
@@ -65,7 +64,7 @@ export default function DashboardScreen() {
 
   const illness = state.illness!;
   const currentDay = illnessDayNumber(illness.feverStartISO, now);
-  const currentPhase = phaseLabel(currentDay);
+  const currentPhase = t(phaseLabel(currentDay));
   const { inMl, outMl, targets, behindMl } = useFluidSummary(state, now);
   const { drinks } = useTodayEntries(state, now);
   const { atRisk, latestReport } = usePlasmaLeakageAlert(state.reports);
@@ -81,41 +80,41 @@ export default function DashboardScreen() {
   const lastTemp = state.temps[0];
   const lastUrine = state.urine[0];
 
-  const isCritical = currentPhase === 'Critical phase';
+  const isCritical = isCriticalPhase(currentDay);
 
   const fluidStatus = atRisk
-    ? { word: 'At Risk', color: '#FF8A75', subtitle: 'Signs of plasma leakage - show your latest report to a doctor now.' }
+    ? { word: t('dashboard.atRisk'), color: '#FF8A75', subtitle: t('dashboard.atRiskSubtitle') }
     : behindMl > 0
       ? {
-          word: 'Behind',
+          word: t('dashboard.behind'),
           color: '#F5C453',
-          subtitle: `About ${behindMl} ml behind - sip ${targets.hourlyGoalMl} ml now to catch up.`,
+          subtitle: t('dashboard.behindSubtitle', { ml: behindMl, goal: targets.hourlyGoalMl }),
         }
-      : { word: 'On Track', color: '#6EE7B7', subtitle: "Nice work - you're keeping pace with today's goal." };
+      : { word: t('dashboard.onTrack'), color: '#6EE7B7', subtitle: t('dashboard.onTrackSubtitle') };
   const gaugePercent = targets.dailyFluidMl > 0 ? intakeMl / targets.dailyFluidMl : 0;
 
   function saveDrink(amountMl: number, kind: string | undefined, atISO: string) {
     const kindDef = DRINK_KINDS.find((k) => k.key === kind) ?? DRINK_KINDS[0];
-    actions.addDrink(amountMl, kindDef.key, kindDef.label, atISO);
+    actions.addDrink(amountMl, kindDef.key, t(kindDef.label), atISO);
     setDrinkModal(false);
-    showSuccess(`${amountMl} ml of ${kindDef.label.toLowerCase()} logged.`, 'Drink logged');
+    showSuccess(t('logging.drinkLogged', { amount: amountMl, kind: t(kindDef.label).toLowerCase() }), t('logging.drinkLoggedTitle'));
   }
 
   function saveUrine(amountMl: number, _kind: string | undefined, atISO: string) {
     actions.addUrine(amountMl, atISO);
     setUrineModal(false);
-    showSuccess(`${amountMl} ml of urine logged.`, 'Urine logged');
+    showSuccess(t('logging.urineLogged', { amount: amountMl }), t('logging.urineLoggedTitle'));
   }
 
   return (
     <Screen>
       <DashboardHero
-        subtitle="Let's stay on top of today's recovery."
+        subtitle={t('dashboard.heroSubtitle')}
         needsAttention={atRisk || behindMl > 0}
       />
 
       <View style={styles.sectionHeader}>
-        <Text style={styles.pageTitle}>Illness Day</Text>
+        <Text style={styles.pageTitle}>{t('dashboard.illnessDay')}</Text>
         <View style={styles.sectionUnderline} />
         <Text style={styles.pageSubtitle}>
           {formatWeekdayDate(now)}  -  {currentPhase}
@@ -138,20 +137,18 @@ export default function DashboardScreen() {
           <View style={styles.gaugeCardLeft}>
             <View style={styles.gaugeKickerRow}>
               <Ionicons name="shield-checkmark" size={15} color="rgba(255,255,255,0.85)" />
-              <Text style={styles.gaugeKicker}>Fluid Balance Today</Text>
+              <Text style={styles.gaugeKicker}>{t('dashboard.fluidBalanceToday')}</Text>
             </View>
             <Text style={[styles.gaugeStatusWord, { color: fluidStatus.color }]}>{fluidStatus.word}</Text>
             <Text style={styles.gaugeSubtitle}>{fluidStatus.subtitle}</Text>
-            <Text style={styles.gaugeStats}>
-              IN {intakeMl} ml  -  OUT {outMl} ml
-            </Text>
+            <Text style={styles.gaugeStats}>{t('dashboard.inOut', { inMl: intakeMl, outMl })}</Text>
             <Pressable
               onPress={() => setLegendVisible(true)}
               style={styles.gaugeLinkRow}
               accessibilityRole="button"
-              accessibilityLabel="What counts toward fluid balance?"
+              accessibilityLabel={t('dashboard.viewDetailsAria')}
             >
-              <Text style={styles.gaugeLinkText}>View Details</Text>
+              <Text style={styles.gaugeLinkText}>{t('dashboard.viewDetails')}</Text>
               <Ionicons name="arrow-forward" size={13} color="#FFFFFF" />
             </Pressable>
           </View>
@@ -168,7 +165,7 @@ export default function DashboardScreen() {
         </View>
       </View>
 
-      <Text style={styles.sectionTitle}>Quick Actions</Text>
+      <Text style={styles.sectionTitle}>{t('dashboard.quickActions')}</Text>
       <View style={styles.quickGrid}>
         <Pressable
           onPress={() => setDrinkModal(true)}
@@ -177,7 +174,7 @@ export default function DashboardScreen() {
           <View style={[styles.quickIconCircle, { backgroundColor: colors.surface }]}>
             <Ionicons name="water" size={17} color={colors.primary} />
           </View>
-          <Text style={styles.quickLabel}>Log Drink</Text>
+          <Text style={styles.quickLabel}>{t('dashboard.logDrink')}</Text>
         </Pressable>
         <Pressable
           onPress={() => setUrineModal(true)}
@@ -186,7 +183,7 @@ export default function DashboardScreen() {
           <View style={[styles.quickIconCircle, { backgroundColor: colors.surface }]}>
             <Ionicons name="flask" size={17} color={colors.outputText} />
           </View>
-          <Text style={styles.quickLabel}>Log Urine</Text>
+          <Text style={styles.quickLabel}>{t('dashboard.logUrine')}</Text>
         </Pressable>
         <Pressable
           onPress={() => router.push('/(tabs)/temp')}
@@ -195,16 +192,16 @@ export default function DashboardScreen() {
           <View style={[styles.quickIconCircle, { backgroundColor: colors.surface }]}>
             <Ionicons name="thermometer" size={17} color={colors.accentPurple} />
           </View>
-          <Text style={styles.quickLabel}>Log Temp</Text>
+          <Text style={styles.quickLabel}>{t('dashboard.logTemp')}</Text>
         </Pressable>
         <Pressable
-          onPress={() => router.push('/(tabs)/safety')}
-          style={({ pressed }) => [styles.quickCard, { backgroundColor: colors.dangerSoft }, pressed && styles.actionCardPressed]}
+          onPress={() => router.push('/guidelines')}
+          style={({ pressed }) => [styles.quickCard, { backgroundColor: colors.accentBlueSoft }, pressed && styles.actionCardPressed]}
         >
           <View style={[styles.quickIconCircle, { backgroundColor: colors.surface }]}>
-            <Ionicons name="shield-checkmark" size={17} color={colors.danger} />
+            <Ionicons name="book" size={17} color={colors.accentBlue} />
           </View>
-          <Text style={styles.quickLabel}>Safety Check</Text>
+          <Text style={styles.quickLabel}>{t('guidelines.screenTitle')}</Text>
         </Pressable>
       </View>
 
@@ -218,8 +215,8 @@ export default function DashboardScreen() {
           </Animated.View>
         </View>
         <View style={{ flex: 1, marginLeft: spacing.md }}>
-          <Text style={styles.tipTitle}>Check Warning Signs</Text>
-          <Text style={styles.tipSubtitle}>Spot trouble early - a quick daily check.</Text>
+          <Text style={styles.tipTitle}>{t('dashboard.checkWarningSigns')}</Text>
+          <Text style={styles.tipSubtitle}>{t('dashboard.checkWarningSignsSubtitle')}</Text>
         </View>
         <Ionicons name="chevron-forward" size={20} color={colors.textSecondary} />
       </Pressable>
@@ -227,13 +224,13 @@ export default function DashboardScreen() {
       <Card style={{ marginTop: spacing.lg }}>
         <View style={styles.cardHeaderRow}>
           <View>
-            <Text style={styles.cardTitle}>Temperature</Text>
+            <Text style={styles.cardTitle}>{t('dashboard.temperature')}</Text>
             <Text style={styles.cardSubtitle}>
               {lastTemp
                 ? hoursAgo(lastTemp.atISO, now) > 0
-                  ? `Last reading ${hoursAgo(lastTemp.atISO, now)}h ago`
-                  : `Last reading ${minutesAgo(lastTemp.atISO, now)}m ago`
-                : 'No readings yet'}
+                  ? t('dashboard.lastReadingHoursAgo', { count: hoursAgo(lastTemp.atISO, now) })
+                  : t('dashboard.lastReadingMinutesAgo', { count: minutesAgo(lastTemp.atISO, now) })
+                : t('dashboard.noReadingsYet')}
             </Text>
           </View>
           {lastTemp ? (
@@ -255,8 +252,8 @@ export default function DashboardScreen() {
         ) : (
           <EmptyState
             icon="thermometer-outline"
-            title="No readings yet"
-            subtitle="Log your temperature from the Temp tab to see your fever curve here."
+            title={t('dashboard.noReadingsYet')}
+            subtitle={t('dashboard.noReadingsSubtitle')}
           />
         )}
       </Card>
@@ -264,15 +261,13 @@ export default function DashboardScreen() {
       {isCritical ? (
         <Card style={{ marginTop: spacing.lg, backgroundColor: colors.dangerSoft, borderWidth: 1, borderColor: colors.borderDanger }}>
           <View style={styles.alertHeaderRow}>
-            <View style={styles.alertMascotWrap}>
-              <Mascot mood="concerned" size={40} animated={false} />
+            <View style={styles.alertIconWrap}>
+              <Ionicons name="warning" size={22} color={colors.danger} />
             </View>
-            <Text style={styles.alertTitle}>Critical Phase Alert</Text>
+            <Text style={styles.alertTitle}>{t('dashboard.criticalPhaseAlert')}</Text>
           </View>
           <Text style={styles.alertBody}>
-            {atRisk
-              ? t('fbc.plasmaLeakageBanner')
-              : `You're in the critical phase (days 3-7), when dengue can turn serious even as the fever settles. Watch closely for warning signs like severe abdominal pain or vomiting.`}
+            {atRisk ? t('fbc.plasmaLeakageBanner') : t('dashboard.criticalPhaseBody')}
           </Text>
         </Card>
       ) : null}
@@ -285,67 +280,64 @@ export default function DashboardScreen() {
             <Text style={styles.cardKicker}>{t('fbc.chartTitle')}</Text>
             <EmptyState
               icon="analytics-outline"
-              title="No blood reports yet"
-              subtitle="Add a platelet and haematocrit report from the Reports tab to track the trend here."
+              title={t('dashboard.noReportsYet')}
+              subtitle={t('dashboard.noReportsSubtitle')}
             />
           </>
         )}
       </Card>
 
       <Card style={{ marginTop: spacing.lg, backgroundColor: colors.surfaceMuted, borderColor: colors.surfaceMutedBorder }}>
-        <Text style={styles.cardKicker}>Quick info</Text>
+        <Text style={styles.cardKicker}>{t('dashboard.quickInfo')}</Text>
         <InfoRow
           icon="thermometer-outline"
-          label="Last temperature"
+          label={t('dashboard.lastTemperature')}
           value={lastTemp ? `${lastTemp.celsius.toFixed(1)}  C  -  ${formatTime24(new Date(lastTemp.atISO))}` : '-'}
           valueColor={lastTemp && lastTemp.celsius >= 38 ? colors.danger : undefined}
         />
         <InfoDivider />
         <InfoRow
           icon="flask-outline"
-          label="Last urine passed"
+          label={t('dashboard.lastUrinePassed')}
           value={
             lastUrine
               ? hoursAgo(lastUrine.atISO, now) > 0
-                ? `${hoursAgo(lastUrine.atISO, now)}h ago`
-                : `${minutesAgo(lastUrine.atISO, now)}m ago`
-              : 'No entry yet'
+                ? t('common.hoursAgo', { count: hoursAgo(lastUrine.atISO, now) })
+                : t('common.minutesAgo', { count: minutesAgo(lastUrine.atISO, now) })
+              : t('dashboard.noEntryYet')
           }
         />
         <InfoDivider />
         <InfoRow
           icon="water-outline"
-          label="Latest platelets"
+          label={t('dashboard.latestPlatelets')}
           value={latestReport?.plateletCount != null ? `${latestReport.plateletCount} x10^3/uL` : '-'}
           valueColor={latestReport?.plateletCount != null && latestReport.plateletCount < 100 ? colors.danger : undefined}
         />
         <InfoDivider />
         <InfoRow
           icon="analytics-outline"
-          label="Latest haematocrit"
+          label={t('dashboard.latestHaematocrit')}
           value={latestReport?.haematocritPct != null ? `${latestReport.haematocritPct}%` : '-'}
         />
         <InfoDivider />
-        <InfoRow icon="time-outline" label="Hourly reminder" value={`Every hour  -  ${targets.hourlyGoalMl} ml`} />
+        <InfoRow icon="time-outline" label={t('dashboard.hourlyReminder')} value={t('dashboard.everyHour', { ml: targets.hourlyGoalMl })} />
       </Card>
 
-      <Note>
-        These targets are a general guide based on your weight, from national dengue home-care advice. Your doctor
-        may set different amounts, and their instructions come first.
-      </Note>
+      <Note>{t('dashboard.footerNote')}</Note>
 
       <AmountEntryModal
         visible={drinkModal}
-        title="Log a drink"
+        title={t('dashboard.logDrinkTitle')}
         presets={DRINK_PRESETS}
         accentColor={colors.drinkIn}
-        kindOptions={DRINK_KINDS}
+        kindOptions={DRINK_KINDS.map((k) => ({ key: k.key, label: t(k.label) }))}
         onClose={() => setDrinkModal(false)}
         onSave={saveDrink}
       />
       <AmountEntryModal
         visible={urineModal}
-        title="Log urine"
+        title={t('dashboard.logUrineTitle')}
         presets={URINE_PRESETS}
         accentColor={colors.urineOut}
         onClose={() => setUrineModal(false)}
@@ -575,9 +567,14 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
   },
-  alertMascotWrap: {
+  alertIconWrap: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: colors.surface,
+    alignItems: 'center',
+    justifyContent: 'center',
     marginRight: spacing.md,
-    marginLeft: -6,
   },
   alertTitle: {
     fontFamily: fontFamily.baseBold,

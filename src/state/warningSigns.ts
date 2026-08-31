@@ -1,15 +1,17 @@
 import { WarningSignKey, WARNING_SIGN_KEYS } from './types';
 
+// Values are i18n keys (under the "warningSigns" namespace), not display
+// text — translate them with t(WARNING_SIGN_LABELS[key]) at render time.
 export const WARNING_SIGN_LABELS: Record<WarningSignKey, string> = {
-  abdominal_pain: 'Bad tummy pain or tenderness',
-  persistent_vomiting: 'Vomiting again and again',
-  bleeding: 'Bleeding from gums, nose, gut, or heavy periods',
-  confused_restless: 'Very drowsy, confused, or restless',
-  dizzy_faint: 'Dizzy or faint when standing up',
-  cold_clammy: 'Cold, clammy hands and feet',
-  no_urine_6h: 'Passed no urine for 6 hours or more',
-  breathless_swelling: 'Breathless, or puffy face, legs, or tummy',
-  fever_settled_worse: 'Fever has settled but I feel worse, not better',
+  abdominal_pain: 'warningSigns.abdominal_pain',
+  persistent_vomiting: 'warningSigns.persistent_vomiting',
+  bleeding: 'warningSigns.bleeding',
+  confused_restless: 'warningSigns.confused_restless',
+  dizzy_faint: 'warningSigns.dizzy_faint',
+  cold_clammy: 'warningSigns.cold_clammy',
+  no_urine_6h: 'warningSigns.no_urine_6h',
+  breathless_swelling: 'warningSigns.breathless_swelling',
+  fever_settled_worse: 'warningSigns.fever_settled_worse',
 };
 
 export const ORDERED_WARNING_SIGN_KEYS = WARNING_SIGN_KEYS;

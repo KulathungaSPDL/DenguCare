@@ -1,5 +1,6 @@
 import { useEffect } from 'react';
 import { Alert } from 'react-native';
+import { useTranslation } from 'react-i18next';
 
 import {
   cancelHourlyReminder,
@@ -18,6 +19,7 @@ import { useNow } from './useNow';
  * permission request + scheduling side effects.
  */
 export function useHourlyReminders(): void {
+  const { t } = useTranslation();
   const { state, actions } = useStore();
   const now = useNow();
   const { targets } = useFluidSummary(state, now);
@@ -30,23 +32,20 @@ export function useHourlyReminders(): void {
       if (remindersOn) {
         if (!isReminderSupported()) {
           if (!cancelled) actions.setRemindersOn(false);
-          Alert.alert(
-            'Not available in Expo Go',
-            'Hourly hydration reminders need a development build — they are not supported inside Expo Go.'
-          );
+          Alert.alert(t('reminders.expoGoTitle'), t('reminders.expoGoMsg'));
           return;
         }
-        const granted = await requestReminderPermissionAsync();
+        const granted = await requestReminderPermissionAsync(t('reminders.channelName'));
         if (cancelled) return;
         if (!granted) {
           actions.setRemindersOn(false);
-          Alert.alert(
-            'Notifications disabled',
-            'Turn on notifications for DenguCare in your device settings to get hourly hydration reminders.'
-          );
+          Alert.alert(t('reminders.disabledTitle'), t('reminders.disabledMsg'));
           return;
         }
-        await scheduleHourlyReminder(targets.hourlyGoalMl);
+        await scheduleHourlyReminder(
+          t('reminders.notificationTitle'),
+          t('reminders.notificationBody', { ml: targets.hourlyGoalMl })
+        );
       } else {
         await cancelHourlyReminder();
       }
