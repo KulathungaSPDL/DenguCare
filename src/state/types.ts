@@ -86,7 +86,26 @@ export interface BloodReport {
   plateletCount: number | null; // x10^3/uL
   haematocritPct: number | null;
   wbcCount: number | null; // x10^3/uL
+  neutrophilsCount: number | null; // Neut#, x10^3/uL
+  lymphocytesCount: number | null; // Lymph#, x10^3/uL
+  monocytesCount: number | null; // Mono#, x10^3/uL
+  mpv: number | null; // Mean platelet volume, fL
+  hgb: number | null; // Haemoglobin, g/dL
   note: string;
+  photoUri: string | null;
+}
+
+export type DengueTestType = 'ns1' | 'igm' | 'igg' | 'pcr';
+export type DengueTestResult = 'positive' | 'negative' | 'pending';
+
+/** A dengue-specific test (NS1/IgM/IgG/PCR) logged independently of the FBC
+ * blood reports above — its own card, its own save, since it's often done
+ * at a different time/lab than the platelet/HCT count. */
+export interface DengueTestRecord {
+  id: string;
+  atISO: string;
+  type: DengueTestType;
+  result: DengueTestResult;
   photoUri: string | null;
 }
 
@@ -114,6 +133,7 @@ export interface ArchivedIllness {
   urine: UrineEntry[];
   temps: TempReading[];
   reports: BloodReport[];
+  dengueTests: DengueTestRecord[];
   medicationDoses: MedicationDose[];
   ivFluids: IvFluidEntry[];
   warningSigns: WarningSignsState;
@@ -128,10 +148,12 @@ export interface AppState {
   careMode: CareMode;
   language: AppLanguage;
   remindersOn: boolean;
+  dashboardWelcomeSeen: boolean;
   drinks: DrinkEntry[];
   urine: UrineEntry[];
   temps: TempReading[];
   reports: BloodReport[];
+  dengueTests: DengueTestRecord[];
   medicationDoses: MedicationDose[];
   ivFluids: IvFluidEntry[];
   warningSigns: WarningSignsState;

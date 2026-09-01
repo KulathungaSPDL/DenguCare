@@ -1,5 +1,5 @@
 import { getDb } from './database';
-import { BloodReport, DrinkEntry, IvFluidEntry, MedicationDose, TempReading, UrineEntry } from '../state/types';
+import { BloodReport, DengueTestRecord, DrinkEntry, IvFluidEntry, MedicationDose, TempReading, UrineEntry } from '../state/types';
 
 // Every insert/delete here is awaited by the calling reducer-effect in
 // store.tsx immediately after the in-memory state updates, so each logged
@@ -71,25 +71,50 @@ export async function deleteTemp(id: string): Promise<void> {
 
 export async function listReports(): Promise<BloodReport[]> {
   const db = await getDb();
-  return db.getAllAsync<BloodReport>('SELECT * FROM blood_reports ORDER BY atISO DESC');
+  return db.getAllAsync<BloodReport>(
+    'SELECT id, atISO, plateletCount, haematocritPct, wbcCount, neutrophilsCount, lymphocytesCount, monocytesCount, mpv, hgb, note, photoUri FROM blood_reports ORDER BY atISO DESC'
+  );
 }
 export async function insertReport(e: BloodReport): Promise<void> {
   const db = await getDb();
   await db.runAsync(
-    'INSERT INTO blood_reports (id, atISO, plateletCount, haematocritPct, wbcCount, note, photoUri) VALUES (?, ?, ?, ?, ?, ?, ?)',
-    e.id, e.atISO, e.plateletCount, e.haematocritPct, e.wbcCount, e.note, e.photoUri
+    'INSERT INTO blood_reports (id, atISO, plateletCount, haematocritPct, wbcCount, neutrophilsCount, lymphocytesCount, monocytesCount, mpv, hgb, note, photoUri) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
+    e.id, e.atISO, e.plateletCount, e.haematocritPct, e.wbcCount, e.neutrophilsCount, e.lymphocytesCount, e.monocytesCount, e.mpv, e.hgb, e.note, e.photoUri
   );
 }
 export async function updateReport(e: BloodReport): Promise<void> {
   const db = await getDb();
   await db.runAsync(
-    'UPDATE blood_reports SET atISO = ?, plateletCount = ?, haematocritPct = ?, wbcCount = ?, note = ?, photoUri = ? WHERE id = ?',
-    e.atISO, e.plateletCount, e.haematocritPct, e.wbcCount, e.note, e.photoUri, e.id
+    'UPDATE blood_reports SET atISO = ?, plateletCount = ?, haematocritPct = ?, wbcCount = ?, neutrophilsCount = ?, lymphocytesCount = ?, monocytesCount = ?, mpv = ?, hgb = ?, note = ?, photoUri = ? WHERE id = ?',
+    e.atISO, e.plateletCount, e.haematocritPct, e.wbcCount, e.neutrophilsCount, e.lymphocytesCount, e.monocytesCount, e.mpv, e.hgb, e.note, e.photoUri, e.id
   );
 }
 export async function deleteReport(id: string): Promise<void> {
   const db = await getDb();
   await db.runAsync('DELETE FROM blood_reports WHERE id = ?', id);
+}
+
+export async function listDengueTests(): Promise<DengueTestRecord[]> {
+  const db = await getDb();
+  return db.getAllAsync<DengueTestRecord>('SELECT * FROM dengue_tests ORDER BY atISO DESC');
+}
+export async function insertDengueTest(e: DengueTestRecord): Promise<void> {
+  const db = await getDb();
+  await db.runAsync(
+    'INSERT INTO dengue_tests (id, atISO, type, result, photoUri) VALUES (?, ?, ?, ?, ?)',
+    e.id, e.atISO, e.type, e.result, e.photoUri
+  );
+}
+export async function updateDengueTest(e: DengueTestRecord): Promise<void> {
+  const db = await getDb();
+  await db.runAsync(
+    'UPDATE dengue_tests SET atISO = ?, type = ?, result = ?, photoUri = ? WHERE id = ?',
+    e.atISO, e.type, e.result, e.photoUri, e.id
+  );
+}
+export async function deleteDengueTest(id: string): Promise<void> {
+  const db = await getDb();
+  await db.runAsync('DELETE FROM dengue_tests WHERE id = ?', id);
 }
 
 export async function listMedicationDoses(): Promise<MedicationDose[]> {
@@ -155,6 +180,7 @@ export async function clearAllLogs(): Promise<void> {
     DELETE FROM urine_entries;
     DELETE FROM temp_readings;
     DELETE FROM blood_reports;
+    DELETE FROM dengue_tests;
     DELETE FROM medication_doses;
     DELETE FROM iv_fluid_entries;
   `);

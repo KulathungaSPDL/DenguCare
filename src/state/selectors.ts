@@ -2,7 +2,7 @@ import { useMemo } from 'react';
 
 import { getFluidTargets, sumMl } from './calculations';
 import { localDateKey, localHour } from './dateUtils';
-import { AppState, BloodReport, DrinkEntry, UrineEntry } from './types';
+import { AppState, BloodReport, UrineEntry } from './types';
 
 export function filterByDateKey<T extends { atISO: string }>(entries: T[], dateKey: string): T[] {
   return entries.filter((e) => localDateKey(new Date(e.atISO)) === dateKey);
@@ -108,7 +108,14 @@ export interface HourBucket {
   urineMl: number;
 }
 
-export function computeHourlyBuckets(drinks: DrinkEntry[], urine: UrineEntry[], startHour = 0, endHour = 23): HourBucket[] {
+// Accepts anything with atISO/amountMl, not just DrinkEntry, so callers can
+// mix in IV fluid entries (mapped to amountMl: volumeMl) as intake too.
+export function computeHourlyBuckets(
+  drinks: { atISO: string; amountMl: number }[],
+  urine: UrineEntry[],
+  startHour = 0,
+  endHour = 23
+): HourBucket[] {
   const buckets: HourBucket[] = [];
   for (let h = startHour; h <= endHour; h += 1) {
     buckets.push({ hour: h, drinkMl: 0, urineMl: 0 });

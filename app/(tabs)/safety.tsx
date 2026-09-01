@@ -123,18 +123,26 @@ export default function SafetyScreen() {
 
       <DangerButton label={t('safetyScreen.callEmergency')} icon="call" onPress={callEmergency} style={{ marginTop: spacing.sm }} />
 
-      <Card style={{ marginTop: spacing.lg }}>
-        <Text style={styles.cardKicker}>{t('safetyScreen.emergencyNumbers')}</Text>
+      <View style={styles.emergencyBox}>
+        <View style={styles.emergencyHeaderRow}>
+          <Ionicons name="call" size={16} color={colors.danger} />
+          <Text style={styles.emergencyTitle}>{t('safetyScreen.emergencyNumbers')}</Text>
+        </View>
         {EMERGENCY_NUMBERS.map((e, i) => (
           <React.Fragment key={e.number}>
             {i > 0 && <EntryListDivider />}
-            <Pressable style={styles.numberRow} onPress={() => Linking.openURL(`tel:${e.number}`)}>
+            <Pressable
+              style={styles.numberRow}
+              onPress={() => Linking.openURL(`tel:${e.number}`)}
+              accessibilityRole="button"
+              accessibilityLabel={`${t(e.labelKey)} ${e.number}`}
+            >
               <Text style={styles.numberLabel}>{t(e.labelKey)}</Text>
               <Text style={styles.numberValue}>{e.number}</Text>
             </Pressable>
           </React.Fragment>
         ))}
-      </Card>
+      </View>
 
       <DarkButton
         label={t('doctorSummary.button')}
@@ -170,14 +178,6 @@ export default function SafetyScreen() {
 }
 
 const styles = StyleSheet.create({
-  cardKicker: {
-    fontFamily: fontFamily.mono,
-    fontSize: fontSize.xs,
-    letterSpacing: 1,
-    color: colors.textSecondary,
-    textTransform: 'uppercase',
-    marginBottom: spacing.sm,
-  },
   introCard: {
     backgroundColor: colors.dangerSoft,
     borderWidth: 1,
@@ -210,6 +210,28 @@ const styles = StyleSheet.create({
     color: colors.textPrimary,
     lineHeight: fontSize.sm * 1.5,
   },
+  emergencyBox: {
+    marginTop: spacing.lg,
+    backgroundColor: colors.dangerSoft,
+    borderWidth: 1,
+    borderColor: colors.borderDanger,
+    borderRadius: radius.xl,
+    padding: spacing.lg,
+  },
+  emergencyHeaderRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.sm,
+    marginBottom: spacing.xs,
+  },
+  emergencyTitle: {
+    fontFamily: fontFamily.baseBold,
+    fontWeight: '800',
+    fontSize: fontSize.xs,
+    letterSpacing: 1,
+    textTransform: 'uppercase',
+    color: colors.danger,
+  },
   numberRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -225,7 +247,7 @@ const styles = StyleSheet.create({
     fontFamily: fontFamily.mono,
     fontWeight: '700',
     fontSize: fontSize.lg,
-    color: colors.primaryDark,
+    color: colors.danger,
   },
   newRecordBtn: {
     flexDirection: 'row',

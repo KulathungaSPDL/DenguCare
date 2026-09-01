@@ -17,14 +17,13 @@ import { useDeleteConfirmation } from '../../src/hooks/useDeleteConfirmation';
 import { useNow } from '../../src/hooks/useNow';
 import { useSuccessAlert } from '../../src/hooks/useSuccessAlert';
 import { sumMl } from '../../src/state/calculations';
-import { localDateKey } from '../../src/state/dateUtils';
+import { dateFromKey, formatDatePretty, localDateKey, localHour } from '../../src/state/dateUtils';
 import { DRINK_KINDS } from '../../src/state/drinkKinds';
 import {
   filterByDateKey,
   useFluidSummary,
   useHyponatremiaWarning,
   useLowUrineOutputWarning,
-  useTodayEntries,
 } from '../../src/state/selectors';
 import { useStore } from '../../src/state/store';
 import { DrinkEntry, IvFluidEntry, UrineEntry } from '../../src/state/types';
@@ -47,17 +46,36 @@ export default function FluidsScreen() {
   const [ivModalOpen, setIvModalOpen] = useState(false);
   const [editingIv, setEditingIv] = useState<IvFluidEntry | null>(null);
   const [entriesVisible, setEntriesVisible] = useState(false);
+  const todayKey = localDateKey(now);
+  const [selectedDayKey, setSelectedDayKey] = useState(todayKey);
   const { confirmDelete, modals } = useDeleteConfirmation();
   const { showSuccess, modal: successModal } = useSuccessAlert();
 
-  const { drinks, urine } = useTodayEntries(state, now);
   const { inMl, outMl, targets, thisHourMl } = useFluidSummary(state, now);
-  const goalMet = thisHourMl >= targets.hourlyGoalMl;
   const showHyponatremiaWarning = useHyponatremiaWarning(state, now);
-  const todayIvFluids = filterByDateKey(state.ivFluids, localDateKey(now));
+  const todayIvFluids = filterByDateKey(state.ivFluids, todayKey);
   const isAdmitted = state.careMode === 'admitted';
   const todayIvMl = isAdmitted ? sumMl(todayIvFluids.map((f) => ({ amountMl: f.volumeMl }))) : 0;
   const showLowUrineOutputWarning = useLowUrineOutputWarning(inMl + todayIvMl, outMl);
+
+  // IV drip is still fluid in - fold this hour's IV entries into the hourly
+  // goal the same way the daily total already does.
+  const currentHour = localHour(now);
+  const thisHourIvMl = isAdmitted ? sumMl(todayIvFluids.filter((f) => localHour(new Date(f.atISO)) === currentHour).map((f) => ({ amountMl: f.volumeMl }))) : 0;
+  const thisHourTotalMl = thisHourMl + thisHourIvMl;
+  const goalMet = thisHourTotalMl >= targets.hourlyGoalMl;
+
+  // The entry-list popup (opened via the chart's eye icon) mirrors whichever
+  // day the hourly chart is currently showing, not always "today".
+  const yesterdayKey = localDateKey(new Date(now.getTime() - 86400000));
+  function dayLabel(key: string): string {
+    if (key === todayKey) return t('dayEntriesModal.title');
+    if (key === yesterdayKey) return t('common.yesterday');
+    return formatDatePretty(dateFromKey(key));
+  }
+  const selectedDayDrinks = filterByDateKey(state.drinks, selectedDayKey);
+  const selectedDayUrine = filterByDateKey(state.urine, selectedDayKey);
+  const selectedDayIvFluids = isAdmitted ? filterByDateKey(state.ivFluids, selectedDayKey) : [];
 
   function saveEntry(amountMl: number, kind: string | undefined, atISO: string) {
     if (editingAmount?.kind === 'drink') {
@@ -144,7 +162,7 @@ export default function FluidsScreen() {
   return (
     <Screen>
       <AppTopBar icon="water" title={t('topBar.fluidBalance')} />
-      <Header title={`In ${inMl} ml  -  Out ${outMl} ml`} />
+      <Header title={`In ${inMl + todayIvMl} ml  -  Out ${outMl} ml`} />
 
       {showLowUrineOutputWarning ? (
         <Banner icon="alert-circle-outline" tone="danger">
@@ -168,20 +186,28 @@ export default function FluidsScreen() {
           ) : null}
         </View>
         <Text style={styles.hourValue}>
-          {thisHourMl} <Text style={styles.hourTarget}>/ {targets.hourlyGoalMl} ml</Text>
+          {thisHourTotalMl} <Text style={styles.hourTarget}>/ {targets.hourlyGoalMl} ml</Text>
         </Text>
         <View style={styles.progressTrack}>
           <View style={styles.progressRow}>
             <View
               style={[
                 styles.progressFill,
-                { flex: Math.min(thisHourMl, targets.hourlyGoalMl) },
+                { flex: Math.min(thisHourTotalMl, targets.hourlyGoalMl) },
               ]}
             />
-            {thisHourMl > targets.hourlyGoalMl ? (
-              <View style={[styles.progressOverflow, { flex: thisHourMl - targets.hourlyGoalMl }]} />
+            {thisHourTotalMl > targets.hourlyGoalMl ? (
+              // Capped so the "over goal" segment can never grow past the goal
+              // segment itself - drinking well past the target should still
+              // read as mostly green, not mostly yellow.
+              <View
+                style={[
+                  styles.progressOverflow,
+                  { flex: Math.min(thisHourTotalMl - targets.hourlyGoalMl, targets.hourlyGoalMl * 0.5) },
+                ]}
+              />
             ) : null}
-            <View style={{ flex: Math.max(0, targets.hourlyGoalMl - thisHourMl) }} />
+            <View style={{ flex: Math.max(0, targets.hourlyGoalMl - thisHourTotalMl) }} />
           </View>
         </View>
       </Card>
@@ -199,7 +225,14 @@ export default function FluidsScreen() {
           </Pressable>
         </View>
         <View style={{ height: spacing.md }} />
-        <HourlyBalanceCarousel allDrinks={state.drinks} allUrine={state.urine} now={now} hourlyGoalMl={targets.hourlyGoalMl} />
+        <HourlyBalanceCarousel
+          allDrinks={state.drinks}
+          allUrine={state.urine}
+          allIvFluids={isAdmitted ? state.ivFluids : []}
+          now={now}
+          hourlyGoalMl={targets.hourlyGoalMl}
+          onDayChange={setSelectedDayKey}
+        />
       </Card>
 
       <View style={styles.addRow}>
@@ -289,9 +322,10 @@ export default function FluidsScreen() {
       <DayEntriesModal
         visible={entriesVisible}
         onClose={() => setEntriesVisible(false)}
-        drinks={drinks}
-        urine={urine}
-        ivFluids={todayIvFluids}
+        title={dayLabel(selectedDayKey)}
+        drinks={selectedDayDrinks}
+        urine={selectedDayUrine}
+        ivFluids={selectedDayIvFluids}
         showIv={isAdmitted}
         onEditDrink={openEditDrink}
         onDeleteDrink={deleteDrink}

@@ -1,5 +1,5 @@
 import { Ionicons } from '@expo/vector-icons';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 
@@ -8,13 +8,15 @@ import { Card } from './Card';
 import { EntryListDivider, EntryListItem } from './EntryListItem';
 import { FbcTrendChart } from './FbcTrendChart';
 import { FeverCurveChart } from './FeverCurveChart';
+import { FullBloodReportModal } from './FullBloodReportModal';
 import { HourlyBalanceCarousel } from './HourlyBalanceCarousel';
 import { InfoDivider, InfoRow } from './InfoRow';
-import { FluidTargets } from '../state/calculations';
+import { sumMl, FluidTargets } from '../state/calculations';
 import { DoctorReportData } from '../state/doctorReport';
 import { dateFromKey, formatDatePretty, formatTime24, localDateKey } from '../state/dateUtils';
 import { drinkKindColor } from '../state/drinkKinds';
-import { Profile } from '../state/types';
+import { filterByDateKey } from '../state/selectors';
+import { DrinkEntry, IvFluidEntry, Profile } from '../state/types';
 import { WARNING_SIGN_LABELS } from '../state/warningSigns';
 import { colors } from '../theme/colors';
 import { radius, spacing } from '../theme/spacing';
@@ -33,59 +35,7 @@ function dateTime(atISO: string): string {
   return `${formatDatePretty(d)}  ${formatTime24(d)}`;
 }
 
-interface DayGroup<T> {
-  key: string;
-  items: T[];
-}
-
-/** Groups already-sorted entries into one bucket per calendar day, keeping
- * the day order they first appear in — so a list sorted most-recent-first
- * comes out with the most recent day first too. */
-function groupByDay<T extends { atISO: string }>(items: T[]): DayGroup<T>[] {
-  const order: string[] = [];
-  const byKey = new Map<string, T[]>();
-  items.forEach((item) => {
-    const key = localDateKey(new Date(item.atISO));
-    if (!byKey.has(key)) {
-      byKey.set(key, []);
-      order.push(key);
-    }
-    byKey.get(key)!.push(item);
-  });
-  return order.map((key) => ({ key, items: byKey.get(key)! }));
-}
-
-/** One calendar day's worth of itemised entries, collapsed behind a
- * Show/Hide toggle so a long history doesn't force endless scrolling. */
-function DayGroupSection({
-  label,
-  count,
-  expanded,
-  onToggle,
-  children,
-}: {
-  label: string;
-  count: number;
-  expanded: boolean;
-  onToggle: () => void;
-  children: React.ReactNode;
-}) {
-  const { t } = useTranslation();
-  return (
-    <View style={styles.dayGroup}>
-      <Pressable onPress={onToggle} style={styles.dayGroupHeader} accessibilityRole="button">
-        <Text style={styles.dayGroupLabel}>
-          {label} · {count}
-        </Text>
-        <View style={styles.dayGroupToggle}>
-          <Text style={styles.dayGroupToggleText}>{expanded ? t('common.hide') : t('common.show')}</Text>
-          <Ionicons name={expanded ? 'chevron-up' : 'chevron-down'} size={14} color={colors.primaryDark} />
-        </View>
-      </Pressable>
-      {expanded ? children : null}
-    </View>
-  );
-}
+type IntakeEntry = { id: string; atISO: string; kind: 'drink'; drink: DrinkEntry } | { id: string; atISO: string; kind: 'iv'; iv: IvFluidEntry };
 
 /** The actual "Doctor Report" content — patient info, active warning
  * signs, fluid balance, and the full temperature/medication/blood-report
@@ -94,30 +44,6 @@ function DayGroupSection({
  * DoctorReportData they pass in. */
 export function ReportBody({ data, profile, targets, visible }: Props) {
   const { t } = useTranslation();
-  const [expandedDays, setExpandedDays] = useState<Set<string>>(new Set());
-
-  const drinkGroups = groupByDay(data.drinks);
-  const ivGroups = groupByDay(data.ivFluids);
-  const urineGroups = groupByDay(data.urine);
-
-  useEffect(() => {
-    if (!visible) return;
-    const initial = new Set<string>();
-    if (drinkGroups[0]) initial.add(`drinks-${drinkGroups[0].key}`);
-    if (ivGroups[0]) initial.add(`iv-${ivGroups[0].key}`);
-    if (urineGroups[0]) initial.add(`urine-${urineGroups[0].key}`);
-    setExpandedDays(initial);
-    // Reset to "most recent day open" each time this view is opened, not on every data change.
-  }, [visible]);
-
-  function toggleDay(groupKey: string) {
-    setExpandedDays((prev) => {
-      const next = new Set(prev);
-      if (next.has(groupKey)) next.delete(groupKey);
-      else next.add(groupKey);
-      return next;
-    });
-  }
 
   const todayKey = localDateKey(data.viewDate);
   const yesterdayKey = localDateKey(new Date(data.viewDate.getTime() - 86400000));
@@ -126,6 +52,37 @@ export function ReportBody({ data, profile, targets, visible }: Props) {
     if (key === yesterdayKey) return t('common.yesterday');
     return formatDatePretty(dateFromKey(key));
   }
+
+  // Tracks whichever day the fluid-balance graph is currently showing, so
+  // the totals and entry list below it stay in sync as the user swipes it.
+  const [selectedDayKey, setSelectedDayKey] = useState(todayKey);
+  const [entryTab, setEntryTab] = useState<'intake' | 'output'>('intake');
+  const [entriesExpanded, setEntriesExpanded] = useState(false);
+  const [fullReportVisible, setFullReportVisible] = useState(false);
+
+  useEffect(() => {
+    if (!visible) return;
+    setSelectedDayKey(todayKey);
+    setEntryTab('intake');
+    setEntriesExpanded(false);
+    setFullReportVisible(false);
+    // Reset to "today, Intake tab, collapsed" each time this view is opened, not on every data change.
+  }, [visible]);
+
+  const dayDrinks = useMemo(() => filterByDateKey(data.drinks, selectedDayKey), [data.drinks, selectedDayKey]);
+  const dayIvFluids = useMemo(() => filterByDateKey(data.ivFluids, selectedDayKey), [data.ivFluids, selectedDayKey]);
+  const dayUrine = useMemo(() => filterByDateKey(data.urine, selectedDayKey), [data.urine, selectedDayKey]);
+
+  const dayFluidInMl = sumMl(dayDrinks) + sumMl(dayIvFluids.map((f) => ({ amountMl: f.volumeMl })));
+  const dayFluidOutMl = sumMl(dayUrine);
+
+  const dayIntakeEntries: IntakeEntry[] = useMemo(() => {
+    const combined: IntakeEntry[] = [
+      ...dayDrinks.map((d) => ({ id: d.id, atISO: d.atISO, kind: 'drink' as const, drink: d })),
+      ...dayIvFluids.map((f) => ({ id: f.id, atISO: f.atISO, kind: 'iv' as const, iv: f })),
+    ];
+    return combined.sort((a, b) => new Date(b.atISO).getTime() - new Date(a.atISO).getTime());
+  }, [dayDrinks, dayIvFluids]);
 
   return (
     <>
@@ -178,103 +135,121 @@ export function ReportBody({ data, profile, targets, visible }: Props) {
 
       <Text style={styles.sectionKicker}>{t('doctorReportModal.fluidBalanceTitle')}</Text>
       <Card style={{ marginBottom: spacing.md }}>
-        <HourlyBalanceCarousel allDrinks={data.drinks} allUrine={data.urine} now={data.viewDate} hourlyGoalMl={targets.hourlyGoalMl} />
+        <HourlyBalanceCarousel
+          allDrinks={data.drinks}
+          allUrine={data.urine}
+          allIvFluids={data.ivFluids}
+          now={data.viewDate}
+          hourlyGoalMl={targets.hourlyGoalMl}
+          onDayChange={setSelectedDayKey}
+        />
       </Card>
+
+      <Text style={styles.dayCaption}>{dayLabel(selectedDayKey)}</Text>
       <View style={styles.balanceRow}>
         <View style={styles.balanceBox}>
           <Text style={styles.balanceLabel}>{t('doctorReportModal.fluidInLabel')}</Text>
-          <Text style={styles.balanceValue}>{data.fluidInMl} ml</Text>
+          <Text style={styles.balanceValue}>{dayFluidInMl} ml</Text>
         </View>
         <View style={{ width: spacing.md }} />
         <View style={styles.balanceBox}>
           <Text style={styles.balanceLabel}>{t('doctorReportModal.fluidOutLabel')}</Text>
-          <Text style={styles.balanceValue}>{data.fluidOutMl} ml</Text>
+          <Text style={styles.balanceValue}>{dayFluidOutMl} ml</Text>
         </View>
       </View>
 
-      <Text style={styles.subKicker}>{t('doctorReportModal.oralIntakeTitle')}</Text>
-      {data.drinks.length === 0 ? (
-        <Text style={styles.emptyNote}>{t('dayEntriesModal.noDrinks')}</Text>
-      ) : (
-        drinkGroups.map((g) => (
-          <DayGroupSection
-            key={g.key}
-            label={dayLabel(g.key)}
-            count={g.items.length}
-            expanded={expandedDays.has(`drinks-${g.key}`)}
-            onToggle={() => toggleDay(`drinks-${g.key}`)}
-          >
-            {g.items.map((d, i) => (
-              <React.Fragment key={d.id}>
-                {i > 0 && <EntryListDivider />}
-                <EntryListItem
-                  icon="water-outline"
-                  iconColor={drinkKindColor(d.kind)}
-                  title={t(`drinkKinds.${d.kind}`)}
-                  time={formatTime24(new Date(d.atISO))}
-                  valueLabel={`${d.amountMl} ml`}
-                />
-              </React.Fragment>
-            ))}
-          </DayGroupSection>
-        ))
-      )}
+      <Pressable
+        onPress={() => setEntriesExpanded((v) => !v)}
+        style={styles.entriesToggle}
+        accessibilityRole="button"
+        accessibilityState={{ expanded: entriesExpanded }}
+      >
+        <Text style={styles.entriesToggleText}>
+          {entriesExpanded ? t('common.hide') : t('common.show')} {t('doctorReportModal.entryDetailsLabel')}
+        </Text>
+        <Ionicons name={entriesExpanded ? 'chevron-up' : 'chevron-down'} size={16} color={colors.primaryDark} />
+      </Pressable>
 
-      {data.ivFluids.length > 0 ? (
+      {entriesExpanded ? (
         <>
-          <Text style={styles.subKicker}>{t('doctorReportModal.ivFluidsTitle')}</Text>
-          {ivGroups.map((g) => (
-            <DayGroupSection
-              key={g.key}
-              label={dayLabel(g.key)}
-              count={g.items.length}
-              expanded={expandedDays.has(`iv-${g.key}`)}
-              onToggle={() => toggleDay(`iv-${g.key}`)}
+          <View style={styles.tabRow}>
+            <Pressable
+              onPress={() => setEntryTab('intake')}
+              style={[styles.tabButton, entryTab === 'intake' && styles.tabButtonActive]}
+              accessibilityRole="button"
+              accessibilityState={{ selected: entryTab === 'intake' }}
             >
-              {g.items.map((f, i) => (
-                <React.Fragment key={f.id}>
+              <Ionicons name="water-outline" size={15} color={entryTab === 'intake' ? colors.textOnPrimary : colors.textSecondary} />
+              <Text style={[styles.tabButtonText, entryTab === 'intake' && styles.tabButtonTextActive]}>
+                {t('doctorReportModal.oralIntakeTitle')}
+              </Text>
+            </Pressable>
+            <Pressable
+              onPress={() => setEntryTab('output')}
+              style={[styles.tabButton, entryTab === 'output' && styles.tabButtonActive]}
+              accessibilityRole="button"
+              accessibilityState={{ selected: entryTab === 'output' }}
+            >
+              <Ionicons name="flask-outline" size={15} color={entryTab === 'output' ? colors.textOnPrimary : colors.textSecondary} />
+              <Text style={[styles.tabButtonText, entryTab === 'output' && styles.tabButtonTextActive]}>
+                {t('doctorReportModal.urineOutputTitle')}
+              </Text>
+            </Pressable>
+          </View>
+
+          {entryTab === 'intake' ? (
+            dayIntakeEntries.length === 0 ? (
+              <Text style={styles.emptyNote}>{t('dayEntriesModal.noDrinks')}</Text>
+            ) : (
+              <View style={styles.entryList}>
+                {dayIntakeEntries.map((entry, i) => (
+                  <React.Fragment key={entry.id}>
+                    {i > 0 && <EntryListDivider />}
+                    {entry.kind === 'drink' ? (
+                      <EntryListItem
+                        icon="water-outline"
+                        iconColor={drinkKindColor(entry.drink.kind)}
+                        title={t(`drinkKinds.${entry.drink.kind}`)}
+                        time={formatTime24(new Date(entry.drink.atISO))}
+                        valueLabel={`${entry.drink.amountMl} ml`}
+                      />
+                    ) : (
+                      <EntryListItem
+                        icon="medkit-outline"
+                        iconColor={colors.ivFluid}
+                        title={t(`ivFluids.fluidTypes.${entry.iv.fluidType}`)}
+                        time={formatTime24(new Date(entry.iv.atISO))}
+                        valueLabel={
+                          entry.iv.rateMlPerHr != null
+                            ? `${entry.iv.volumeMl} ml  ·  ${entry.iv.rateMlPerHr} ml/hr`
+                            : `${entry.iv.volumeMl} ml`
+                        }
+                      />
+                    )}
+                  </React.Fragment>
+                ))}
+              </View>
+            )
+          ) : dayUrine.length === 0 ? (
+            <Text style={styles.emptyNote}>{t('dayEntriesModal.noUrine')}</Text>
+          ) : (
+            <View style={styles.entryList}>
+              {dayUrine.map((u, i) => (
+                <React.Fragment key={u.id}>
                   {i > 0 && <EntryListDivider />}
                   <EntryListItem
-                    icon="medkit-outline"
-                    iconColor={colors.ivFluid}
-                    title={t(`ivFluids.fluidTypes.${f.fluidType}`)}
-                    time={formatTime24(new Date(f.atISO))}
-                    valueLabel={f.rateMlPerHr != null ? `${f.volumeMl} ml  ·  ${f.rateMlPerHr} ml/hr` : `${f.volumeMl} ml`}
+                    icon="flask-outline"
+                    iconColor={colors.urineOut}
+                    title={t('dayEntriesModal.urineTab')}
+                    time={formatTime24(new Date(u.atISO))}
+                    valueLabel={`${u.amountMl} ml`}
                   />
                 </React.Fragment>
               ))}
-            </DayGroupSection>
-          ))}
+            </View>
+          )}
         </>
       ) : null}
-
-      <Text style={styles.subKicker}>{t('doctorReportModal.urineOutputTitle')}</Text>
-      {data.urine.length === 0 ? (
-        <Text style={styles.emptyNote}>{t('dayEntriesModal.noUrine')}</Text>
-      ) : (
-        urineGroups.map((g) => (
-          <DayGroupSection
-            key={g.key}
-            label={dayLabel(g.key)}
-            count={g.items.length}
-            expanded={expandedDays.has(`urine-${g.key}`)}
-            onToggle={() => toggleDay(`urine-${g.key}`)}
-          >
-            {g.items.map((u, i) => (
-              <React.Fragment key={u.id}>
-                {i > 0 && <EntryListDivider />}
-                <EntryListItem
-                  icon="flask-outline"
-                  iconColor={colors.urineOut}
-                  title={t('dayEntriesModal.urineTab')}
-                  time={formatTime24(new Date(u.atISO))}
-                  valueLabel={`${u.amountMl} ml`}
-                />
-              </React.Fragment>
-            ))}
-          </DayGroupSection>
-        ))
-      )}
 
       <Text style={styles.sectionKicker}>{t('doctorReportModal.temperatureHistoryTitle')}</Text>
       {data.feverStartISO && data.temps.length > 0 ? (
@@ -317,7 +292,17 @@ export function ReportBody({ data, profile, targets, visible }: Props) {
         ))
       )}
 
-      <Text style={styles.sectionKicker}>{t('doctorReportModal.bloodReportTitle')}</Text>
+      <View style={styles.bloodReportHeaderRow}>
+        <Text style={[styles.sectionKicker, styles.bloodReportKicker]}>{t('doctorReportModal.bloodReportTitle')}</Text>
+        <Pressable
+          onPress={() => setFullReportVisible(true)}
+          style={styles.viewFullReportBtn}
+          accessibilityRole="button"
+        >
+          <Ionicons name="scan-outline" size={14} color={colors.primaryDark} />
+          <Text style={styles.viewFullReportBtnText}>{t('doctorReportModal.viewFullReportButton')}</Text>
+        </Pressable>
+      </View>
       {data.feverStartISO && data.reports.length > 0 ? (
         <Card style={{ marginBottom: spacing.md }}>
           <FbcTrendChart reports={data.reports} feverStartISO={data.feverStartISO} />
@@ -343,7 +328,32 @@ export function ReportBody({ data, profile, targets, visible }: Props) {
         ))
       )}
 
+      <Text style={styles.sectionKicker}>{t('doctorReportModal.dengueTestTitle')}</Text>
+      {data.dengueTests.length === 0 ? (
+        <Text style={styles.emptyNote}>{t('doctorReportModal.noDengueTests')}</Text>
+      ) : (
+        data.dengueTests.map((test, i) => (
+          <React.Fragment key={test.id}>
+            {i > 0 && <EntryListDivider />}
+            <EntryListItem
+              icon="flask-outline"
+              iconColor={test.result === 'positive' ? colors.danger : colors.primary}
+              title={`${t(`reportsScreen.dengueTestType.${test.type}`)} — ${t(`reportsScreen.dengueTestResult.${test.result}`)}`}
+              time={dateTime(test.atISO)}
+              valueLabel={test.photoUri ? t('doctorReportModal.photoAttached') : ''}
+            />
+          </React.Fragment>
+        ))
+      )}
+
       <View style={{ height: spacing.lg }} />
+
+      <FullBloodReportModal
+        visible={fullReportVisible}
+        onClose={() => setFullReportVisible(false)}
+        reports={data.reports}
+        feverStartISO={data.feverStartISO}
+      />
     </>
   );
 }
@@ -395,46 +405,96 @@ const styles = StyleSheet.create({
     marginTop: spacing.lg,
     marginBottom: spacing.sm,
   },
-  subKicker: {
-    fontFamily: fontFamily.baseBold,
-    fontWeight: '600',
-    fontSize: fontSize.sm,
-    color: colors.textSecondary,
-    marginTop: spacing.md,
-    marginBottom: spacing.xs,
-  },
   emptyNote: {
     fontFamily: fontFamily.base,
     fontSize: fontSize.sm,
     color: colors.textSecondary,
     paddingVertical: spacing.sm,
   },
-  dayGroup: {
-    marginTop: spacing.xs,
-  },
-  dayGroupHeader: {
+  bloodReportHeaderRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    paddingVertical: spacing.sm,
+    marginTop: spacing.lg,
+    marginBottom: spacing.sm,
   },
-  dayGroupLabel: {
+  bloodReportKicker: {
+    marginTop: 0,
+    marginBottom: 0,
+  },
+  viewFullReportBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    paddingVertical: 6,
+    paddingHorizontal: 10,
+    borderRadius: radius.pill,
+    borderWidth: 1,
+    borderColor: colors.primary,
+    backgroundColor: colors.primarySoft,
+  },
+  viewFullReportBtnText: {
+    fontFamily: fontFamily.baseBold,
+    fontWeight: '600',
+    fontSize: fontSize.xs,
+    color: colors.primaryDark,
+  },
+  dayCaption: {
     fontFamily: fontFamily.baseBold,
     fontWeight: '600',
     fontSize: fontSize.sm,
     color: colors.textPrimary,
+    marginBottom: spacing.sm,
   },
-  dayGroupToggle: {
+  entryList: {
+    marginTop: spacing.md,
+  },
+  entriesToggle: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 4,
+    justifyContent: 'center',
+    gap: 6,
+    marginTop: spacing.md,
+    paddingVertical: spacing.sm,
   },
-  dayGroupToggleText: {
+  entriesToggleText: {
     fontFamily: fontFamily.baseBold,
     fontWeight: '600',
     fontSize: fontSize.xs,
     color: colors.primaryDark,
     textTransform: 'uppercase',
+    letterSpacing: 0.5,
+  },
+  tabRow: {
+    flexDirection: 'row',
+    gap: spacing.sm,
+    marginTop: spacing.xs,
+    marginBottom: spacing.xs,
+  },
+  tabButton: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 6,
+    paddingVertical: 10,
+    borderRadius: radius.pill,
+    borderWidth: 1,
+    borderColor: colors.border,
+    backgroundColor: colors.surface,
+  },
+  tabButtonActive: {
+    backgroundColor: colors.primary,
+    borderColor: colors.primary,
+  },
+  tabButtonText: {
+    fontFamily: fontFamily.baseBold,
+    fontWeight: '600',
+    fontSize: fontSize.sm,
+    color: colors.textSecondary,
+  },
+  tabButtonTextActive: {
+    color: colors.textOnPrimary,
   },
   balanceRow: {
     flexDirection: 'row',

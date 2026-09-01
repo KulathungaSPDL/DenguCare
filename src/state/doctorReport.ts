@@ -4,6 +4,7 @@ import {
   AppState,
   ArchivedIllness,
   BloodReport,
+  DengueTestRecord,
   DrinkEntry,
   IvFluidEntry,
   MedicationDose,
@@ -37,6 +38,7 @@ export interface DoctorReportData {
   temps: TempReading[];
   doses: MedicationDose[];
   reports: BloodReport[];
+  dengueTests: DengueTestRecord[];
 }
 
 interface RecordBag {
@@ -45,6 +47,7 @@ interface RecordBag {
   urine: UrineEntry[];
   temps: TempReading[];
   reports: BloodReport[];
+  dengueTests: DengueTestRecord[];
   medicationDoses: MedicationDose[];
   warningSigns: WarningSignsState;
 }
@@ -69,6 +72,7 @@ function buildReportData(
   const temps = [...records.temps].sort(byTimeDesc);
   const doses = [...records.medicationDoses].sort(byTimeDesc);
   const reports = [...records.reports].sort(byTimeAsc);
+  const dengueTests = [...records.dengueTests].sort(byTimeDesc);
   const activeWarningSigns = WARNING_SIGN_KEYS.filter((k) => records.warningSigns[k]);
 
   return {
@@ -86,6 +90,7 @@ function buildReportData(
     temps,
     doses,
     reports,
+    dengueTests,
   };
 }
 
@@ -101,6 +106,7 @@ export function buildDoctorReportData(state: AppState, now: Date): DoctorReportD
       urine: state.urine,
       temps: state.temps,
       reports: state.reports,
+      dengueTests: state.dengueTests,
       medicationDoses: state.medicationDoses,
       warningSigns: state.warningSigns,
     },
@@ -124,6 +130,7 @@ export function buildArchivedReportData(archived: ArchivedIllness, dobISO: strin
       urine: archived.urine,
       temps: archived.temps,
       reports: archived.reports,
+      dengueTests: archived.dengueTests,
       medicationDoses: archived.medicationDoses,
       warningSigns: archived.warningSigns,
     },

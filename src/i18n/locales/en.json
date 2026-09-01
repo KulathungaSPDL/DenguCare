@@ -143,11 +143,31 @@
     "oralIntakeTitle": "Oral intake",
     "ivFluidsTitle": "IV fluids",
     "urineOutputTitle": "Urine output",
+    "entryDetailsLabel": "entries",
     "temperatureHistoryTitle": "Temperature history",
     "medicationTitle": "Paracetamol doses",
     "noDoses": "No doses logged.",
     "bloodReportTitle": "Blood report trend (FBC)",
+    "viewFullReportButton": "View full report",
+    "dengueTestTitle": "Dengue tests (NS1/IgM/IgG/PCR)",
+    "noDengueTests": "No dengue tests logged.",
+    "dengueTestLabel": "Dengue test",
+    "photoAttached": "photo attached",
     "noteLabel": "Note"
+  },
+  "fullReportModal": {
+    "title": "Full Blood Report",
+    "dateTimeHeader": "Date/time",
+    "dayHeader": "Day",
+    "wbcHeader": "WBC",
+    "neutHeader": "Neut#",
+    "lymphHeader": "Lymph#",
+    "monoHeader": "Mono#",
+    "pltHeader": "PLT",
+    "mpvHeader": "MPV",
+    "hgbHeader": "HGB",
+    "hctHeader": "HCT",
+    "noteHeader": "Note"
   },
   "previousDataModal": {
     "title": "Previous Data",
@@ -175,7 +195,9 @@
     "checkbox2": "I will go to a hospital straight away if I get any warning sign, no matter what the app says.",
     "checkbox3": "I agree to the Terms of Use and the Privacy Notice, including storing my health records on this device and in my account.",
     "emergencyNote": "Emergency in Sri Lanka: call 1990 (Suwa Seriya ambulance). Dengue hotline: 1999.",
-    "continueButton": "Agree and Continue"
+    "continueButton": "Agree and Continue",
+    "showMore": "Show more",
+    "showLess": "Show less"
   },
   "signin": {
     "title": "Sign In",
@@ -233,6 +255,8 @@
   "dashboard": {
     "greeting": "Welcome back!",
     "heroSubtitle": "Let's stay on top of today's recovery.",
+    "firstWelcome": "Welcome, {{name}}!",
+    "welcomeDescription": "Your recovery companion is ready — log fluids, track symptoms and catch warning signs early, all in one calm, simple place.",
     "illnessDay": "Illness Day",
     "fluidBalanceToday": "Fluid Balance Today",
     "atRisk": "At Risk",
@@ -242,6 +266,8 @@
     "behindSubtitle": "About {{ml}} ml behind - sip {{goal}} ml now to catch up.",
     "onTrack": "On Track",
     "onTrackSubtitle": "Nice work - you're keeping pace with today's goal.",
+    "noDataToday": "Not Recorded Yet",
+    "noDataTodaySubtitle": "Log your first drink to start tracking today's fluid balance.",
     "inOut": "IN {{inMl}} ml  -  OUT {{outMl}} ml",
     "viewDetails": "View Details",
     "viewDetailsAria": "What counts toward fluid balance?",
@@ -274,7 +300,7 @@
     "logUrineTitle": "Log urine"
   },
   "fluidsScreen": {
-    "thisHour": "This hour",
+    "thisHour": "This hour's fluid target",
     "goalMet": "Goal met",
     "fluidBalanceByHour": "Fluid balance by hour",
     "viewTodayEntriesAria": "View today's entries",
@@ -298,8 +324,8 @@
   },
   "dayEntriesModal": {
     "title": "Today's entries",
-    "noDrinks": "No drinks logged today yet.",
-    "noUrine": "No urine passes logged today yet.",
+    "noDrinks": "No drinks logged yet.",
+    "noUrine": "No urine passes logged yet.",
     "drinksTab": "Drinks",
     "urineTab": "Urine",
     "ivTab": "IV Fluid"
@@ -319,6 +345,12 @@
     "channelName": "Hourly hydration reminders",
     "notificationTitle": "Time to hydrate",
     "notificationBody": "Sip {{ml}} ml now to stay on track this hour."
+  },
+  "missedReminder": {
+    "title": "Time to log your fluids",
+    "message": "It's been over an hour since your last fluid log. Log what you've had to keep your hydration tracking on track.",
+    "logNow": "Log now",
+    "cancel": "Not now"
   },
   "settingsMenu": {
     "viewProfile": "View Profile",
@@ -400,6 +432,17 @@
     "haematocritPlaceholder": "e.g. 42",
     "wbcLabel": "WBC count (x10^3/uL) (optional)",
     "wbcPlaceholder": "e.g. 4.2",
+    "moreValuesLabel": "more lab values",
+    "neutrophilsLabel": "Neutrophils # (x10^3/uL) (optional)",
+    "neutrophilsPlaceholder": "e.g. 1.5",
+    "lymphocytesLabel": "Lymphocytes # (x10^3/uL) (optional)",
+    "lymphocytesPlaceholder": "e.g. 2.0",
+    "monocytesLabel": "Monocytes # (x10^3/uL) (optional)",
+    "monocytesPlaceholder": "e.g. 0.3",
+    "mpvLabel": "MPV (fL) (optional)",
+    "mpvPlaceholder": "e.g. 9.5",
+    "hgbLabel": "Haemoglobin (g/dL) (optional)",
+    "hgbPlaceholder": "e.g. 12.0",
     "saveReport": "Save report",
     "noReportsYet": "No reports yet",
     "noReportsSubtitle": "Add your first blood report above - by photo or typed in - and we'll show your platelet and haematocrit trends here.",
@@ -412,7 +455,40 @@
     "deleteReportMsg": "This blood report will be removed from your platelet and haematocrit trends. This can't be undone.",
     "deleteReportSuccess": "The blood report has been removed.",
     "reportUpdated": "Blood report updated.",
-    "reportSaved": "Blood report saved."
+    "reportSaved": "Blood report saved.",
+    "dengueTestSectionTitle": "Dengue Test",
+    "addDengueTest": "Add dengue test",
+    "editDengueTest": "Edit dengue test",
+    "newDengueTest": "New dengue test",
+    "dengueTestLabel": "Test done",
+    "removePhotoAria": "Remove photo",
+    "viewPhotoAria": "View photo",
+    "dengueTestType": {
+      "ns1": "NS1 Antigen",
+      "igm": "IgM Antibody",
+      "igg": "IgG Antibody",
+      "pcr": "PCR"
+    },
+    "dengueTestResult": {
+      "positive": "Positive",
+      "negative": "Negative",
+      "pending": "Pending"
+    },
+    "ns1EarlyNote": "It's day {{day}} of fever. Submit an NS1 antigen test now for the most accurate result, then log it here once you have it.",
+    "ns1TimingNote": "It's day {{day}} of fever. NS1 antigen tests are most reliable in the first 3 days — ask your doctor about an antibody (IgM) test instead.",
+    "saveDengueTest": "Save dengue test",
+    "dengueTestSaved": "Dengue test saved.",
+    "dengueTestUpdated": "Dengue test updated.",
+    "noDengueTestsYet": "No dengue tests yet",
+    "noDengueTestsSubtitle": "Add an NS1, IgM, IgG or PCR result above once you have it, with a photo of the lab slip if you like.",
+    "deleteDengueTestTitle": "Delete this dengue test?",
+    "deleteDengueTestMsg": "This dengue test result will be removed. This can't be undone.",
+    "deleteDengueTestSuccess": "The dengue test has been removed."
+  },
+  "imageViewer": {
+    "hint": "Pinch, double-tap, or use +/- to zoom",
+    "zoomInAria": "Zoom in",
+    "zoomOutAria": "Zoom out"
   },
   "guidelines": {
     "button": "Dengue Prevention & Care Guide",

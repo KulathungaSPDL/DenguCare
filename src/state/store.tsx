@@ -2,6 +2,7 @@ import React, { createContext, useContext, useEffect, useMemo, useReducer } from
 
 import {
   clearAllLogs,
+  deleteDengueTest,
   deleteDrink,
   deleteIvFluid,
   deleteMedicationDose,
@@ -9,12 +10,14 @@ import {
   deleteTemp,
   deleteUrine,
   getAllKv,
+  insertDengueTest,
   insertDrink,
   insertIvFluid,
   insertMedicationDose,
   insertReport,
   insertTemp,
   insertUrine,
+  listDengueTests,
   listDrinks,
   listIvFluids,
   listMedicationDoses,
@@ -22,6 +25,7 @@ import {
   listTemps,
   listUrine,
   setKv,
+  updateDengueTest as updateDengueTestRow,
   updateDrink as updateDrinkRow,
   updateIvFluid as updateIvFluidRow,
   updateReport as updateReportRow,
@@ -39,6 +43,9 @@ import {
   CareMode,
   Condition,
   Consent,
+  DengueTestRecord,
+  DengueTestResult,
+  DengueTestType,
   DrinkEntry,
   DrinkKind,
   IvFluidEntry,
@@ -60,6 +67,7 @@ type Action =
   | { type: 'SET_CARE_MODE'; payload: { careMode: CareMode } }
   | { type: 'SET_LANGUAGE'; payload: { language: AppLanguage } }
   | { type: 'SET_REMINDERS_ON'; payload: { remindersOn: boolean } }
+  | { type: 'SET_DASHBOARD_WELCOME_SEEN' }
   | { type: 'START_ILLNESS'; payload: { feverStartISO: string } }
   | { type: 'RESET_ILLNESS' }
   | { type: 'ADD_DRINK'; payload: DrinkEntry }
@@ -74,6 +82,9 @@ type Action =
   | { type: 'ADD_REPORT'; payload: BloodReport }
   | { type: 'UPDATE_REPORT'; payload: BloodReport }
   | { type: 'REMOVE_REPORT'; payload: { id: string } }
+  | { type: 'ADD_DENGUE_TEST'; payload: DengueTestRecord }
+  | { type: 'UPDATE_DENGUE_TEST'; payload: DengueTestRecord }
+  | { type: 'REMOVE_DENGUE_TEST'; payload: { id: string } }
   | { type: 'ADD_MEDICATION_DOSE'; payload: MedicationDose }
   | { type: 'REMOVE_MEDICATION_DOSE'; payload: { id: string } }
   | { type: 'ADD_IV_FLUID'; payload: IvFluidEntry }
@@ -106,6 +117,8 @@ function reducer(state: AppState, action: Action): AppState {
       return { ...state, language: action.payload.language };
     case 'SET_REMINDERS_ON':
       return { ...state, remindersOn: action.payload.remindersOn };
+    case 'SET_DASHBOARD_WELCOME_SEEN':
+      return { ...state, dashboardWelcomeSeen: true };
     case 'START_ILLNESS':
       return {
         ...state,
@@ -125,6 +138,7 @@ function reducer(state: AppState, action: Action): AppState {
               urine: state.urine,
               temps: state.temps,
               reports: state.reports,
+              dengueTests: state.dengueTests,
               medicationDoses: state.medicationDoses,
               ivFluids: state.ivFluids,
               warningSigns: state.warningSigns,
@@ -140,6 +154,7 @@ function reducer(state: AppState, action: Action): AppState {
         urine: [],
         temps: [],
         reports: [],
+        dengueTests: [],
         medicationDoses: [],
         ivFluids: [],
         warningSigns: { ...emptyWarningSigns },
@@ -169,6 +184,12 @@ function reducer(state: AppState, action: Action): AppState {
       return { ...state, reports: state.reports.map((r) => (r.id === action.payload.id ? action.payload : r)) };
     case 'REMOVE_REPORT':
       return { ...state, reports: state.reports.filter((r) => r.id !== action.payload.id) };
+    case 'ADD_DENGUE_TEST':
+      return { ...state, dengueTests: [action.payload, ...state.dengueTests] };
+    case 'UPDATE_DENGUE_TEST':
+      return { ...state, dengueTests: state.dengueTests.map((d) => (d.id === action.payload.id ? action.payload : d)) };
+    case 'REMOVE_DENGUE_TEST':
+      return { ...state, dengueTests: state.dengueTests.filter((d) => d.id !== action.payload.id) };
     case 'ADD_MEDICATION_DOSE':
       return { ...state, medicationDoses: [action.payload, ...state.medicationDoses] };
     case 'REMOVE_MEDICATION_DOSE':
@@ -202,6 +223,7 @@ interface StoreContextValue {
     setCareMode: (careMode: CareMode) => void;
     setLanguage: (language: AppLanguage) => void;
     setRemindersOn: (remindersOn: boolean) => void;
+    markDashboardWelcomeSeen: () => void;
     startIllness: (feverStartISO: string) => void;
     resetIllness: () => void;
     addDrink: (amountMl: number, kind: DrinkKind, label: string, atISO?: string) => void;
@@ -216,6 +238,9 @@ interface StoreContextValue {
     addReport: (report: Omit<BloodReport, 'id' | 'atISO'> & { atISO?: string }) => void;
     updateReport: (id: string, report: Omit<BloodReport, 'id' | 'atISO'> & { atISO: string }) => void;
     removeReport: (id: string) => void;
+    addDengueTest: (type: DengueTestType, result: DengueTestResult, photoUri: string | null, atISO?: string) => void;
+    updateDengueTest: (id: string, type: DengueTestType, result: DengueTestResult, photoUri: string | null, atISO: string) => void;
+    removeDengueTest: (id: string) => void;
     addMedicationDose: (doseMg: number, atISO?: string) => void;
     removeMedicationDose: (id: string) => void;
     addIvFluid: (volumeMl: number, rateMlPerHr: number | null, fluidType: string, note: string, atISO?: string) => void;
@@ -253,12 +278,13 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
     let cancelled = false;
     (async () => {
       try {
-        const [kv, drinks, urine, temps, reports, medicationDoses, ivFluids] = await Promise.all([
+        const [kv, drinks, urine, temps, reports, dengueTests, medicationDoses, ivFluids] = await Promise.all([
           getAllKv(),
           listDrinks(),
           listUrine(),
           listTemps(),
           listReports(),
+          listDengueTests(),
           listMedicationDoses(),
           listIvFluids(),
         ]);
@@ -271,12 +297,14 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
           careMode: parseKv(kv.careMode, defaultState.careMode),
           language: parseKv(kv.language, defaultState.language),
           remindersOn: parseKv(kv.remindersOn, defaultState.remindersOn),
+          dashboardWelcomeSeen: parseKv(kv.dashboardWelcomeSeen, defaultState.dashboardWelcomeSeen),
           warningSigns: parseKv(kv.warningSigns, { ...emptyWarningSigns }),
           archivedIllnesses: parseKv(kv.archivedIllnesses, defaultState.archivedIllnesses),
           drinks,
           urine,
           temps,
           reports,
+          dengueTests,
           medicationDoses,
           ivFluids,
         };
@@ -331,6 +359,10 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
     if (!state.hydrated) return;
     setKv('remindersOn', state.remindersOn).catch(() => {});
   }, [state.hydrated, state.remindersOn]);
+  useEffect(() => {
+    if (!state.hydrated) return;
+    setKv('dashboardWelcomeSeen', state.dashboardWelcomeSeen).catch(() => {});
+  }, [state.hydrated, state.dashboardWelcomeSeen]);
 
   const actions = useMemo<StoreContextValue['actions']>(
     () => ({
@@ -342,6 +374,7 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
       setCareMode: (careMode) => dispatch({ type: 'SET_CARE_MODE', payload: { careMode } }),
       setLanguage: (language) => dispatch({ type: 'SET_LANGUAGE', payload: { language } }),
       setRemindersOn: (remindersOn) => dispatch({ type: 'SET_REMINDERS_ON', payload: { remindersOn } }),
+      markDashboardWelcomeSeen: () => dispatch({ type: 'SET_DASHBOARD_WELCOME_SEEN' }),
       startIllness: (feverStartISO) => dispatch({ type: 'START_ILLNESS', payload: { feverStartISO } }),
       resetIllness: () => {
         dispatch({ type: 'RESET_ILLNESS' });
@@ -396,6 +429,11 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
           plateletCount: report.plateletCount,
           haematocritPct: report.haematocritPct,
           wbcCount: report.wbcCount,
+          neutrophilsCount: report.neutrophilsCount,
+          lymphocytesCount: report.lymphocytesCount,
+          monocytesCount: report.monocytesCount,
+          mpv: report.mpv,
+          hgb: report.hgb,
           note: report.note,
           photoUri: report.photoUri,
         };
@@ -409,6 +447,11 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
           plateletCount: report.plateletCount,
           haematocritPct: report.haematocritPct,
           wbcCount: report.wbcCount,
+          neutrophilsCount: report.neutrophilsCount,
+          lymphocytesCount: report.lymphocytesCount,
+          monocytesCount: report.monocytesCount,
+          mpv: report.mpv,
+          hgb: report.hgb,
           note: report.note,
           photoUri: report.photoUri,
         };
@@ -418,6 +461,20 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
       removeReport: (id) => {
         dispatch({ type: 'REMOVE_REPORT', payload: { id } });
         deleteReport(id).catch(() => {});
+      },
+      addDengueTest: (type, result, photoUri, atISO) => {
+        const entry: DengueTestRecord = { id: makeId(), atISO: atISO ?? new Date().toISOString(), type, result, photoUri };
+        dispatch({ type: 'ADD_DENGUE_TEST', payload: entry });
+        insertDengueTest(entry).catch(() => {});
+      },
+      updateDengueTest: (id, type, result, photoUri, atISO) => {
+        const entry: DengueTestRecord = { id, atISO, type, result, photoUri };
+        dispatch({ type: 'UPDATE_DENGUE_TEST', payload: entry });
+        updateDengueTestRow(entry).catch(() => {});
+      },
+      removeDengueTest: (id) => {
+        dispatch({ type: 'REMOVE_DENGUE_TEST', payload: { id } });
+        deleteDengueTest(id).catch(() => {});
       },
       addMedicationDose: (doseMg, atISO) => {
         const entry: MedicationDose = {

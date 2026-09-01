@@ -17,6 +17,7 @@ type EntryTab = 'drinks' | 'urine' | 'iv';
 interface Props {
   visible: boolean;
   onClose: () => void;
+  title: string;
   drinks: DrinkEntry[];
   urine: UrineEntry[];
   ivFluids: IvFluidEntry[];
@@ -30,12 +31,13 @@ interface Props {
 }
 
 /** Centered popup opened from the hourly chart's info icon - shows every
- * entry behind today's chart, split into Drinks / Urine / IV Fluid tabs.
- * Tapping a row edits it; the trash icon deletes it. Only the entry list
- * scrolls; the header and tabs stay put. */
+ * entry behind whichever day the chart is currently on, split into
+ * Drinks / Urine / IV Fluid tabs. Tapping a row edits it; the trash icon
+ * deletes it. Only the entry list scrolls; the header and tabs stay put. */
 export function DayEntriesModal({
   visible,
   onClose,
+  title,
   drinks,
   urine,
   ivFluids,
@@ -75,7 +77,7 @@ export function DayEntriesModal({
         <Pressable style={StyleSheet.absoluteFill} onPress={onClose} />
         <Animated.View style={[styles.card, { opacity, transform: [{ scale }] }]}>
           <View style={styles.headerRow}>
-            <Text style={styles.title}>{t('dayEntriesModal.title')}</Text>
+            <Text style={styles.title}>{title}</Text>
             <Pressable onPress={onClose} hitSlop={12}>
               <Ionicons name="close" size={22} color={colors.textSecondary} />
             </Pressable>

@@ -87,15 +87,19 @@ export default function DashboardScreen() {
 
   const isCritical = isCriticalPhase(currentDay);
 
+  const hasFluidDataToday = intakeMl > 0 || outMl > 0;
+
   const fluidStatus = atRisk
     ? { word: t('dashboard.atRisk'), color: '#FF8A75', subtitle: t('dashboard.atRiskSubtitle') }
-    : behindMl > 0
-      ? {
-          word: t('dashboard.behind'),
-          color: '#F5C453',
-          subtitle: t('dashboard.behindSubtitle', { ml: behindMl, goal: targets.hourlyGoalMl }),
-        }
-      : { word: t('dashboard.onTrack'), color: '#6EE7B7', subtitle: t('dashboard.onTrackSubtitle') };
+    : !hasFluidDataToday
+      ? { word: t('dashboard.noDataToday'), color: '#CBE7E3', subtitle: t('dashboard.noDataTodaySubtitle') }
+      : behindMl > 0
+        ? {
+            word: t('dashboard.behind'),
+            color: '#F5C453',
+            subtitle: t('dashboard.behindSubtitle', { ml: behindMl, goal: targets.hourlyGoalMl }),
+          }
+        : { word: t('dashboard.onTrack'), color: '#6EE7B7', subtitle: t('dashboard.onTrackSubtitle') };
   const gaugePercent = targets.dailyFluidMl > 0 ? intakeMl / targets.dailyFluidMl : 0;
 
   function saveDrink(amountMl: number, kind: string | undefined, atISO: string) {
@@ -113,10 +117,7 @@ export default function DashboardScreen() {
 
   return (
     <Screen>
-      <DashboardHero
-        subtitle={t('dashboard.heroSubtitle')}
-        needsAttention={atRisk || showLowUrineOutputWarning || behindMl > 0}
-      />
+      <DashboardHero needsAttention={atRisk || showLowUrineOutputWarning || (hasFluidDataToday && behindMl > 0)} />
 
       <View style={styles.sectionHeader}>
         <Text style={styles.pageTitle}>{t('dashboard.illnessDay')}</Text>

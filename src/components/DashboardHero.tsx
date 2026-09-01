@@ -1,5 +1,5 @@
 import { Ionicons } from '@expo/vector-icons';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Image, LayoutChangeEvent, Pressable, StyleSheet, Text, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 
@@ -11,7 +11,6 @@ import { initialsFor } from '../utils/initials';
 import { SettingsMenu } from './SettingsMenu';
 
 interface Props {
-  subtitle: string;
   needsAttention?: boolean;
 }
 
@@ -22,12 +21,22 @@ interface Props {
 const BG_W = 1774;
 const BG_H = 887;
 
-export function DashboardHero({ subtitle, needsAttention }: Props) {
+export function DashboardHero({ needsAttention }: Props) {
   const { t } = useTranslation();
   const { state, actions } = useStore();
   const [menuVisible, setMenuVisible] = useState(false);
   const [cardSize, setCardSize] = useState({ width: 0, height: 0 });
   const { profile } = state;
+
+  // Captured once at mount so the first-open welcome copy stays on screen for
+  // this visit even after markDashboardWelcomeSeen() flips the persisted flag —
+  // it should only disappear on the *next* app open, not mid-session.
+  const [showWelcome] = useState(() => !state.dashboardWelcomeSeen);
+
+  useEffect(() => {
+    if (!state.dashboardWelcomeSeen) actions.markDashboardWelcomeSeen();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   function onCardLayout(e: LayoutChangeEvent) {
     const { width, height } = e.nativeEvent.layout;
@@ -87,8 +96,19 @@ export function DashboardHero({ subtitle, needsAttention }: Props) {
       </View>
 
       <View style={styles.greetingBlock}>
-        <Text style={styles.greeting}>{t('dashboard.greeting')}</Text>
-        <Text style={styles.subtitle}>{subtitle}</Text>
+        {showWelcome ? (
+          <>
+            <Text style={styles.greeting}>
+              {t('dashboard.firstWelcome', { name: profile.name.trim() || t('topBar.patientFallback') })}
+            </Text>
+            <Text style={styles.welcomeSubtitle}>{t('dashboard.welcomeDescription')}</Text>
+          </>
+        ) : (
+          <>
+            <Text style={styles.greeting}>{t('dashboard.greeting')}</Text>
+            <Text style={styles.subtitle}>{t('dashboard.heroSubtitle')}</Text>
+          </>
+        )}
       </View>
 
       <SettingsMenu visible={menuVisible} onClose={() => setMenuVisible(false)} />
@@ -103,7 +123,7 @@ const styles = StyleSheet.create({
     bottom: 0,
   },
   card: {
-    minHeight: 220,
+    minHeight: 188,
     borderRadius: radius.xl,
     padding: spacing.lg,
     overflow: 'hidden',
@@ -177,7 +197,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   greetingBlock: {
-    marginTop: spacing.xxl,
+    marginTop: spacing.xl,
     maxWidth: '68%',
   },
   greeting: {
@@ -192,5 +212,13 @@ const styles = StyleSheet.create({
     fontSize: fontSize.md,
     lineHeight: fontSize.md * 1.4,
     color: colors.textPrimary,
+  },
+  welcomeSubtitle: {
+    marginTop: spacing.xs,
+    fontFamily: fontFamily.baseSemiBold,
+    fontWeight: '600',
+    fontSize: fontSize.md,
+    lineHeight: fontSize.md * 1.4,
+    color: colors.primaryDark,
   },
 });

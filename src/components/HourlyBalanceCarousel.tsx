@@ -12,7 +12,7 @@ import { useTranslation } from 'react-i18next';
 
 import { dateFromKey, dateKeysBetween, formatDatePretty, localDateKey } from '../state/dateUtils';
 import { computeHourlyBuckets, filterByDateKey, HourBucket } from '../state/selectors';
-import { DrinkEntry, UrineEntry } from '../state/types';
+import { DrinkEntry, IvFluidEntry, UrineEntry } from '../state/types';
 import { colors } from '../theme/colors';
 import { spacing } from '../theme/spacing';
 import { fontFamily, fontSize } from '../theme/typography';
@@ -22,8 +22,10 @@ import { HourlyBalanceChart } from './HourlyBalanceChart';
 interface Props {
   allDrinks: DrinkEntry[];
   allUrine: UrineEntry[];
+  allIvFluids?: IvFluidEntry[];
   now: Date;
   hourlyGoalMl: number;
+  onDayChange?: (dateKey: string) => void;
 }
 
 interface Panel {
@@ -38,7 +40,7 @@ const DAY_MS = 86400000;
  * from the very first logged entry through today, so the carousel grows a
  * page at a time as the record grows instead of always showing a fixed
  * 3-day window. Opens on today's panel. */
-export function HourlyBalanceCarousel({ allDrinks, allUrine, now, hourlyGoalMl }: Props) {
+export function HourlyBalanceCarousel({ allDrinks, allUrine, allIvFluids = [], now, hourlyGoalMl, onDayChange }: Props) {
   const { t } = useTranslation();
   const [width, setWidth] = useState(0);
   const [pageIndex, setPageIndex] = useState(0);
@@ -48,16 +50,20 @@ export function HourlyBalanceCarousel({ allDrinks, allUrine, now, hourlyGoalMl }
   const yesterdayKey = localDateKey(new Date(now.getTime() - DAY_MS));
 
   const panels: Panel[] = useMemo(() => {
-    const allKeys = [...allDrinks, ...allUrine].map((e) => localDateKey(new Date(e.atISO)));
+    const allKeys = [...allDrinks, ...allUrine, ...allIvFluids].map((e) => localDateKey(new Date(e.atISO)));
     const earliestKey = allKeys.length > 0 ? allKeys.reduce((min, k) => (k < min ? k : min)) : todayKey;
     const startKey = earliestKey < todayKey ? earliestKey : todayKey;
 
-    return dateKeysBetween(startKey, todayKey).map((key) => ({
-      key,
-      label: key === todayKey ? t('common.today') : key === yesterdayKey ? t('common.yesterday') : formatDatePretty(dateFromKey(key)),
-      buckets: computeHourlyBuckets(filterByDateKey(allDrinks, key), filterByDateKey(allUrine, key)),
-    }));
-  }, [allDrinks, allUrine, todayKey, yesterdayKey]);
+    return dateKeysBetween(startKey, todayKey).map((key) => {
+      const dayDrinks = filterByDateKey(allDrinks, key);
+      const dayIvFluids = filterByDateKey(allIvFluids, key).map((f) => ({ atISO: f.atISO, amountMl: f.volumeMl }));
+      return {
+        key,
+        label: key === todayKey ? t('common.today') : key === yesterdayKey ? t('common.yesterday') : formatDatePretty(dateFromKey(key)),
+        buckets: computeHourlyBuckets([...dayDrinks, ...dayIvFluids], filterByDateKey(allUrine, key)),
+      };
+    });
+  }, [allDrinks, allUrine, allIvFluids, todayKey, yesterdayKey]);
 
   function onLayout(e: LayoutChangeEvent) {
     const w = e.nativeEvent.layout.width;
@@ -67,6 +73,13 @@ export function HourlyBalanceCarousel({ allDrinks, allUrine, now, hourlyGoalMl }
   useEffect(() => {
     setPageIndex(panels.length - 1);
   }, [panels.length]);
+
+  // Let the parent (fluid-in/out totals, entry list) know which day is on
+  // screen so it can stay in sync as the user swipes between panels.
+  useEffect(() => {
+    const key = panels[pageIndex]?.key;
+    if (key) onDayChange?.(key);
+  }, [pageIndex, panels, onDayChange]);
 
   // contentOffset alone isn't reliably respected as an *initial* scroll
   // position across platforms (notably Android), so scroll to the last

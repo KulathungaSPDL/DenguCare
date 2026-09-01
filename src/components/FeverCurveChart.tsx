@@ -27,7 +27,10 @@ const HOUR_WIDTH = 22;
 
 // Absolute clinical bounds the Y-axis will never go outside.
 const ABS_Y_MIN = 35;
-const ABS_Y_MAX = 41;
+const ABS_Y_MAX = 50;
+// Sensible zoom when readings don't need the full range — most fevers sit
+// well under this, so the chart stays readable instead of looking flat.
+const DEFAULT_Y_MAX = 41;
 
 export function FeverCurveChart({ readings, feverStartISO, shadedStart = 3, shadedEnd = 7, settledLine = 37.5 }: Props) {
   const { t } = useTranslation();
@@ -47,7 +50,7 @@ export function FeverCurveChart({ readings, feverStartISO, shadedStart = 3, shad
     const hi = Math.max(...values, 38);
     const min = Math.max(ABS_Y_MIN, Math.floor(lo - 0.5));
     const max = Math.min(ABS_Y_MAX, Math.ceil(hi + 0.5));
-    return max - min >= 2 ? { yMin: min, yMax: max } : { yMin: ABS_Y_MIN, yMax: ABS_Y_MAX };
+    return max - min >= 2 ? { yMin: min, yMax: max } : { yMin: ABS_Y_MIN, yMax: DEFAULT_Y_MAX };
   }, [sorted, settledLine]);
 
   const plotH = CHART_HEIGHT - TOP_PAD - BOTTOM_PAD;

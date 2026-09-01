@@ -58,6 +58,43 @@ CREATE INDEX IF NOT EXISTS idx_meds_atISO ON medication_doses(atISO);
 CREATE INDEX IF NOT EXISTS idx_iv_atISO ON iv_fluid_entries(atISO);
 `;
 
+const SCHEMA_V2 = `
+ALTER TABLE blood_reports ADD COLUMN dengueTestType TEXT;
+ALTER TABLE blood_reports ADD COLUMN dengueTestResult TEXT;
+`;
+
+// Superseded by dengueTestsJson (a report could carry more than one dengue
+// test) — the V2 columns are left in place on already-migrated devices since
+// SQLite can't cheaply drop columns, but nothing reads them anymore.
+const SCHEMA_V3 = `
+ALTER TABLE blood_reports ADD COLUMN dengueTestsJson TEXT;
+`;
+
+// Dengue tests (NS1/IgM/IgG/PCR) moved out to their own table — logged on
+// their own card independently of the FBC blood_reports, since they're
+// often done at a different time/lab. blood_reports.dengueTestsJson from V3
+// is left in place unused, same reason as the V2 columns above.
+const SCHEMA_V4 = `
+CREATE TABLE IF NOT EXISTS dengue_tests (
+  id TEXT PRIMARY KEY NOT NULL,
+  atISO TEXT NOT NULL,
+  type TEXT NOT NULL,
+  result TEXT NOT NULL,
+  photoUri TEXT
+);
+CREATE INDEX IF NOT EXISTS idx_dengue_tests_atISO ON dengue_tests(atISO);
+`;
+
+// Extra FBC differential fields a user can transcribe from a photographed
+// lab slip alongside the original platelet/HCT/WBC trio.
+const SCHEMA_V5 = `
+ALTER TABLE blood_reports ADD COLUMN neutrophilsCount REAL;
+ALTER TABLE blood_reports ADD COLUMN lymphocytesCount REAL;
+ALTER TABLE blood_reports ADD COLUMN monocytesCount REAL;
+ALTER TABLE blood_reports ADD COLUMN mpv REAL;
+ALTER TABLE blood_reports ADD COLUMN hgb REAL;
+`;
+
 async function migrate(db: SQLite.SQLiteDatabase): Promise<void> {
   const row = await db.getFirstAsync<{ user_version: number }>('PRAGMA user_version');
   const version = row?.user_version ?? 0;
@@ -65,6 +102,22 @@ async function migrate(db: SQLite.SQLiteDatabase): Promise<void> {
   if (version < 1) {
     await db.execAsync(SCHEMA_V1);
     await db.execAsync('PRAGMA user_version = 1');
+  }
+  if (version < 2) {
+    await db.execAsync(SCHEMA_V2);
+    await db.execAsync('PRAGMA user_version = 2');
+  }
+  if (version < 3) {
+    await db.execAsync(SCHEMA_V3);
+    await db.execAsync('PRAGMA user_version = 3');
+  }
+  if (version < 4) {
+    await db.execAsync(SCHEMA_V4);
+    await db.execAsync('PRAGMA user_version = 4');
+  }
+  if (version < 5) {
+    await db.execAsync(SCHEMA_V5);
+    await db.execAsync('PRAGMA user_version = 5');
   }
 }
 

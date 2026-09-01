@@ -3,27 +3,32 @@ import React from 'react';
 
 import { BottomNav } from '../../src/components/BottomNav';
 import { useHourlyReminders } from '../../src/hooks/useHourlyReminders';
+import { useMissedReminderAlert } from '../../src/hooks/useMissedReminderAlert';
 import { useStore } from '../../src/state/store';
 
 export default function TabsLayout() {
   const { state } = useStore();
   useHourlyReminders();
+  const { modal: missedReminderModal } = useMissedReminderAlert();
 
   if (!state.hydrated) return null;
   if (!state.illness) return <Redirect href="/onboarding/fever-start" />;
 
   return (
-    <Tabs
-      tabBar={(props) => <BottomNav {...props} />}
-      screenOptions={{
-        headerShown: false,
-      }}
-    >
-      <Tabs.Screen name="index" options={{ title: 'Dashboard' }} />
-      <Tabs.Screen name="fluids" options={{ title: 'Fluids' }} />
-      <Tabs.Screen name="temp" options={{ title: 'Temp' }} />
-      <Tabs.Screen name="reports" options={{ title: 'Reports' }} />
-      <Tabs.Screen name="safety" options={{ title: 'Safety' }} />
-    </Tabs>
+    <>
+      <Tabs
+        tabBar={(props) => <BottomNav {...props} />}
+        screenOptions={{
+          headerShown: false,
+        }}
+      >
+        <Tabs.Screen name="index" options={{ title: 'Dashboard' }} />
+        <Tabs.Screen name="fluids" options={{ title: 'Fluids' }} />
+        <Tabs.Screen name="temp" options={{ title: 'Temp' }} />
+        <Tabs.Screen name="reports" options={{ title: 'Reports' }} />
+        <Tabs.Screen name="safety" options={{ title: 'Safety' }} />
+      </Tabs>
+      {missedReminderModal}
+    </>
   );
 }

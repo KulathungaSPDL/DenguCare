@@ -143,11 +143,31 @@
     "oralIntakeTitle": "මුඛයෙන් ගත් තරල",
     "ivFluidsTitle": "IV තරල",
     "urineOutputTitle": "මුත්‍රා පිටවීම",
+    "entryDetailsLabel": "විස්තර",
     "temperatureHistoryTitle": "උෂ්ණත්ව ඉතිහාසය",
     "medicationTitle": "පැරසිටමෝල් මාත්‍රා",
     "noDoses": "මාත්‍රා කිසිවක් ලොග් කර නැත.",
     "bloodReportTitle": "රුධිර වාර්තා ප්‍රවණතාව (FBC)",
+    "viewFullReportButton": "සම්පූර්ණ වාර්තාව බලන්න",
+    "dengueTestTitle": "ඩෙංගු පරීක්ෂණ (NS1/IgM/IgG/PCR)",
+    "noDengueTests": "ඩෙංගු පරීක්ෂණ කිසිවක් ලොග් කර නැත.",
+    "dengueTestLabel": "ඩෙංගු පරීක්ෂණය",
+    "photoAttached": "ඡායාරූපය අමුණා ඇත",
     "noteLabel": "සටහන"
+  },
+  "fullReportModal": {
+    "title": "සම්පූර්ණ රුධිර වාර්තාව",
+    "dateTimeHeader": "දිනය/වේලාව",
+    "dayHeader": "දිනය",
+    "wbcHeader": "WBC",
+    "neutHeader": "Neut#",
+    "lymphHeader": "Lymph#",
+    "monoHeader": "Mono#",
+    "pltHeader": "PLT",
+    "mpvHeader": "MPV",
+    "hgbHeader": "HGB",
+    "hctHeader": "HCT",
+    "noteHeader": "සටහන"
   },
   "previousDataModal": {
     "title": "පෙර දත්ත",
@@ -175,7 +195,9 @@
     "checkbox2": "යෙදුම කුමක් පැවසුවත්, මට යම් අනතුරු ඇඟවීමේ සලකුණක් ඇති වුවහොත් මම වහාම රෝහලට යන්නෙමි.",
     "checkbox3": "මගේ සෞඛ්‍ය වාර්තා මෙම උපාංගයේ සහ මගේ ගිණුමේ ගබඩා කිරීම ඇතුළුව, භාවිත නියම සහ පෞද්ගලිකත්ව දැන්වීමට මම එකඟ වෙමි.",
     "emergencyNote": "ශ්‍රී ලංකාවේ හදිසි අවස්ථා: 1990 (සුව සැරිය ගිලන් රථය) අමතන්න. ඩෙංගු උපදෙස් අංකය: 1999.",
-    "continueButton": "එකඟයි, ඉදිරියට යන්න"
+    "continueButton": "එකඟයි, ඉදිරියට යන්න",
+    "showMore": "තව බලන්න",
+    "showLess": "අඩුවෙන් බලන්න"
   },
   "signin": {
     "title": "පිවිසෙන්න",
@@ -233,6 +255,8 @@
   "dashboard": {
     "greeting": "නැවත සාදරයෙන් පිළිගනිමු!",
     "heroSubtitle": "අද දින සුවවීම මනාව අනුගමනය කරමු.",
+    "firstWelcome": "සාදරයෙන් පිළිගනිමු, {{name}}!",
+    "welcomeDescription": "ඔබේ සුවවීමේ සහායක දැන් සූදානම් — ජල පාන සටහන් කරන්න, රෝග ලක්ෂණ නිරීක්ෂණය කරන්න, අනතුරු ඇඟවීම් කල් තියා අඳුනාගන්න — සියල්ල එකම, සරල තැනක.",
     "illnessDay": "රෝග දිනය",
     "fluidBalanceToday": "අද දින තරල සමතුලිතතාවය",
     "atRisk": "අවදානම් තත්වයේ",
@@ -242,6 +266,8 @@
     "behindSubtitle": "ml {{ml}}කින් පසුගාමීයි - දැන් ml {{goal}}ක් පානය කර ලුහුබැඳ ගන්න.",
     "onTrack": "නිවැරදි මාවතේ",
     "onTrackSubtitle": "හොඳ වැඩක් - ඔබ අද දිනට ඉලක්කය සමඟ ගැළපෙමින් සිටී.",
+    "noDataToday": "තවම සටහන් වී නැත",
+    "noDataTodaySubtitle": "අද දිනයේ ජල සමතුලිතතාවය නිරීක්ෂණය කිරීම ආරම්භ කිරීමට ඔබේ පළමු පානය සටහන් කරන්න.",
     "inOut": "ඇතුළට ml {{inMl}}  -  පිටතට ml {{outMl}}",
     "viewDetails": "විස්තර බලන්න",
     "viewDetailsAria": "තරල සමතුලිතතාවයට ගණන් ගැනෙන්නේ කුමක්ද?",
@@ -274,7 +300,7 @@
     "logUrineTitle": "මුත්‍රාව ලොග් කරන්න"
   },
   "fluidsScreen": {
-    "thisHour": "මෙම පැය",
+    "thisHour": "මෙම පැයේ තරල ඉලක්කය",
     "goalMet": "ඉලක්කය සපුරා ඇත",
     "fluidBalanceByHour": "පැය අනුව තරල සමතුලිතතාවය",
     "viewTodayEntriesAria": "අද දින ඇතුළත් කිරීම් බලන්න",
@@ -298,8 +324,8 @@
   },
   "dayEntriesModal": {
     "title": "අද දින ඇතුළත් කිරීම්",
-    "noDrinks": "අද දින පාන කිසිවක් තවම ලොග් කර නැත.",
-    "noUrine": "අද දින මුත්‍රා පහ කිරීම් කිසිවක් තවම ලොග් කර නැත.",
+    "noDrinks": "පාන කිසිවක් තවම ලොග් කර නැත.",
+    "noUrine": "මුත්‍රා පහ කිරීම් කිසිවක් තවම ලොග් කර නැත.",
     "drinksTab": "පාන",
     "urineTab": "මුත්‍රාව",
     "ivTab": "IV තරලය"
@@ -319,6 +345,12 @@
     "channelName": "පැයකට වරක් ජල පාන මතක් කිරීම්",
     "notificationTitle": "ජලය පානය කළ යුතු වේලාව",
     "notificationBody": "මෙම පැය තුළ ඉලක්කයේ රැඳී සිටීමට දැන් ml {{ml}}ක් පානය කරන්න."
+  },
+  "missedReminder": {
+    "title": "ඔබේ ජල පාන සටහන් කිරීමට වේලාවයි",
+    "message": "ඔබේ අවසාන ජල පාන සටහනෙන් පැයකට වඩා ගතවී ඇත. ඔබේ සජලනය ලුහුබැඳීම දිගටම පවත්වා ගැනීමට ඔබ පානය කළ දේ සටහන් කරන්න.",
+    "logNow": "දැන් සටහන් කරන්න",
+    "cancel": "දැන් නොවේ"
   },
   "settingsMenu": {
     "viewProfile": "පැතිකඩ බලන්න",
@@ -400,6 +432,17 @@
     "haematocritPlaceholder": "උදා. 42",
     "wbcLabel": "WBC ගණන (x10^3/uL) (විකල්පයි)",
     "wbcPlaceholder": "උදා. 4.2",
+    "moreValuesLabel": "තවත් රුධිර වටිනාකම්",
+    "neutrophilsLabel": "Neutrophils # (x10^3/uL) (විකල්පයි)",
+    "neutrophilsPlaceholder": "උදා. 1.5",
+    "lymphocytesLabel": "Lymphocytes # (x10^3/uL) (විකල්පයි)",
+    "lymphocytesPlaceholder": "උදා. 2.0",
+    "monocytesLabel": "Monocytes # (x10^3/uL) (විකල්පයි)",
+    "monocytesPlaceholder": "උදා. 0.3",
+    "mpvLabel": "MPV (fL) (විකල්පයි)",
+    "mpvPlaceholder": "උදා. 9.5",
+    "hgbLabel": "රුධිර වර්ණකය (g/dL) (විකල්පයි)",
+    "hgbPlaceholder": "උදා. 12.0",
     "saveReport": "වාර්තාව සුරකින්න",
     "noReportsYet": "තවම වාර්තා නැත",
     "noReportsSubtitle": "ඔබේ ප්ලේට්ලට් සහ හීමැටොක්‍රිට් ප්‍රවණතා මෙහි පෙන්වීමට ඉහත ඔබේ පළමු රුධිර වාර්තාව - ඡායාරූපයකින් හෝ ටයිප් කර - එක් කරන්න.",
@@ -412,7 +455,40 @@
     "deleteReportMsg": "මෙම රුධිර වාර්තාව ඔබේ ප්ලේට්ලට් සහ හීමැටොක්‍රිට් ප්‍රවණතාවෙන් ඉවත් කරනු ලැබේ. මෙය අහෝසි කළ නොහැක.",
     "deleteReportSuccess": "රුධිර වාර්තාව ඉවත් කර ඇත.",
     "reportUpdated": "රුධිර වාර්තාව යාවත්කාලීන කරන ලදී.",
-    "reportSaved": "රුධිර වාර්තාව සුරකින ලදී."
+    "reportSaved": "රුධිර වාර්තාව සුරකින ලදී.",
+    "dengueTestSectionTitle": "ඩෙංගු පරීක්ෂණය",
+    "addDengueTest": "ඩෙංගු පරීක්ෂණයක් එක් කරන්න",
+    "editDengueTest": "ඩෙංගු පරීක්ෂණය සංස්කරණය කරන්න",
+    "newDengueTest": "නව ඩෙංගු පරීක්ෂණය",
+    "dengueTestLabel": "කරන ලද පරීක්ෂණය",
+    "removePhotoAria": "ඡායාරූපය ඉවත් කරන්න",
+    "viewPhotoAria": "ඡායාරූපය බලන්න",
+    "dengueTestType": {
+      "ns1": "NS1 ප්‍රතිදේහජනක",
+      "igm": "IgM ප්‍රතිදේහ",
+      "igg": "IgG ප්‍රතිදේහ",
+      "pcr": "PCR"
+    },
+    "dengueTestResult": {
+      "positive": "ධනාත්මක",
+      "negative": "ඍණාත්මක",
+      "pending": "බලාපොරොත්තුවෙන්"
+    },
+    "ns1EarlyNote": "මෙය උණේ {{day}} වන දිනයයි. වඩාත් නිවැරදි ප්‍රතිඵලයක් සඳහා දැන් NS1 ප්‍රතිදේහජනක පරීක්ෂණයක් කරවා, ප්‍රතිඵලය ලැබුණු පසු මෙහි සටහන් කරන්න.",
+    "ns1TimingNote": "මෙය උණේ {{day}} වන දිනයයි. NS1 ප්‍රතිදේහජනක පරීක්ෂණ මුල් දින 3 තුළ වඩාත් විශ්වාසදායකයි — ප්‍රතිදේහ (IgM) පරීක්ෂණයක් ගැන ඔබේ වෛද්‍යවරයාගෙන් අසන්න.",
+    "saveDengueTest": "ඩෙංගු පරීක්ෂණය සුරකින්න",
+    "dengueTestSaved": "ඩෙංගු පරීක්ෂණය සුරකින ලදී.",
+    "dengueTestUpdated": "ඩෙංගු පරීක්ෂණය යාවත්කාලීන කරන ලදී.",
+    "noDengueTestsYet": "තවම ඩෙංගු පරීක්ෂණ නැත",
+    "noDengueTestsSubtitle": "ප්‍රතිඵලය ලැබුණු පසු NS1, IgM, IgG හෝ PCR ප්‍රතිඵලයක් ඉහත එක් කරන්න, ඔබ කැමති නම් රසායනාගාර පත්‍රිකාවේ ඡායාරූපයක් සමඟ.",
+    "deleteDengueTestTitle": "මෙම ඩෙංගු පරීක්ෂණය මකන්නද?",
+    "deleteDengueTestMsg": "මෙම ඩෙංගු පරීක්ෂණ ප්‍රතිඵලය ඉවත් කරනු ලැබේ. මෙය අහෝසි කළ නොහැක.",
+    "deleteDengueTestSuccess": "ඩෙංගු පරීක්ෂණය ඉවත් කර ඇත."
+  },
+  "imageViewer": {
+    "hint": "විශාල කිරීමට ඇඟිලි දෙකකින් අදින්න, දෙවරක් තට්ටු කරන්න, හෝ +/- භාවිත කරන්න",
+    "zoomInAria": "විශාල කරන්න",
+    "zoomOutAria": "කුඩා කරන්න"
   },
   "guidelines": {
     "button": "ඩෙංගු වැළැක්වීම සහ රැකවරණ මාර්ගෝපදේශය",
