@@ -1,3 +1,4 @@
+import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { StatusBar } from 'expo-status-bar';
 import React, { useEffect, useRef } from 'react';
@@ -25,10 +26,12 @@ const LANGUAGE_OPTIONS: { code: Exclude<AppLanguage, null>; label: string }[] = 
   { code: 'ta', label: 'தமிழ்' },
 ];
 
-// Shared visual content for the startup screen, rendered on every cold start
-// from app/index.tsx before the app decides where to send the user next.
-// A warm teal gradient hero with the brand mark and the CTA doing the rest -
-// deliberately spare, so it reads as a clinical-grade product, not a mascot app.
+const featureItems = [
+  { icon: 'water-outline', title: 'Fluid tracking', caption: 'Daily intake and urine output at a glance.' },
+  { icon: 'shield-checkmark-outline', title: 'Warning signs', caption: 'Know what to watch for and when to act.' },
+  { icon: 'document-text-outline', title: 'Recovery summary', caption: 'Share clear updates with your care team.' },
+] as const;
+
 export function WelcomeContent({ onContinue }: WelcomeContentProps) {
   const { t, i18n } = useTranslation();
   const { actions } = useStore();
@@ -41,11 +44,11 @@ export function WelcomeContent({ onContinue }: WelcomeContentProps) {
   return (
     <View style={styles.root}>
       <StatusBar style="light" />
-      <LinearGradient colors={gradients.heroTeal} start={{ x: 0.1, y: 0 }} end={{ x: 0.9, y: 1 }} style={StyleSheet.absoluteFill} />
+      <LinearGradient colors={gradients.heroTeal} start={{ x: 0.2, y: 0 }} end={{ x: 1, y: 1 }} style={StyleSheet.absoluteFill} />
       <Svg width="100%" height="100%" style={StyleSheet.absoluteFill} pointerEvents="none">
-        <Circle cx="88%" cy="4%" r="90" fill="#FFFFFF" opacity={0.07} />
-        <Circle cx="-6%" cy="30%" r="70" fill="#FFFFFF" opacity={0.06} />
-        <Circle cx="100%" cy="78%" r="120" fill="#FFFFFF" opacity={0.05} />
+        <Circle cx="88%" cy="6%" r="120" fill="#FFFFFF" opacity={0.08} />
+        <Circle cx="-8%" cy="28%" r="90" fill="#FFFFFF" opacity={0.06} />
+        <Circle cx="82%" cy="90%" r="160" fill="#FFFFFF" opacity={0.05} />
       </Svg>
 
       <SafeAreaView style={styles.safe} edges={['top', 'left', 'right', 'bottom']}>
@@ -66,15 +69,43 @@ export function WelcomeContent({ onContinue }: WelcomeContentProps) {
           })}
         </View>
 
-        <Animated.View style={[styles.center, { opacity: fade, transform: [{ translateY: fade.interpolate({ inputRange: [0, 1], outputRange: [16, 0] }) }] }]}>
-          <CareBadge size={128} />
+        <Animated.View
+          style={[
+            styles.center,
+            {
+              opacity: fade,
+              transform: [{ translateY: fade.interpolate({ inputRange: [0, 1], outputRange: [16, 0] }) }],
+            },
+          ]}
+        >
+          <View style={styles.heroWrap}>
+            <View style={styles.logoWrap}>
+              <CareBadge size={138} />
+            </View>
 
-          <Text style={styles.brand}>DenguCare</Text>
-          <View style={styles.divider} />
-          <Text style={styles.tagline}>{t('welcome.tagline')}</Text>
+            <View style={styles.textBlock}>
+              <Text style={styles.h1}>DenguCare</Text>
+              <Text style={styles.tagline}>{t('welcome.tagline')}</Text>
+            </View>
+          </View>
+
+          <View style={styles.featurePanel}>
+            <Text style={styles.featureTitle}>Everything you need, in one place</Text>
+            {featureItems.map((feature) => (
+              <View key={feature.title} style={styles.featureRow}>
+                <View style={styles.featureIconWrap}>
+                  <Ionicons name={feature.icon} size={18} color={colors.primary} />
+                </View>
+                <View style={styles.featureTextWrap}>
+                  <Text style={styles.featureLabel}>{feature.title}</Text>
+                  <Text style={styles.featureCaption}>{feature.caption}</Text>
+                </View>
+              </View>
+            ))}
+          </View>
         </Animated.View>
 
-        <PrimaryButton label={t('welcome.getStarted')} icon="chevron-forward" onPress={onContinue} style={styles.button} />
+        <PrimaryButton label={t('welcome.getStarted')} icon="arrow-forward" onPress={onContinue} style={styles.button} />
       </SafeAreaView>
     </View>
   );
@@ -91,11 +122,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing.xl,
     paddingTop: spacing.lg,
     paddingBottom: spacing.lg,
-  },
-  center: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
   },
   langRow: {
     flexDirection: 'row',
@@ -125,26 +151,102 @@ const styles = StyleSheet.create({
     fontFamily: fontFamily.baseBold,
     fontWeight: '700',
   },
-  brand: {
-    marginTop: spacing.xl,
+  center: {
+    flex: 1,
+    justifyContent: 'center',
+  },
+  heroWrap: {
+    paddingVertical: spacing.md,
+    alignItems: 'center',
+  },
+  logoWrap: {
+    width: 138,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: spacing.lg,
+  },
+  textBlock: {
+    width: '100%',
+    alignItems: 'center',
+  },
+  h1: {
     color: colors.textOnDark,
     fontFamily: fontFamily.baseExtraBold,
-    fontSize: fontSize.display,
-    letterSpacing: 0.5,
-  },
-  divider: {
-    marginTop: spacing.md,
-    width: 40,
-    height: 3,
-    borderRadius: 2,
-    backgroundColor: 'rgba(255,255,255,0.35)',
+    fontSize: 48,
+    lineHeight: 52,
+    letterSpacing: -1.2,
+    textShadowColor: 'rgba(0,0,0,0.18)',
+    textShadowOffset: { width: 0, height: 4 },
+    textShadowRadius: 12,
   },
   tagline: {
-    marginTop: spacing.md,
-    color: '#BFF0EC',
+    marginTop: spacing.sm,
+    color: '#C9F1ED',
     fontFamily: fontFamily.baseSemiBold,
+    fontSize: fontSize.md,
+    lineHeight: 22,
+  },
+  highlightsRow: {
+    flexDirection: 'row',
+    marginTop: spacing.xl,
+    gap: spacing.sm,
+    flexWrap: 'wrap',
+  },
+  highlightChip: {
+    paddingVertical: spacing.sm,
+    paddingHorizontal: spacing.md,
+    borderRadius: 999,
+    backgroundColor: 'rgba(255,255,255,0.1)',
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.18)',
+  },
+  highlightChipText: {
+    color: colors.textOnDark,
+    fontFamily: fontFamily.baseMedium,
+    fontSize: fontSize.sm,
+  },
+  featurePanel: {
+    marginTop: spacing.xl,
+    backgroundColor: 'rgba(255,255,255,0.14)',
+    borderRadius: 24,
+    padding: spacing.xl,
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.18)',
+  },
+  featureTitle: {
+    color: colors.textOnDark,
+    fontFamily: fontFamily.baseBold,
     fontSize: fontSize.lg,
-    textAlign: 'center',
+    marginBottom: spacing.md,
+  },
+  featureRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: spacing.md,
+  },
+  featureIconWrap: {
+    width: 38,
+    height: 38,
+    borderRadius: 12,
+    backgroundColor: '#DDF8F5',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: spacing.md,
+  },
+  featureTextWrap: {
+    flex: 1,
+  },
+  featureLabel: {
+    color: colors.textOnDark,
+    fontFamily: fontFamily.baseSemiBold,
+    fontSize: fontSize.md,
+  },
+  featureCaption: {
+    marginTop: 2,
+    color: '#C9F1ED',
+    fontFamily: fontFamily.base,
+    fontSize: fontSize.sm,
+    lineHeight: 18,
   },
   button: {
     width: '100%',

@@ -30,7 +30,13 @@ import {
 } from '../../src/state/dateUtils';
 import { DRINK_KINDS } from '../../src/state/drinkKinds';
 import { isCriticalPhase, phaseLabel } from '../../src/state/phase';
-import { filterByDateKey, useFluidSummary, usePlasmaLeakageAlert, useTodayEntries } from '../../src/state/selectors';
+import {
+  filterByDateKey,
+  useFluidSummary,
+  useLowUrineOutputWarning,
+  usePlasmaLeakageAlert,
+  useTodayEntries,
+} from '../../src/state/selectors';
 import { useStore } from '../../src/state/store';
 import { colors } from '../../src/theme/colors';
 import { gradients } from '../../src/theme/gradients';
@@ -74,6 +80,7 @@ export default function DashboardScreen() {
       ? sumMl(filterByDateKey(state.ivFluids, localDateKey(now)).map((f) => ({ amountMl: f.volumeMl })))
       : 0;
   const intakeMl = inMl + todayIvMl;
+  const showLowUrineOutputWarning = useLowUrineOutputWarning(intakeMl, outMl);
 
   const lastTemp = state.temps[0];
   const lastUrine = state.urine[0];
@@ -108,7 +115,7 @@ export default function DashboardScreen() {
     <Screen>
       <DashboardHero
         subtitle={t('dashboard.heroSubtitle')}
-        needsAttention={atRisk || behindMl > 0}
+        needsAttention={atRisk || showLowUrineOutputWarning || behindMl > 0}
       />
 
       <View style={styles.sectionHeader}>
@@ -125,6 +132,14 @@ export default function DashboardScreen() {
         <View style={{ marginTop: spacing.lg }}>
           <Banner icon="alert-circle-outline" tone="danger">
             {t('fbc.plasmaLeakageBanner')}
+          </Banner>
+        </View>
+      ) : null}
+
+      {showLowUrineOutputWarning ? (
+        <View style={{ marginTop: spacing.lg }}>
+          <Banner icon="alert-circle-outline" tone="danger">
+            {t('dashboard.lowUrineOutputBanner')}
           </Banner>
         </View>
       ) : null}

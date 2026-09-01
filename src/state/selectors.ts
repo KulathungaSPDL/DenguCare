@@ -58,6 +58,20 @@ export function useHyponatremiaWarning(state: AppState, now: Date): boolean {
   }, [drinks]);
 }
 
+const LOW_OUTPUT_MIN_INTAKE_ML = 300; // don't judge before there's enough intake to compare against
+const LOW_OUTPUT_RATIO = 0.3; // output under 30% of intake
+
+/** True once intake is high enough to judge (>=300ml) but urine output stays
+ * under 30% of it — output far below intake can signal fluid retention /
+ * plasma leakage, not just under-drinking. Takes raw totals rather than
+ * state/now so callers can include IV fluid in intake where relevant. */
+export function useLowUrineOutputWarning(inMl: number, outMl: number): boolean {
+  return useMemo(() => {
+    if (inMl < LOW_OUTPUT_MIN_INTAKE_ML) return false;
+    return outMl < inMl * LOW_OUTPUT_RATIO;
+  }, [inMl, outMl]);
+}
+
 const PLASMA_LEAKAGE_HCT_RISE = 1.2; // +20% over baseline
 const PLASMA_LEAKAGE_PLATELET_THRESHOLD = 100; // x10^3/uL
 

@@ -16,7 +16,8 @@
         "expo-image-picker",
         {
           "photosPermission": "DenguCare uses your photos to attach a blood report image to your record.",
-          "cameraPermission": "DenguCare uses your camera to photograph a blood report for your record."
+          "cameraPermission": "DenguCare uses your camera to photograph a blood report for your record.",
+          "microphonePermission": false
         }
       ],
       "expo-notifications",
@@ -27,6 +28,7 @@
       "supportsTablet": true
     },
     "android": {
+      "package": "com.loonslab.dengucare",
       "adaptiveIcon": {
         "backgroundColor": "#E6F4FE",
         "foregroundImage": "./assets/android-icon-foreground.png",
@@ -37,6 +39,13 @@
     },
     "web": {
       "favicon": "./assets/favicon.png"
-    }
+    },
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "69c08b78-8126-4dad-8b8f-5dcbd76bd152"
+      }
+    },
+    "owner": "dinusha_lakmal"
   }
 }

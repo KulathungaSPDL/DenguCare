@@ -16,9 +16,16 @@ import { Screen } from '../../src/components/Screen';
 import { useDeleteConfirmation } from '../../src/hooks/useDeleteConfirmation';
 import { useNow } from '../../src/hooks/useNow';
 import { useSuccessAlert } from '../../src/hooks/useSuccessAlert';
+import { sumMl } from '../../src/state/calculations';
 import { localDateKey } from '../../src/state/dateUtils';
 import { DRINK_KINDS } from '../../src/state/drinkKinds';
-import { filterByDateKey, useFluidSummary, useHyponatremiaWarning, useTodayEntries } from '../../src/state/selectors';
+import {
+  filterByDateKey,
+  useFluidSummary,
+  useHyponatremiaWarning,
+  useLowUrineOutputWarning,
+  useTodayEntries,
+} from '../../src/state/selectors';
 import { useStore } from '../../src/state/store';
 import { DrinkEntry, IvFluidEntry, UrineEntry } from '../../src/state/types';
 import { colors } from '../../src/theme/colors';
@@ -49,6 +56,8 @@ export default function FluidsScreen() {
   const showHyponatremiaWarning = useHyponatremiaWarning(state, now);
   const todayIvFluids = filterByDateKey(state.ivFluids, localDateKey(now));
   const isAdmitted = state.careMode === 'admitted';
+  const todayIvMl = isAdmitted ? sumMl(todayIvFluids.map((f) => ({ amountMl: f.volumeMl }))) : 0;
+  const showLowUrineOutputWarning = useLowUrineOutputWarning(inMl + todayIvMl, outMl);
 
   function saveEntry(amountMl: number, kind: string | undefined, atISO: string) {
     if (editingAmount?.kind === 'drink') {
@@ -136,6 +145,12 @@ export default function FluidsScreen() {
     <Screen>
       <AppTopBar icon="water" title={t('topBar.fluidBalance')} />
       <Header title={`In ${inMl} ml  -  Out ${outMl} ml`} />
+
+      {showLowUrineOutputWarning ? (
+        <Banner icon="alert-circle-outline" tone="danger">
+          {t('fluids.lowUrineOutputWarning')}
+        </Banner>
+      ) : null}
 
       {showHyponatremiaWarning ? (
         <Banner icon="warning-outline" tone="warning">

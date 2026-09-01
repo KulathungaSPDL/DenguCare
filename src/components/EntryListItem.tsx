@@ -50,7 +50,15 @@ export function EntryListItem({
         <View style={styles.pressArea}>{content}</View>
       )}
       {onPress ? (
-        <Ionicons name="create-outline" size={18} color={colors.textSecondary} style={styles.edit} />
+        <Pressable
+          onPress={onPress}
+          hitSlop={10}
+          accessibilityRole="button"
+          accessibilityLabel={`Edit ${title}`}
+          style={styles.edit}
+        >
+          <Ionicons name="create-outline" size={18} color={colors.textSecondary} />
+        </Pressable>
       ) : null}
       {onDelete ? (
         <Pressable onPress={onDelete} hitSlop={10} style={styles.trash}>

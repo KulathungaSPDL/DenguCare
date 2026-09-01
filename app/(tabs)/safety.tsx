@@ -15,6 +15,10 @@ import { LinkRow } from '../../src/components/LinkRow';
 import { Note } from '../../src/components/Note';
 import { Screen } from '../../src/components/Screen';
 import { WarningSignRow } from '../../src/components/WarningSignRow';
+import { useNow } from '../../src/hooks/useNow';
+import { sumMl } from '../../src/state/calculations';
+import { localDateKey } from '../../src/state/dateUtils';
+import { filterByDateKey, useFluidSummary, useLowUrineOutputWarning } from '../../src/state/selectors';
 import { useStore } from '../../src/state/store';
 import { ORDERED_WARNING_SIGN_KEYS, WARNING_SIGN_LABELS } from '../../src/state/warningSigns';
 import { WarningSignKey } from '../../src/state/types';
@@ -43,6 +47,14 @@ const SIGN_STYLE: Record<WarningSignKey, { icon: keyof typeof Ionicons.glyphMap;
 export default function SafetyScreen() {
   const { t } = useTranslation();
   const { state, actions } = useStore();
+  const now = useNow();
+
+  const { inMl, outMl } = useFluidSummary(state, now);
+  const isAdmitted = state.careMode === 'admitted';
+  const todayIvMl = isAdmitted
+    ? sumMl(filterByDateKey(state.ivFluids, localDateKey(now)).map((f) => ({ amountMl: f.volumeMl })))
+    : 0;
+  const showLowUrineOutputWarning = useLowUrineOutputWarning(inMl + todayIvMl, outMl);
 
   const anyChecked = ORDERED_WARNING_SIGN_KEYS.some((k) => state.warningSigns[k]);
   const [reportVisible, setReportVisible] = useState(false);
@@ -86,6 +98,12 @@ export default function SafetyScreen() {
       {anyChecked ? (
         <Banner icon="alert-circle-outline" tone="danger">
           {t('safetyScreen.goToHospitalBanner')}
+        </Banner>
+      ) : null}
+
+      {showLowUrineOutputWarning ? (
+        <Banner icon="flask-outline" tone="danger">
+          {t('safetyScreen.lowUrineOutputBanner')}
         </Banner>
       ) : null}
 

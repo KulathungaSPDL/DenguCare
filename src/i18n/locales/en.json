@@ -102,6 +102,7 @@
   "fluids": {
     "kingCoconut": "King Coconut",
     "hyponatremiaWarning": "More than half of what you've drunk today is plain water. Mix in ORS/Jeevani, King Coconut, or soup as well — water alone can dilute your body's salts.",
+    "lowUrineOutputWarning": "Your urine output today is much lower than what you've been drinking. Reduced output despite good intake can be a dengue warning sign — keep monitoring and contact a doctor if it continues.",
     "darkFluidAdvisory": "Avoid dark or red-coloured drinks — beetroot, blackcurrant, and grape juice can look like blood if you vomit or pass blood, and may cause confusion about internal bleeding."
   },
   "paracetamol": {
@@ -236,6 +237,7 @@
     "fluidBalanceToday": "Fluid Balance Today",
     "atRisk": "At Risk",
     "atRiskSubtitle": "Signs of plasma leakage - show your latest report to a doctor now.",
+    "lowUrineOutputBanner": "Your urine output is much lower than your fluid intake today. Reduced output despite good intake can be an early warning sign — keep monitoring and contact a doctor if it continues.",
     "behind": "Behind",
     "behindSubtitle": "About {{ml}} ml behind - sip {{goal}} ml now to catch up.",
     "onTrack": "On Track",
@@ -502,6 +504,7 @@
     "criticalWarningSigns": "Critical Warning Signs",
     "introBody": "Tick anything you have — do not wait to see if it passes. If you or the patient experience any of these symptoms, seek immediate medical attention.",
     "goToHospitalBanner": "Go to a hospital now. Do not wait to see if it passes - bring this record with you.",
+    "lowUrineOutputBanner": "Your urine output is much lower than your fluid intake today. This is itself a dengue warning sign — monitor closely and seek medical care if it continues.",
     "callEmergency": "Call Emergency",
     "emergencyNumbers": "Emergency numbers",
     "emergency": {
