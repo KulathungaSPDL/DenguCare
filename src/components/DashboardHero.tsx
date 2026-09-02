@@ -217,8 +217,8 @@ const styles = StyleSheet.create({
     marginTop: spacing.xs,
     fontFamily: fontFamily.baseSemiBold,
     fontWeight: '600',
-    fontSize: fontSize.md,
-    lineHeight: fontSize.md * 1.4,
+    fontSize: fontSize.sm,
+    lineHeight: fontSize.sm * 1.4,
     color: colors.primaryDark,
   },
 });

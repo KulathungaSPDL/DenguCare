@@ -148,6 +148,9 @@ export interface AppState {
   careMode: CareMode;
   language: AppLanguage;
   remindersOn: boolean;
+  // Pauses hourly hydration reminders/nudges until this moment - set when
+  // the patient is about to sleep, so they aren't woken up by them.
+  remindersSnoozedUntilISO: string | null;
   dashboardWelcomeSeen: boolean;
   drinks: DrinkEntry[];
   urine: UrineEntry[];

@@ -23,13 +23,17 @@ export function useHourlyReminders(): void {
   const { state, actions } = useStore();
   const now = useNow();
   const { targets } = useFluidSummary(state, now);
-  const { remindersOn } = state;
+  const { remindersOn, remindersSnoozedUntilISO } = state;
+  // useNow ticks every minute (and on app foreground), so this flips back to
+  // false - re-running the effect below to resume the reminder - as soon as
+  // the sleep window is over, without needing its own timer.
+  const isSnoozed = remindersSnoozedUntilISO != null && new Date(remindersSnoozedUntilISO).getTime() > now.getTime();
 
   useEffect(() => {
     let cancelled = false;
 
     (async () => {
-      if (remindersOn) {
+      if (remindersOn && !isSnoozed) {
         if (!isReminderSupported()) {
           if (!cancelled) actions.setRemindersOn(false);
           Alert.alert(t('reminders.expoGoTitle'), t('reminders.expoGoMsg'));
@@ -54,5 +58,5 @@ export function useHourlyReminders(): void {
     return () => {
       cancelled = true;
     };
-  }, [remindersOn, targets.hourlyGoalMl]);
+  }, [remindersOn, isSnoozed, targets.hourlyGoalMl]);
 }

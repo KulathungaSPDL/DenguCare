@@ -11,6 +11,7 @@ import { fontFamily, fontSize } from '../theme/typography';
 import { ConfirmModal } from './ConfirmModal';
 import { PreviousDataModal } from './PreviousDataModal';
 import { ProfileModal } from './ProfileModal';
+import { SleepModeModal } from './SleepModeModal';
 
 const LANGUAGE_OPTIONS: { code: Exclude<AppLanguage, null>; label: string }[] = [
   { code: 'en', label: 'English' },
@@ -25,8 +26,11 @@ export function SettingsMenu({ visible, onClose }: { visible: boolean; onClose: 
   const { state, actions } = useStore();
   const isAdmitted = state.careMode === 'admitted';
   const remindersOn = state.remindersOn;
+  const isSleepModeActive =
+    state.remindersSnoozedUntilISO != null && new Date(state.remindersSnoozedUntilISO).getTime() > Date.now();
   const [profileVisible, setProfileVisible] = useState(false);
   const [previousDataVisible, setPreviousDataVisible] = useState(false);
+  const [sleepModeVisible, setSleepModeVisible] = useState(false);
   const [careModeConfirm, setCareModeConfirm] = useState<CareMode | null>(null);
 
   function openProfile() {
@@ -37,6 +41,11 @@ export function SettingsMenu({ visible, onClose }: { visible: boolean; onClose: 
   function openPreviousData() {
     onClose();
     setPreviousDataVisible(true);
+  }
+
+  function openSleepMode() {
+    onClose();
+    setSleepModeVisible(true);
   }
 
   function toggleCareMode() {
@@ -121,6 +130,25 @@ export function SettingsMenu({ visible, onClose }: { visible: boolean; onClose: 
               </View>
             </Pressable>
 
+            <Pressable
+              onPress={openSleepMode}
+              style={styles.modalRow}
+              accessibilityRole="button"
+              accessibilityLabel={t('settingsMenu.sleepModeAria')}
+            >
+              <View style={styles.modalRowLabelWrap}>
+                <Ionicons name="moon-outline" size={18} color={colors.textPrimary} style={styles.modalRowIcon} />
+                <Text style={styles.modalRowText}>{t('settingsMenu.sleepMode')}</Text>
+              </View>
+              {isSleepModeActive ? (
+                <View style={[styles.pillIndicator, styles.pillIndicatorOn]}>
+                  <Text style={[styles.pillIndicatorText, styles.pillIndicatorTextOn]}>{t('settingsMenu.sleeping')}</Text>
+                </View>
+              ) : (
+                <Ionicons name="chevron-forward" size={16} color={colors.textSecondary} />
+              )}
+            </Pressable>
+
             <View style={styles.modalDivider} />
 
             <Pressable
@@ -140,6 +168,7 @@ export function SettingsMenu({ visible, onClose }: { visible: boolean; onClose: 
 
       <ProfileModal visible={profileVisible} onClose={() => setProfileVisible(false)} />
       <PreviousDataModal visible={previousDataVisible} onClose={() => setPreviousDataVisible(false)} />
+      <SleepModeModal visible={sleepModeVisible} onClose={() => setSleepModeVisible(false)} />
       <ConfirmModal
         visible={careModeConfirm != null}
         title={careModeConfirm === 'admitted' ? t('settingsMenu.switchToAdmittedTitle') : t('settingsMenu.switchToHomeTitle')}

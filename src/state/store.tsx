@@ -67,6 +67,7 @@ type Action =
   | { type: 'SET_CARE_MODE'; payload: { careMode: CareMode } }
   | { type: 'SET_LANGUAGE'; payload: { language: AppLanguage } }
   | { type: 'SET_REMINDERS_ON'; payload: { remindersOn: boolean } }
+  | { type: 'SET_REMINDERS_SNOOZED_UNTIL'; payload: { untilISO: string | null } }
   | { type: 'SET_DASHBOARD_WELCOME_SEEN' }
   | { type: 'START_ILLNESS'; payload: { feverStartISO: string } }
   | { type: 'RESET_ILLNESS' }
@@ -117,6 +118,8 @@ function reducer(state: AppState, action: Action): AppState {
       return { ...state, language: action.payload.language };
     case 'SET_REMINDERS_ON':
       return { ...state, remindersOn: action.payload.remindersOn };
+    case 'SET_REMINDERS_SNOOZED_UNTIL':
+      return { ...state, remindersSnoozedUntilISO: action.payload.untilISO };
     case 'SET_DASHBOARD_WELCOME_SEEN':
       return { ...state, dashboardWelcomeSeen: true };
     case 'START_ILLNESS':
@@ -223,6 +226,7 @@ interface StoreContextValue {
     setCareMode: (careMode: CareMode) => void;
     setLanguage: (language: AppLanguage) => void;
     setRemindersOn: (remindersOn: boolean) => void;
+    setRemindersSnoozedUntil: (untilISO: string | null) => void;
     markDashboardWelcomeSeen: () => void;
     startIllness: (feverStartISO: string) => void;
     resetIllness: () => void;
@@ -297,6 +301,7 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
           careMode: parseKv(kv.careMode, defaultState.careMode),
           language: parseKv(kv.language, defaultState.language),
           remindersOn: parseKv(kv.remindersOn, defaultState.remindersOn),
+          remindersSnoozedUntilISO: parseKv(kv.remindersSnoozedUntilISO, defaultState.remindersSnoozedUntilISO),
           dashboardWelcomeSeen: parseKv(kv.dashboardWelcomeSeen, defaultState.dashboardWelcomeSeen),
           warningSigns: parseKv(kv.warningSigns, { ...emptyWarningSigns }),
           archivedIllnesses: parseKv(kv.archivedIllnesses, defaultState.archivedIllnesses),
@@ -361,6 +366,10 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
   }, [state.hydrated, state.remindersOn]);
   useEffect(() => {
     if (!state.hydrated) return;
+    setKv('remindersSnoozedUntilISO', state.remindersSnoozedUntilISO).catch(() => {});
+  }, [state.hydrated, state.remindersSnoozedUntilISO]);
+  useEffect(() => {
+    if (!state.hydrated) return;
     setKv('dashboardWelcomeSeen', state.dashboardWelcomeSeen).catch(() => {});
   }, [state.hydrated, state.dashboardWelcomeSeen]);
 
@@ -374,6 +383,7 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
       setCareMode: (careMode) => dispatch({ type: 'SET_CARE_MODE', payload: { careMode } }),
       setLanguage: (language) => dispatch({ type: 'SET_LANGUAGE', payload: { language } }),
       setRemindersOn: (remindersOn) => dispatch({ type: 'SET_REMINDERS_ON', payload: { remindersOn } }),
+      setRemindersSnoozedUntil: (untilISO) => dispatch({ type: 'SET_REMINDERS_SNOOZED_UNTIL', payload: { untilISO } }),
       markDashboardWelcomeSeen: () => dispatch({ type: 'SET_DASHBOARD_WELCOME_SEEN' }),
       startIllness: (feverStartISO) => dispatch({ type: 'START_ILLNESS', payload: { feverStartISO } }),
       resetIllness: () => {

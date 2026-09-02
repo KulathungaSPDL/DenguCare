@@ -140,7 +140,7 @@ export default function DashboardScreen() {
       {showLowUrineOutputWarning ? (
         <View style={{ marginTop: spacing.lg }}>
           <Banner icon="alert-circle-outline" tone="danger">
-            {t('dashboard.lowUrineOutputBanner')}
+            {t('dashboard.lowUrineOutputBanner', { inMl: intakeMl, outMl })}
           </Banner>
         </View>
       ) : null}

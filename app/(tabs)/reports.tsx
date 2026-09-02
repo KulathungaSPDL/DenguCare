@@ -601,6 +601,8 @@ export default function ReportsScreen() {
         )}
       </Card>
 
+      <View style={{ height: spacing.xxl }} />
+
       {modals}
       {successModal}
       <ImageViewerModal visible={viewerUri != null} uri={viewerUri} onClose={() => setViewerUri(null)} />

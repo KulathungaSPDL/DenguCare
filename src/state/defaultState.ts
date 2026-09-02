@@ -29,6 +29,7 @@ export const defaultState: AppState = {
   careMode: 'home',
   language: null,
   remindersOn: true,
+  remindersSnoozedUntilISO: null,
   dashboardWelcomeSeen: false,
   drinks: [],
   urine: [],

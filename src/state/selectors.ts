@@ -47,14 +47,21 @@ export function useFluidSummary(state: AppState, now: Date) {
 const HYPONATREMIA_MIN_TOTAL_ML = 500; // don't warn on the first sip or two of the day
 const HYPONATREMIA_WATER_SHARE = 0.5;
 
-/** True when plain water alone has made up more than half of today's fluid intake. */
-export function useHyponatremiaWarning(state: AppState, now: Date): boolean {
+export interface HyponatremiaWarning {
+  show: boolean;
+  waterMl: number;
+  totalMl: number;
+}
+
+/** True (plus the actual amounts, for a personalized message) when plain
+ * water alone has made up more than half of today's fluid intake. */
+export function useHyponatremiaWarning(state: AppState, now: Date): HyponatremiaWarning {
   const { drinks } = useTodayEntries(state, now);
   return useMemo(() => {
-    const total = sumMl(drinks);
-    if (total < HYPONATREMIA_MIN_TOTAL_ML) return false;
+    const totalMl = sumMl(drinks);
     const waterMl = sumMl(drinks.filter((d) => d.kind === 'water'));
-    return waterMl / total > HYPONATREMIA_WATER_SHARE;
+    const show = totalMl >= HYPONATREMIA_MIN_TOTAL_ML && waterMl / totalMl > HYPONATREMIA_WATER_SHARE;
+    return { show, waterMl, totalMl };
   }, [drinks]);
 }
 

@@ -52,11 +52,12 @@ export default function FluidsScreen() {
   const { showSuccess, modal: successModal } = useSuccessAlert();
 
   const { inMl, outMl, targets, thisHourMl } = useFluidSummary(state, now);
-  const showHyponatremiaWarning = useHyponatremiaWarning(state, now);
+  const hyponatremia = useHyponatremiaWarning(state, now);
   const todayIvFluids = filterByDateKey(state.ivFluids, todayKey);
   const isAdmitted = state.careMode === 'admitted';
   const todayIvMl = isAdmitted ? sumMl(todayIvFluids.map((f) => ({ amountMl: f.volumeMl }))) : 0;
-  const showLowUrineOutputWarning = useLowUrineOutputWarning(inMl + todayIvMl, outMl);
+  const totalIntakeMl = inMl + todayIvMl;
+  const showLowUrineOutputWarning = useLowUrineOutputWarning(totalIntakeMl, outMl);
 
   // IV drip is still fluid in - fold this hour's IV entries into the hourly
   // goal the same way the daily total already does.
@@ -166,13 +167,13 @@ export default function FluidsScreen() {
 
       {showLowUrineOutputWarning ? (
         <Banner icon="alert-circle-outline" tone="danger">
-          {t('fluids.lowUrineOutputWarning')}
+          {t('fluids.lowUrineOutputWarning', { inMl: totalIntakeMl, outMl })}
         </Banner>
       ) : null}
 
-      {showHyponatremiaWarning ? (
+      {hyponatremia.show ? (
         <Banner icon="warning-outline" tone="warning">
-          {t('fluids.hyponatremiaWarning')}
+          {t('fluids.hyponatremiaWarning', { waterMl: hyponatremia.waterMl, totalMl: hyponatremia.totalMl })}
         </Banner>
       ) : null}
 

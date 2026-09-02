@@ -103,7 +103,7 @@ export default function SafetyScreen() {
 
       {showLowUrineOutputWarning ? (
         <Banner icon="flask-outline" tone="danger">
-          {t('safetyScreen.lowUrineOutputBanner')}
+          {t('safetyScreen.lowUrineOutputBanner', { inMl: inMl + todayIvMl, outMl })}
         </Banner>
       ) : null}
 
