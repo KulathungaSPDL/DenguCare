@@ -11,6 +11,7 @@ import { FeverCurveChart } from './FeverCurveChart';
 import { FullBloodReportModal } from './FullBloodReportModal';
 import { HourlyBalanceCarousel } from './HourlyBalanceCarousel';
 import { InfoDivider, InfoRow } from './InfoRow';
+import { Pagination } from './Pagination';
 import { sumMl, FluidTargets } from '../state/calculations';
 import { DoctorReportData } from '../state/doctorReport';
 import { dateFromKey, formatDatePretty, formatTime24, localDateKey } from '../state/dateUtils';
@@ -37,6 +38,8 @@ function dateTime(atISO: string): string {
 
 type IntakeEntry = { id: string; atISO: string; kind: 'drink'; drink: DrinkEntry } | { id: string; atISO: string; kind: 'iv'; iv: IvFluidEntry };
 
+const PAGE_SIZE = 10;
+
 /** The actual "Doctor Report" content — patient info, active warning
  * signs, fluid balance, and the full temperature/medication/blood-report
  * history — shared between the live report (current illness) and the
@@ -59,6 +62,12 @@ export function ReportBody({ data, profile, targets, visible }: Props) {
   const [entryTab, setEntryTab] = useState<'intake' | 'output'>('intake');
   const [entriesExpanded, setEntriesExpanded] = useState(false);
   const [fullReportVisible, setFullReportVisible] = useState(false);
+  const [tempsExpanded, setTempsExpanded] = useState(false);
+  const [tempsPage, setTempsPage] = useState(0);
+  const [dosesExpanded, setDosesExpanded] = useState(false);
+  const [dosesPage, setDosesPage] = useState(0);
+  const [intakePage, setIntakePage] = useState(0);
+  const [outputPage, setOutputPage] = useState(0);
 
   useEffect(() => {
     if (!visible) return;
@@ -66,8 +75,21 @@ export function ReportBody({ data, profile, targets, visible }: Props) {
     setEntryTab('intake');
     setEntriesExpanded(false);
     setFullReportVisible(false);
+    setTempsExpanded(false);
+    setTempsPage(0);
+    setDosesExpanded(false);
+    setDosesPage(0);
+    setIntakePage(0);
+    setOutputPage(0);
     // Reset to "today, Intake tab, collapsed" each time this view is opened, not on every data change.
   }, [visible]);
+
+  // The selected day's intake/output lists change size as the fluid-balance
+  // graph is swiped between days, so start each newly-selected day back at page 1.
+  useEffect(() => {
+    setIntakePage(0);
+    setOutputPage(0);
+  }, [selectedDayKey]);
 
   const dayDrinks = useMemo(() => filterByDateKey(data.drinks, selectedDayKey), [data.drinks, selectedDayKey]);
   const dayIvFluids = useMemo(() => filterByDateKey(data.ivFluids, selectedDayKey), [data.ivFluids, selectedDayKey]);
@@ -83,6 +105,22 @@ export function ReportBody({ data, profile, targets, visible }: Props) {
     ];
     return combined.sort((a, b) => new Date(b.atISO).getTime() - new Date(a.atISO).getTime());
   }, [dayDrinks, dayIvFluids]);
+
+  const intakeTotalPages = Math.max(1, Math.ceil(dayIntakeEntries.length / PAGE_SIZE));
+  const intakePageSafe = Math.min(intakePage, intakeTotalPages - 1);
+  const pagedIntakeEntries = dayIntakeEntries.slice(intakePageSafe * PAGE_SIZE, intakePageSafe * PAGE_SIZE + PAGE_SIZE);
+
+  const outputTotalPages = Math.max(1, Math.ceil(dayUrine.length / PAGE_SIZE));
+  const outputPageSafe = Math.min(outputPage, outputTotalPages - 1);
+  const pagedUrine = dayUrine.slice(outputPageSafe * PAGE_SIZE, outputPageSafe * PAGE_SIZE + PAGE_SIZE);
+
+  const tempsTotalPages = Math.max(1, Math.ceil(data.temps.length / PAGE_SIZE));
+  const tempsPageSafe = Math.min(tempsPage, tempsTotalPages - 1);
+  const pagedTemps = data.temps.slice(tempsPageSafe * PAGE_SIZE, tempsPageSafe * PAGE_SIZE + PAGE_SIZE);
+
+  const dosesTotalPages = Math.max(1, Math.ceil(data.doses.length / PAGE_SIZE));
+  const dosesPageSafe = Math.min(dosesPage, dosesTotalPages - 1);
+  const pagedDoses = data.doses.slice(dosesPageSafe * PAGE_SIZE, dosesPageSafe * PAGE_SIZE + PAGE_SIZE);
 
   return (
     <>
@@ -201,52 +239,72 @@ export function ReportBody({ data, profile, targets, visible }: Props) {
             dayIntakeEntries.length === 0 ? (
               <Text style={styles.emptyNote}>{t('dayEntriesModal.noDrinks')}</Text>
             ) : (
-              <View style={styles.entryList}>
-                {dayIntakeEntries.map((entry, i) => (
-                  <React.Fragment key={entry.id}>
-                    {i > 0 && <EntryListDivider />}
-                    {entry.kind === 'drink' ? (
-                      <EntryListItem
-                        icon="water-outline"
-                        iconColor={drinkKindColor(entry.drink.kind)}
-                        title={t(`drinkKinds.${entry.drink.kind}`)}
-                        time={formatTime24(new Date(entry.drink.atISO))}
-                        valueLabel={`${entry.drink.amountMl} ml`}
-                      />
-                    ) : (
-                      <EntryListItem
-                        icon="medkit-outline"
-                        iconColor={colors.ivFluid}
-                        title={t(`ivFluids.fluidTypes.${entry.iv.fluidType}`)}
-                        time={formatTime24(new Date(entry.iv.atISO))}
-                        valueLabel={
-                          entry.iv.rateMlPerHr != null
-                            ? `${entry.iv.volumeMl} ml  ·  ${entry.iv.rateMlPerHr} ml/hr`
-                            : `${entry.iv.volumeMl} ml`
-                        }
-                      />
-                    )}
-                  </React.Fragment>
-                ))}
-              </View>
+              <>
+                <View style={styles.entryList}>
+                  {pagedIntakeEntries.map((entry, i) => (
+                    <React.Fragment key={entry.id}>
+                      {i > 0 && <EntryListDivider />}
+                      {entry.kind === 'drink' ? (
+                        <EntryListItem
+                          icon="water-outline"
+                          iconColor={drinkKindColor(entry.drink.kind)}
+                          title={t(`drinkKinds.${entry.drink.kind}`)}
+                          time={formatTime24(new Date(entry.drink.atISO))}
+                          valueLabel={`${entry.drink.amountMl} ml`}
+                        />
+                      ) : (
+                        <EntryListItem
+                          icon="medkit-outline"
+                          iconColor={colors.ivFluid}
+                          title={t(`ivFluids.fluidTypes.${entry.iv.fluidType}`)}
+                          time={formatTime24(new Date(entry.iv.atISO))}
+                          valueLabel={
+                            entry.iv.rateMlPerHr != null
+                              ? `${entry.iv.volumeMl} ml  ·  ${entry.iv.rateMlPerHr} ml/hr`
+                              : `${entry.iv.volumeMl} ml`
+                          }
+                        />
+                      )}
+                    </React.Fragment>
+                  ))}
+                </View>
+                {dayIntakeEntries.length > PAGE_SIZE ? (
+                  <Pagination
+                    page={intakePageSafe}
+                    totalPages={intakeTotalPages}
+                    onPrev={() => setIntakePage((p) => Math.max(0, p - 1))}
+                    onNext={() => setIntakePage((p) => Math.min(intakeTotalPages - 1, p + 1))}
+                  />
+                ) : null}
+              </>
             )
           ) : dayUrine.length === 0 ? (
             <Text style={styles.emptyNote}>{t('dayEntriesModal.noUrine')}</Text>
           ) : (
-            <View style={styles.entryList}>
-              {dayUrine.map((u, i) => (
-                <React.Fragment key={u.id}>
-                  {i > 0 && <EntryListDivider />}
-                  <EntryListItem
-                    icon="flask-outline"
-                    iconColor={colors.urineOut}
-                    title={t('dayEntriesModal.urineTab')}
-                    time={formatTime24(new Date(u.atISO))}
-                    valueLabel={`${u.amountMl} ml`}
-                  />
-                </React.Fragment>
-              ))}
-            </View>
+            <>
+              <View style={styles.entryList}>
+                {pagedUrine.map((u, i) => (
+                  <React.Fragment key={u.id}>
+                    {i > 0 && <EntryListDivider />}
+                    <EntryListItem
+                      icon="flask-outline"
+                      iconColor={colors.urineOut}
+                      title={t('dayEntriesModal.urineTab')}
+                      time={formatTime24(new Date(u.atISO))}
+                      valueLabel={`${u.amountMl} ml`}
+                    />
+                  </React.Fragment>
+                ))}
+              </View>
+              {dayUrine.length > PAGE_SIZE ? (
+                <Pagination
+                  page={outputPageSafe}
+                  totalPages={outputTotalPages}
+                  onPrev={() => setOutputPage((p) => Math.max(0, p - 1))}
+                  onNext={() => setOutputPage((p) => Math.min(outputTotalPages - 1, p + 1))}
+                />
+              ) : null}
+            </>
           )}
         </>
       ) : null}
@@ -260,36 +318,86 @@ export function ReportBody({ data, profile, targets, visible }: Props) {
       {data.temps.length === 0 ? (
         <Text style={styles.emptyNote}>{t('tempScreen.noReadingsYet')}</Text>
       ) : (
-        data.temps.map((r, i) => (
-          <React.Fragment key={r.id}>
-            {i > 0 && <EntryListDivider />}
-            <EntryListItem
-              icon="thermometer-outline"
-              iconColor={colors.danger}
-              title={t(`tempScreen.methods.${r.method}`)}
-              time={dateTime(r.atISO)}
-              valueLabel={`${r.celsius.toFixed(1)} °C`}
-            />
-          </React.Fragment>
-        ))
+        <>
+          <Pressable
+            onPress={() => setTempsExpanded((v) => !v)}
+            style={styles.entriesToggle}
+            accessibilityRole="button"
+            accessibilityState={{ expanded: tempsExpanded }}
+          >
+            <Text style={styles.entriesToggleText}>
+              {tempsExpanded ? t('common.hide') : t('common.show')} {t('doctorReportModal.temperatureReadingsLabel')}
+            </Text>
+            <Ionicons name={tempsExpanded ? 'chevron-up' : 'chevron-down'} size={16} color={colors.primaryDark} />
+          </Pressable>
+          {tempsExpanded ? (
+            <>
+              {pagedTemps.map((r, i) => (
+                <React.Fragment key={r.id}>
+                  {i > 0 && <EntryListDivider />}
+                  <EntryListItem
+                    icon="thermometer-outline"
+                    iconColor={colors.danger}
+                    title={t(`tempScreen.methods.${r.method}`)}
+                    time={dateTime(r.atISO)}
+                    valueLabel={`${r.celsius.toFixed(1)} °C`}
+                  />
+                </React.Fragment>
+              ))}
+              {data.temps.length > PAGE_SIZE ? (
+                <Pagination
+                  page={tempsPageSafe}
+                  totalPages={tempsTotalPages}
+                  onPrev={() => setTempsPage((p) => Math.max(0, p - 1))}
+                  onNext={() => setTempsPage((p) => Math.min(tempsTotalPages - 1, p + 1))}
+                />
+              ) : null}
+            </>
+          ) : null}
+        </>
       )}
 
       <Text style={styles.sectionKicker}>{t('doctorReportModal.medicationTitle')}</Text>
       {data.doses.length === 0 ? (
         <Text style={styles.emptyNote}>{t('doctorReportModal.noDoses')}</Text>
       ) : (
-        data.doses.map((d, i) => (
-          <React.Fragment key={d.id}>
-            {i > 0 && <EntryListDivider />}
-            <EntryListItem
-              icon="medical-outline"
-              iconColor={colors.primary}
-              title={t('paracetamol.title')}
-              time={dateTime(d.atISO)}
-              valueLabel={`${d.doseMg} mg`}
-            />
-          </React.Fragment>
-        ))
+        <>
+          <Pressable
+            onPress={() => setDosesExpanded((v) => !v)}
+            style={styles.entriesToggle}
+            accessibilityRole="button"
+            accessibilityState={{ expanded: dosesExpanded }}
+          >
+            <Text style={styles.entriesToggleText}>
+              {dosesExpanded ? t('common.hide') : t('common.show')} {t('doctorReportModal.medicationDosesLabel')}
+            </Text>
+            <Ionicons name={dosesExpanded ? 'chevron-up' : 'chevron-down'} size={16} color={colors.primaryDark} />
+          </Pressable>
+          {dosesExpanded ? (
+            <>
+              {pagedDoses.map((d, i) => (
+                <React.Fragment key={d.id}>
+                  {i > 0 && <EntryListDivider />}
+                  <EntryListItem
+                    icon="medical-outline"
+                    iconColor={colors.primary}
+                    title={t('paracetamol.title')}
+                    time={dateTime(d.atISO)}
+                    valueLabel={`${d.doseMg} mg`}
+                  />
+                </React.Fragment>
+              ))}
+              {data.doses.length > PAGE_SIZE ? (
+                <Pagination
+                  page={dosesPageSafe}
+                  totalPages={dosesTotalPages}
+                  onPrev={() => setDosesPage((p) => Math.max(0, p - 1))}
+                  onNext={() => setDosesPage((p) => Math.min(dosesTotalPages - 1, p + 1))}
+                />
+              ) : null}
+            </>
+          ) : null}
+        </>
       )}
 
       <View style={styles.bloodReportHeaderRow}>

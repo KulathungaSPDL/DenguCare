@@ -340,6 +340,8 @@ export default function DashboardScreen() {
 
       <Note>{t('dashboard.footerNote')}</Note>
 
+      <View style={{ height: spacing.xxl }} />
+
       <AmountEntryModal
         visible={drinkModal}
         title={t('dashboard.logDrinkTitle')}

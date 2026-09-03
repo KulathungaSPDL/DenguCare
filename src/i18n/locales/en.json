@@ -145,7 +145,9 @@
     "urineOutputTitle": "Urine output",
     "entryDetailsLabel": "entries",
     "temperatureHistoryTitle": "Temperature history",
+    "temperatureReadingsLabel": "readings",
     "medicationTitle": "Paracetamol doses",
+    "medicationDosesLabel": "doses",
     "noDoses": "No doses logged.",
     "bloodReportTitle": "Blood report trend (FBC)",
     "viewFullReportButton": "View full report",
@@ -339,6 +341,17 @@
     "yesDelete": "Yes, delete",
     "noKeepIt": "No, keep it"
   },
+  "proUpsell": {
+    "title": "Pro feature",
+    "gotIt": "Got it",
+    "takePhotoMessage": "Attaching a photo of your lab sheet is a Pro feature. Upgrade to Pro to use it.",
+    "chooseFileMessage": "Uploading a lab report file is a Pro feature. Upgrade to Pro to use it."
+  },
+  "pagination": {
+    "pageOf": "Page {{page}} of {{total}}",
+    "prevAria": "Previous page",
+    "nextAria": "Next page"
+  },
   "reminders": {
     "expoGoTitle": "Not available in Expo Go",
     "expoGoMsg": "Hourly hydration reminders need a development build — they are not supported inside Expo Go.",
@@ -412,6 +425,8 @@
     "temperatureLabel": "Temperature ( C)",
     "saveReading": "Save reading",
     "history": "History",
+    "viewHistoryAria": "View temperature history",
+    "viewDoseHistoryAria": "View paracetamol history",
     "noReadingsYet": "No readings yet.",
     "readingRow": "{{time}}  -  Day {{day}}",
     "deleteReadingTitle": "Delete this reading?",
@@ -419,6 +434,12 @@
     "deleteReadingSuccess": "The temperature reading has been removed.",
     "readingUpdated": "Temperature reading updated.",
     "readingSaved": "Temperature reading saved.",
+    "doseHistory": "Paracetamol history",
+    "noDosesYet": "No doses logged yet.",
+    "doseRow": "{{time}}  -  Day {{day}}",
+    "deleteDoseTitle": "Delete this dose?",
+    "deleteDoseMsg": "This paracetamol dose will be removed from your medication log. This can't be undone.",
+    "deleteDoseSuccess": "The dose has been removed.",
     "note": "Use paracetamol only for fever. Do not take ibuprofen, diclofenac, mefenamic acid, or aspirin - they raise the risk of bleeding in dengue.",
     "dailyToggle": "Daily",
     "hourlyToggle": "Hourly",

@@ -145,7 +145,9 @@
     "urineOutputTitle": "මුත්‍රා පිටවීම",
     "entryDetailsLabel": "විස්තර",
     "temperatureHistoryTitle": "උෂ්ණත්ව ඉතිහාසය",
+    "temperatureReadingsLabel": "කියවීම්",
     "medicationTitle": "පැරසිටමෝල් මාත්‍රා",
+    "medicationDosesLabel": "මාත්‍රා",
     "noDoses": "මාත්‍රා කිසිවක් ලොග් කර නැත.",
     "bloodReportTitle": "රුධිර වාර්තා ප්‍රවණතාව (FBC)",
     "viewFullReportButton": "සම්පූර්ණ වාර්තාව බලන්න",
@@ -339,6 +341,17 @@
     "yesDelete": "ඔව්, මකන්න",
     "noKeepIt": "නැත, තබා ගන්න"
   },
+  "proUpsell": {
+    "title": "ප්‍රෝ විශේෂාංගය",
+    "gotIt": "හරි",
+    "takePhotoMessage": "ඔබේ රසායනාගාර වාර්තාවේ ඡායාරූපයක් ඇමිණීම ප්‍රෝ විශේෂාංගයකි. එය භාවිතා කිරීමට ප්‍රෝ වෙත උසස් කරන්න.",
+    "chooseFileMessage": "රසායනාගාර වාර්තා ගොනුවක් උඩුගත කිරීම ප්‍රෝ විශේෂාංගයකි. එය භාවිතා කිරීමට ප්‍රෝ වෙත උසස් කරන්න."
+  },
+  "pagination": {
+    "pageOf": "පිටුව {{page}} / {{total}}",
+    "prevAria": "පෙර පිටුව",
+    "nextAria": "ඊළඟ පිටුව"
+  },
   "reminders": {
     "expoGoTitle": "Expo Go හි ලබා ගත නොහැක",
     "expoGoMsg": "පැයකට වරක් ජල පාන මතක් කිරීම් සඳහා development build එකක් අවශ්‍ය වේ — ඒවා Expo Go තුළ සහාය නොදක්වයි.",
@@ -412,6 +425,8 @@
     "temperatureLabel": "උෂ්ණත්වය ( C)",
     "saveReading": "කියැවීම සුරකින්න",
     "history": "ඉතිහාසය",
+    "viewHistoryAria": "උෂ්ණත්ව ඉතිහාසය බලන්න",
+    "viewDoseHistoryAria": "පැරසිටමෝල් ඉතිහාසය බලන්න",
     "noReadingsYet": "තවම කියැවීම් නැත.",
     "readingRow": "{{time}}  -  දිනය {{day}}",
     "deleteReadingTitle": "මෙම කියැවීම මකන්නද?",
@@ -419,6 +434,12 @@
     "deleteReadingSuccess": "උෂ්ණත්ව කියැවීම ඉවත් කර ඇත.",
     "readingUpdated": "උෂ්ණත්ව කියැවීම යාවත්කාලීන කරන ලදී.",
     "readingSaved": "උෂ්ණත්ව කියැවීම සුරකින ලදී.",
+    "doseHistory": "පැරසිටමෝල් ඉතිහාසය",
+    "noDosesYet": "තවම මාත්‍රා කිසිවක් ලොග් කර නැත.",
+    "doseRow": "{{time}}  -  දිනය {{day}}",
+    "deleteDoseTitle": "මෙම මාත්‍රාව මකන්නද?",
+    "deleteDoseMsg": "මෙම පැරසිටමෝල් මාත්‍රාව ඔබේ ඖෂධ ලොගයෙන් ඉවත් කරනු ලැබේ. මෙය අහෝසි කළ නොහැක.",
+    "deleteDoseSuccess": "මාත්‍රාව ඉවත් කරන ලදී.",
     "note": "උණ සඳහා පමණක් පැරසිටමෝල් භාවිතා කරන්න. ඉබුප්‍රොෆෙන්, ඩික්ලෝෆෙනැක්, මෙෆෙනැමික් අම්ලය, හෝ ඇස්පිරින් නොගන්න - ඒවා ඩෙංගු රෝගයේදී රුධිර වහනය වීමේ අවදානම වැඩි කරයි.",
     "dailyToggle": "දිනපතා",
     "hourlyToggle": "පැයෙන් පැය",

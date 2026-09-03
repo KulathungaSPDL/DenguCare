@@ -168,6 +168,7 @@ const styles = StyleSheet.create({
     color: colors.ink,
   },
   iconColumn: {
+    flexDirection: 'row',
     alignItems: 'center',
     gap: spacing.sm,
   },

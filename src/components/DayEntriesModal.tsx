@@ -4,6 +4,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useTranslation } from 'react-i18next';
 
 import { EntryListDivider, EntryListItem } from './EntryListItem';
+import { Pagination } from './Pagination';
 import { SegmentedToggle } from './SegmentedToggle';
 import { colors } from '../theme/colors';
 import { radius, spacing } from '../theme/spacing';
@@ -13,6 +14,8 @@ import { drinkKindColor } from '../state/drinkKinds';
 import { DrinkEntry, IvFluidEntry, UrineEntry } from '../state/types';
 
 type EntryTab = 'drinks' | 'urine' | 'iv';
+
+const PAGE_SIZE = 5;
 
 interface Props {
   visible: boolean;
@@ -51,12 +54,18 @@ export function DayEntriesModal({
 }: Props) {
   const { t } = useTranslation();
   const [tab, setTab] = useState<EntryTab>('drinks');
+  const [drinksPage, setDrinksPage] = useState(0);
+  const [urinePage, setUrinePage] = useState(0);
+  const [ivPage, setIvPage] = useState(0);
   const scale = useRef(new Animated.Value(0.9)).current;
   const opacity = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
     if (!visible) return;
     setTab('drinks');
+    setDrinksPage(0);
+    setUrinePage(0);
+    setIvPage(0);
     scale.setValue(0.9);
     opacity.setValue(0);
     Animated.parallel([
@@ -64,6 +73,18 @@ export function DayEntriesModal({
       Animated.timing(opacity, { toValue: 1, duration: 160, useNativeDriver: true }),
     ]).start();
   }, [visible, scale, opacity]);
+
+  const drinksTotalPages = Math.max(1, Math.ceil(drinks.length / PAGE_SIZE));
+  const drinksPageSafe = Math.min(drinksPage, drinksTotalPages - 1);
+  const pagedDrinks = drinks.slice(drinksPageSafe * PAGE_SIZE, drinksPageSafe * PAGE_SIZE + PAGE_SIZE);
+
+  const urineTotalPages = Math.max(1, Math.ceil(urine.length / PAGE_SIZE));
+  const urinePageSafe = Math.min(urinePage, urineTotalPages - 1);
+  const pagedUrine = urine.slice(urinePageSafe * PAGE_SIZE, urinePageSafe * PAGE_SIZE + PAGE_SIZE);
+
+  const ivTotalPages = Math.max(1, Math.ceil(ivFluids.length / PAGE_SIZE));
+  const ivPageSafe = Math.min(ivPage, ivTotalPages - 1);
+  const pagedIv = ivFluids.slice(ivPageSafe * PAGE_SIZE, ivPageSafe * PAGE_SIZE + PAGE_SIZE);
 
   const options: { value: EntryTab; label: string }[] = [
     { value: 'drinks', label: t('dayEntriesModal.drinksTab') },
@@ -91,7 +112,7 @@ export function DayEntriesModal({
               (drinks.length === 0 ? (
                 <Text style={styles.empty}>{t('dayEntriesModal.noDrinks')}</Text>
               ) : (
-                drinks.map((d, i) => (
+                pagedDrinks.map((d, i) => (
                   <React.Fragment key={d.id}>
                     {i > 0 && <EntryListDivider />}
                     <EntryListItem
@@ -111,7 +132,7 @@ export function DayEntriesModal({
               (urine.length === 0 ? (
                 <Text style={styles.empty}>{t('dayEntriesModal.noUrine')}</Text>
               ) : (
-                urine.map((u, i) => (
+                pagedUrine.map((u, i) => (
                   <React.Fragment key={u.id}>
                     {i > 0 && <EntryListDivider />}
                     <EntryListItem
@@ -131,7 +152,7 @@ export function DayEntriesModal({
               (ivFluids.length === 0 ? (
                 <Text style={styles.empty}>{t('ivFluids.empty')}</Text>
               ) : (
-                ivFluids.map((f, i) => (
+                pagedIv.map((f, i) => (
                   <React.Fragment key={f.id}>
                     {i > 0 && <EntryListDivider />}
                     <EntryListItem
@@ -149,6 +170,31 @@ export function DayEntriesModal({
                 ))
               ))}
           </ScrollView>
+
+          {tab === 'drinks' && drinks.length > PAGE_SIZE ? (
+            <Pagination
+              page={drinksPageSafe}
+              totalPages={drinksTotalPages}
+              onPrev={() => setDrinksPage((p) => Math.max(0, p - 1))}
+              onNext={() => setDrinksPage((p) => Math.min(drinksTotalPages - 1, p + 1))}
+            />
+          ) : null}
+          {tab === 'urine' && urine.length > PAGE_SIZE ? (
+            <Pagination
+              page={urinePageSafe}
+              totalPages={urineTotalPages}
+              onPrev={() => setUrinePage((p) => Math.max(0, p - 1))}
+              onNext={() => setUrinePage((p) => Math.min(urineTotalPages - 1, p + 1))}
+            />
+          ) : null}
+          {tab === 'iv' && ivFluids.length > PAGE_SIZE ? (
+            <Pagination
+              page={ivPageSafe}
+              totalPages={ivTotalPages}
+              onPrev={() => setIvPage((p) => Math.max(0, p - 1))}
+              onNext={() => setIvPage((p) => Math.min(ivTotalPages - 1, p + 1))}
+            />
+          ) : null}
         </Animated.View>
       </View>
     </Modal>

@@ -20,6 +20,7 @@ import { LabeledInput } from '../../src/components/LabeledInput';
 import { Screen } from '../../src/components/Screen';
 import { useDeleteConfirmation } from '../../src/hooks/useDeleteConfirmation';
 import { useNow } from '../../src/hooks/useNow';
+import { useProUpsell } from '../../src/hooks/useProUpsell';
 import { useSuccessAlert } from '../../src/hooks/useSuccessAlert';
 import { formatDatePretty, formatTime24, illnessDayNumber } from '../../src/state/dateUtils';
 import { usePlasmaLeakageAlert } from '../../src/state/selectors';
@@ -102,6 +103,7 @@ export default function ReportsScreen() {
 
   const { atRisk, latestReport } = usePlasmaLeakageAlert(state.reports);
   const { showSuccess, modal: successModal } = useSuccessAlert();
+  const { showProUpsell, modal: proUpsellModal } = useProUpsell();
   const { confirmDelete, modals } = useDeleteConfirmation();
   const alertedReportIdRef = useRef<string | null>(null);
 
@@ -158,26 +160,12 @@ export default function ReportsScreen() {
     });
   }
 
-  async function takePhoto() {
-    const perm = await ImagePicker.requestCameraPermissionsAsync();
-    if (!perm.granted) return;
-    const result = await ImagePicker.launchCameraAsync({ quality: 0.6 });
-    if (!result.canceled && result.assets[0]) {
-      setPhotoUri(result.assets[0].uri);
-      resetForm();
-      setFormOpen(true);
-    }
+  function takePhoto() {
+    showProUpsell(t('proUpsell.takePhotoMessage'));
   }
 
-  async function chooseFile() {
-    const perm = await ImagePicker.requestMediaLibraryPermissionsAsync();
-    if (!perm.granted) return;
-    const result = await ImagePicker.launchImageLibraryAsync({ quality: 0.6 });
-    if (!result.canceled && result.assets[0]) {
-      setPhotoUri(result.assets[0].uri);
-      resetForm();
-      setFormOpen(true);
-    }
+  function chooseFile() {
+    showProUpsell(t('proUpsell.chooseFileMessage'));
   }
 
   function saveReport() {
@@ -605,6 +593,7 @@ export default function ReportsScreen() {
 
       {modals}
       {successModal}
+      {proUpsellModal}
       <ImageViewerModal visible={viewerUri != null} uri={viewerUri} onClose={() => setViewerUri(null)} />
     </Screen>
   );

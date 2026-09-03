@@ -162,6 +162,8 @@ export default function SafetyScreen() {
 
       <Note>{t('safetyScreen.finalNote')}</Note>
 
+      <View style={{ height: spacing.xxl }} />
+
       <ConfirmModal
         visible={newRecordConfirmVisible}
         title={t('safetyScreen.confirmNewRecordTitle')}

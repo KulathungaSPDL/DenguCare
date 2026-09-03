@@ -221,8 +221,9 @@ export default function FluidsScreen() {
             hitSlop={10}
             accessibilityRole="button"
             accessibilityLabel={t('fluidsScreen.viewTodayEntriesAria')}
+            style={({ pressed }) => [styles.iconBtn, pressed && styles.iconBtnPressed]}
           >
-            <MaterialCommunityIcons name="eye-circle-outline" size={20} color={colors.textSecondary} />
+            <MaterialCommunityIcons name="eye-circle-outline" size={20} color={colors.primaryDark} />
           </Pressable>
         </View>
         <View style={{ height: spacing.md }} />
@@ -336,6 +337,8 @@ export default function FluidsScreen() {
         onDeleteIv={deleteIvFluid}
       />
 
+      <View style={{ height: spacing.xxl }} />
+
       {modals}
       {successModal}
     </Screen>
@@ -376,6 +379,17 @@ const styles = StyleSheet.create({
     fontWeight: '700',
     fontSize: fontSize.sm,
     color: colors.textPrimary,
+  },
+  iconBtn: {
+    width: 32,
+    height: 32,
+    borderRadius: radius.pill,
+    backgroundColor: colors.primarySoft,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  iconBtnPressed: {
+    backgroundColor: colors.primaryMist,
   },
   hourHeaderRow: {
     flexDirection: 'row',
