@@ -1,5 +1,5 @@
-import { useEffect } from 'react';
-import { Alert } from 'react-native';
+import { useEffect, useRef } from 'react';
+import { Alert, Linking, Platform } from 'react-native';
 import { useTranslation } from 'react-i18next';
 
 import {
@@ -28,6 +28,10 @@ export function useHourlyReminders(): void {
   // false - re-running the effect below to resume the reminder - as soon as
   // the sleep window is over, without needing its own timer.
   const isSnoozed = remindersSnoozedUntilISO != null && new Date(remindersSnoozedUntilISO).getTime() > now.getTime();
+  // Only nag once per app session, the first time reminders are actually
+  // confirmed scheduled - not on every effect re-run (e.g. weight edits
+  // changing targets.hourlyGoalMl re-schedule the same reminder).
+  const batteryTipShownRef = useRef(false);
 
   useEffect(() => {
     let cancelled = false;
@@ -50,6 +54,17 @@ export function useHourlyReminders(): void {
           t('reminders.notificationTitle'),
           t('reminders.notificationBody', { ml: targets.hourlyGoalMl })
         );
+        // Android alarms are reliable natively, but many OEMs' battery
+        // managers silently kill background apps anyway - point users at
+        // the settings screen once so hourly reminders keep firing when
+        // the app isn't open.
+        if (Platform.OS === 'android' && !batteryTipShownRef.current) {
+          batteryTipShownRef.current = true;
+          Alert.alert(t('reminders.batteryTipTitle'), t('reminders.batteryTipMsg'), [
+            { text: t('common.cancel'), style: 'cancel' },
+            { text: t('reminders.openSettings'), onPress: () => Linking.openSettings() },
+          ]);
+        }
       } else {
         await cancelHourlyReminder();
       }

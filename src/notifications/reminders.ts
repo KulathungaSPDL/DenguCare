@@ -41,9 +41,14 @@ export async function requestReminderPermissionAsync(channelName: string): Promi
   if (!Notifications) return false;
 
   if (Platform.OS === 'android') {
+    // HIGH (not DEFAULT) keeps this channel out of Android's more aggressive
+    // Doze/App Standby deferral buckets, so the hourly alarm still fires
+    // reliably once the app is backgrounded or fully closed.
     await Notifications.setNotificationChannelAsync(ANDROID_CHANNEL_ID, {
       name: channelName,
-      importance: Notifications.AndroidImportance.DEFAULT,
+      importance: Notifications.AndroidImportance.HIGH,
+      vibrationPattern: [0, 250, 250, 250],
+      sound: 'default',
     });
   }
 
@@ -61,7 +66,12 @@ export async function scheduleHourlyReminder(title: string, body: string): Promi
   await Notifications.cancelScheduledNotificationAsync(HOURLY_REMINDER_ID).catch(() => {});
   await Notifications.scheduleNotificationAsync({
     identifier: HOURLY_REMINDER_ID,
-    content: { title, body },
+    content: {
+      title,
+      body,
+      sound: 'default',
+      priority: Notifications.AndroidNotificationPriority.HIGH,
+    },
     trigger: {
       type: Notifications.SchedulableTriggerInputTypes.TIME_INTERVAL,
       seconds: 3600,

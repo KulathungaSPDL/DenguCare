@@ -359,7 +359,10 @@
     "disabledMsg": "Turn on notifications for DenguCare in your device settings to get hourly hydration reminders.",
     "channelName": "Hourly hydration reminders",
     "notificationTitle": "Time to hydrate",
-    "notificationBody": "Sip {{ml}} ml now to stay on track this hour."
+    "notificationBody": "Sip {{ml}} ml now to stay on track this hour.",
+    "batteryTipTitle": "Keep reminders reliable",
+    "batteryTipMsg": "Some phones stop apps running in the background to save battery, which can silently stop hourly reminders. For DenguCare, choose \"Unrestricted\" or turn off battery optimization in your device's app settings.",
+    "openSettings": "Open settings"
   },
   "missedReminder": {
     "title": "Time to log your fluids",
